@@ -65,10 +65,12 @@ namespace ATM
                             if (operation=="1")
                             {
                                 accounts[index].deposit();
+                                writeAccounts(accounts);
                                 break;
                             } else if (operation=="2")
                             {
                                 accounts[index].withdraw();
+                                writeAccounts(accounts);
                                 break;
                             } else if (operation=="3")
                             {
@@ -89,6 +91,7 @@ namespace ATM
                                     if (amt > 0)
                                     {
                                         accounts[transferTo - 1].Tin(amt);
+                                        writeAccounts(accounts);
                                         break;
                                     } else
                                     {
@@ -115,8 +118,6 @@ namespace ATM
                         {
                             Console.WriteLine("Invalid Option!");
                         }
-
-                        writeAccounts(accounts);
                     }
                 } else if (option == "e")
                 {
