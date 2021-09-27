@@ -10,4 +10,4 @@ Everey Account is treated as an object with encapsulated properties and methods.
 
 ## Flowchart
 
-![Flowchart](/ATM_Console_App.drawio.png?raw=true 'Flowchart')
+![Flowchart](/ATM_Console_App.jpg?raw=true 'Flowchart')
