@@ -60,18 +60,18 @@ namespace ATM
             if (enteredPin == Convert.ToString(this.pin))
             {
                 Console.WriteLine("\n\n____DEPOSIT____");
-                Console.Write("Enter ammount to be deposited : ");
-                int ammount = Convert.ToInt32(Console.ReadLine());
-                if (ammount > 0)
+                Console.Write("Enter Amount to be deposited : ");
+                int Amount = Convert.ToInt32(Console.ReadLine());
+                if (Amount > 0)
                 {
-                    this.availBal += ammount;
-                    string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(ammount);
+                    this.availBal += Amount;
+                    string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(Amount);
                     this.transactions.Add(transaction);
-                    Console.WriteLine("Ammount Deposited Successfully");
+                    Console.WriteLine("Amount Deposited Successfully");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Ammount");
+                    Console.WriteLine("Invalid Amount");
                 }
             } else
             {
@@ -87,14 +87,14 @@ namespace ATM
             if (enteredPin == Convert.ToString(this.pin))
             {
                 Console.WriteLine("\n\n____WITHDRAW____");
-                Console.Write("Enter ammount to be withdrawn : ");
-                int ammount = Convert.ToInt32(Console.ReadLine());
-                if (ammount > 0 && ammount <= this.availBal)
+                Console.Write("Enter Amount to be withdrawn : ");
+                int Amount = Convert.ToInt32(Console.ReadLine());
+                if (Amount > 0 && Amount <= this.availBal)
                 {
-                    this.availBal -= ammount;
-                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(ammount);
+                    this.availBal -= Amount;
+                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(Amount);
                     this.transactions.Add(transaction);
-                    Console.WriteLine("Ammount Withdrawn Successfully");
+                    Console.WriteLine("Amount Withdrawn Successfully");
                 }
                 else
                 {
@@ -114,14 +114,14 @@ namespace ATM
             if (enteredPin == Convert.ToString(this.pin))
             {
                 Console.WriteLine("\n\n____TRANSFER____");
-                Console.Write("Enter ammount to be transfered : ");
-                int ammount = Convert.ToInt32(Console.ReadLine());
-                if (ammount > 0 && ammount <= this.availBal)
+                Console.Write("Enter Amount to be transfered : ");
+                int Amount = Convert.ToInt32(Console.ReadLine());
+                if (Amount > 0 && Amount <= this.availBal)
                 {
-                    this.availBal -= ammount;
-                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(ammount);
+                    this.availBal -= Amount;
+                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(Amount);
                     this.transactions.Add(transaction);
-                    return ammount;
+                    return Amount;
                 }
                 else
                 {
@@ -141,7 +141,7 @@ namespace ATM
             this.availBal += amt;
             string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(amt);
             this.transactions.Add(transaction);
-            Console.WriteLine("Ammount Transfered Successfully");
+            Console.WriteLine("Amount Transfered Successfully");
         }
 
         public void history()
