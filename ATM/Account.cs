@@ -4,72 +4,58 @@ using System.Collections.Generic;
 namespace ATM
 {
     [Serializable]
-    class Account
+    public class Account
     {
-        public string name;
-        public int accountNumber;
-        private int availBal, pin;
+        private string name;
+        private int availBal, pin, accountNumber;
         private List<string> transactions;
 
-        public Account(int accNo)
+        private Account(int accNo, int selectedPin, string selectedName)
         {
-            Console.WriteLine("\n\n____CREATING ACCOUNT____");
-            Console.Write("Enter Your name : ");
-            this.name = Console.ReadLine();
-            Console.Write("Set a 4-digit pin : ");
-            string selectedPin = Console.ReadLine();
-            if (selectedPin.Length != 4)
-            {
-                Console.WriteLine("Invalid Pin! Try again");
-                this.pin = -1;
-            }
-            else
-            {
-                try
-                {
-                    this.pin = Convert.ToInt32(selectedPin);
-                    this.accountNumber = accNo;
-                    this.availBal = 0;
-                    this.transactions = new List<string>();
-                    string transaction = DateTime.Now.ToString() + "\tAccount Created";
-                    transactions.Add(transaction);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Invalid Pin! Try again");
-                    this.pin = -1;
-                }
-            }
+            this.accountNumber = accNo;
+            this.name = selectedName;
+            this.pin = selectedPin;
+            this.availBal = 0;
+            transactions = new List<string>();
+            string transaction = DateTime.Now.ToString() + "\tAccount Created";
+            transactions.Add(transaction);
         }
 
-        public bool isPinValid()
+        public static Account CreateInstance(int accNo)
         {
-            if(this.pin == -1)
+            (string selectedName, int selectedPin) = ConsoleUI.accountCreationInfo();
+            if (selectedName == "____" || selectedPin == -1)
             {
-                return false;
-            } else
-            {
-                return true;
+                return null;
             }
+            return new Account(accNo, selectedPin, selectedName);
+        }
+
+        public string Name
+        {
+            get => this.name;
+        }
+
+        public int AccountNumber
+        {
+            get => this.accountNumber;
         }
 
         public void deposit()
         {
             if (authenticate())
             {
-                Console.WriteLine("\n\n____DEPOSIT____");
-                Console.Write("Enter Amount to be deposited : ");
-                int Amount = Convert.ToInt32(Console.ReadLine());
-                if (Amount > 0)
+                int amount = ConsoleUI.getAmmount('d');
+                if (amount > 0)
                 {
-                    this.availBal += Amount;
-                    string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(Amount);
+                    this.availBal += amount;
+                    string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(amount);
                     this.transactions.Add(transaction);
-                    Console.WriteLine("Amount Deposited Successfully");
+                    ConsoleUI.succesMsg('d');
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Amount");
+                    ConsoleUI.invalidAmountMsg();
                 }
             }
         }
@@ -78,19 +64,17 @@ namespace ATM
         {
             if (authenticate())
             {
-                Console.WriteLine("\n\n____WITHDRAW____");
-                Console.Write("Enter Amount to be withdrawn : ");
-                int Amount = Convert.ToInt32(Console.ReadLine());
-                if (Amount > 0 && Amount <= this.availBal)
+                int amount = ConsoleUI.getAmmount('w');
+                if (amount > 0 && amount <= this.availBal)
                 {
-                    this.availBal -= Amount;
-                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(Amount);
+                    this.availBal -= amount;
+                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(amount);
                     this.transactions.Add(transaction);
-                    Console.WriteLine("Amount Withdrawn Successfully");
+                    ConsoleUI.succesMsg('w');
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Amount");
+                    ConsoleUI.invalidAmountMsg();
                 }
             } 
         }
@@ -99,19 +83,17 @@ namespace ATM
         {
             if (authenticate())
             {
-                Console.WriteLine("\n\n____TRANSFER____");
-                Console.Write("Enter Amount to be transfered : ");
-                int Amount = Convert.ToInt32(Console.ReadLine());
-                if (Amount > 0 && Amount <= this.availBal)
+                int amount = ConsoleUI.getAmmount('t');
+                if (amount > 0 && amount <= this.availBal)
                 {
-                    this.availBal -= Amount;
-                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(Amount);
+                    this.availBal -= amount;
+                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(amount);
                     this.transactions.Add(transaction);
-                    return Amount;
+                    return amount;
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Amount");
+                    ConsoleUI.invalidAmountMsg();
                     return -1;
                 }
             }
@@ -126,7 +108,7 @@ namespace ATM
             this.availBal += amt;
             string transaction = DateTime.Now.ToString() + "\tCredited    Rs. " + Convert.ToString(amt);
             this.transactions.Add(transaction);
-            Console.WriteLine("Amount Transfered Successfully");
+            ConsoleUI.succesMsg('t');
         }
 
         public void history()
@@ -134,7 +116,7 @@ namespace ATM
             if (authenticate())
             {
                 Console.WriteLine("\n\n____TRANSACTION HISTORY____");
-                foreach (string transaction in transactions)
+                foreach (string transaction in this.transactions)
                 {
                     Console.WriteLine(transaction);
                 }
@@ -145,14 +127,12 @@ namespace ATM
 
         private bool authenticate()
         {
-            Console.WriteLine("\n____AUTHENTICATION____");
-            Console.Write("\nEnter PIN : ");
-            string enteredPin = Console.ReadLine();
+            string enteredPin = ConsoleUI.getPinFromUser();
             if (enteredPin==Convert.ToString(this.pin))
             {
                 return true;
             }
-            Console.WriteLine("Wrong Pin!");
+            ConsoleUI.wrongPinMsg();
             return false;
         }
     }
