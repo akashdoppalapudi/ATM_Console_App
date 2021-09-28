@@ -78,7 +78,7 @@ namespace ATM
                                 Console.WriteLine();
                                 foreach (Account acc in accounts)
                                 {
-                                    if (accounts[index].accountNumber != acc.accountNumber)
+                                    if (index != accounts.IndexOf(acc))
                                     {
                                         Console.WriteLine(acc.accountNumber + ". " + acc.name);
                                     }
@@ -96,13 +96,20 @@ namespace ATM
                                     } else
                                     {
                                         Console.WriteLine("Transfer Failed");
+                                        accounts[index].Tin(amt);
+                                        Console.WriteLine("Back to your own Account.");
+                                        writeAccounts(accounts);
                                         break;
                                     }
                                 } catch (Exception e)
                                 {
                                     Console.WriteLine("Invalid Choice!");
+                                    accounts[index].Tin(amt);
+                                    Console.WriteLine("Back to your own Account.");
+                                    writeAccounts(accounts);
                                     continue;
                                 }
+ 
                             } else if (operation=="4") {
                                 accounts[index].history();
                                 break;
