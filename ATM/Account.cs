@@ -55,9 +55,7 @@ namespace ATM
 
         public void deposit()
         {
-            Console.Write("\nEnter PIN : ");
-            string enteredPin = Console.ReadLine();
-            if (enteredPin == Convert.ToString(this.pin))
+            if (authenticate())
             {
                 Console.WriteLine("\n\n____DEPOSIT____");
                 Console.Write("Enter Amount to be deposited : ");
@@ -73,18 +71,12 @@ namespace ATM
                 {
                     Console.WriteLine("Invalid Amount");
                 }
-            } else
-            {
-                Console.WriteLine("Wrong pin!");
             }
-            
         }
 
         public void withdraw()
         {
-            Console.Write("\nEnter PIN : ");
-            string enteredPin = Console.ReadLine();
-            if (enteredPin == Convert.ToString(this.pin))
+            if (authenticate())
             {
                 Console.WriteLine("\n\n____WITHDRAW____");
                 Console.Write("Enter Amount to be withdrawn : ");
@@ -100,18 +92,12 @@ namespace ATM
                 {
                     Console.WriteLine("Invalid Amount");
                 }
-            } else
-            {
-                Console.WriteLine("Wrong Pin!");
-            }
-            
+            } 
         }
 
         public int Tout()
         {
-            Console.Write("\nEnter PIN : ");
-            string enteredPin = Console.ReadLine();
-            if (enteredPin == Convert.ToString(this.pin))
+            if (authenticate())
             {
                 Console.WriteLine("\n\n____TRANSFER____");
                 Console.Write("Enter Amount to be transfered : ");
@@ -131,7 +117,6 @@ namespace ATM
             }
             else
             {
-                Console.WriteLine("Wrong Pin!");
                 return -1;
             }
         }
@@ -146,9 +131,7 @@ namespace ATM
 
         public void history()
         {
-            Console.Write("\nEnter PIN : ");
-            string enteredPin = Console.ReadLine();
-            if (enteredPin == Convert.ToString(this.pin))
+            if (authenticate())
             {
                 Console.WriteLine("\n\n____TRANSACTION HISTORY____");
                 foreach (string transaction in transactions)
@@ -157,10 +140,20 @@ namespace ATM
                 }
                 Console.WriteLine("\t\tAvailable Balance : Rs. " + this.availBal);
             }
-            else
+            
+        }
+
+        private bool authenticate()
+        {
+            Console.WriteLine("\n____AUTHENTICATION____");
+            Console.Write("\nEnter PIN : ");
+            string enteredPin = Console.ReadLine();
+            if (enteredPin==Convert.ToString(this.pin))
             {
-                Console.WriteLine("Wrong Pin!");
+                return true;
             }
+            Console.WriteLine("Wrong Pin!");
+            return false;
         }
     }
 }
