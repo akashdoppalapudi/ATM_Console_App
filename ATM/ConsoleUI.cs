@@ -58,6 +58,11 @@ namespace ATM
             Console.WriteLine("Invalid Option!");
         }
 
+        public static void transferFailedMsg()
+        {
+            Console.WriteLine("Transfer Failed");
+        }
+
         public static void succesMsg(char msgFor)
         {
             switch (msgFor)
@@ -93,12 +98,14 @@ namespace ATM
                 selectedPin = -1;
                 Console.WriteLine("Invalid Pin!");
                 return (selectedName, selectedPin);
-            } else
+            }
+            else
             {
                 try
                 {
                     selectedPin = int.Parse(userInput);
-                } catch
+                }
+                catch
                 {
                     selectedPin = -1;
                     Console.WriteLine("Invalid Pin!");
@@ -129,11 +136,46 @@ namespace ATM
             try
             {
                 amount = int.Parse(userInput);
-            } catch
+            }
+            catch
             {
                 amount = -1;
             }
             return amount;
+        }
+
+        public static Account selectTransferToAccount(List<Account> accounts, int fromAccNo)
+        {
+            Account selectedAccount;
+            Console.WriteLine();
+            foreach (Account acc in accounts)
+            {
+                if (fromAccNo != acc.AccountNumber)
+                {
+                    Console.WriteLine(acc.AccountNumber + ". " + acc.Name);
+                }
+            }
+            Console.Write("Select an Account to transfer money to : ");
+            string userInput = Console.ReadLine();
+            try
+            {
+                int selectedAccountNumber = int.Parse(userInput);
+                if (selectedAccountNumber > 0 && selectedAccountNumber <= accounts.Count && selectedAccountNumber != fromAccNo)
+                {
+                    selectedAccount = accounts[selectedAccountNumber - 1];
+                }
+                else
+                {
+                    selectedAccount = null;
+                    ConsoleUI.invalidOptionMsg();
+                }
+            }
+            catch
+            {
+                selectedAccount = null;
+                ConsoleUI.invalidOptionMsg();
+            }
+            return selectedAccount;
         }
     }
 }

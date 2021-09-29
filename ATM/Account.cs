@@ -76,30 +76,33 @@ namespace ATM
                 {
                     ConsoleUI.invalidAmountMsg();
                 }
-            } 
+            }
         }
 
-        public int Tout()
+        public void Tout(List<Account> accounts)
         {
             if (authenticate())
             {
                 int amount = ConsoleUI.getAmmount('t');
+                Account Toaccount = ConsoleUI.selectTransferToAccount(accounts, this.AccountNumber);
                 if (amount > 0 && amount <= this.availBal)
                 {
-                    this.availBal -= amount;
-                    string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(amount);
-                    this.transactions.Add(transaction);
-                    return amount;
+                    if (Toaccount != null)
+                    {
+                        this.availBal -= amount;
+                        string transaction = DateTime.Now.ToString() + "\tDebited     Rs. " + Convert.ToString(amount);
+                        this.transactions.Add(transaction);
+                        Toaccount.Tin(amount);
+                    }
+                    else
+                    {
+                        ConsoleUI.transferFailedMsg();
+                    }
                 }
                 else
                 {
                     ConsoleUI.invalidAmountMsg();
-                    return -1;
                 }
-            }
-            else
-            {
-                return -1;
             }
         }
 
@@ -122,13 +125,13 @@ namespace ATM
                 }
                 Console.WriteLine("\t\tAvailable Balance : Rs. " + this.availBal);
             }
-            
+
         }
 
         private bool authenticate()
         {
             string enteredPin = ConsoleUI.getPinFromUser();
-            if (enteredPin==Convert.ToString(this.pin))
+            if (enteredPin == Convert.ToString(this.pin))
             {
                 return true;
             }
