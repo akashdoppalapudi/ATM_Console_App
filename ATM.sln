@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATM", "ATM\ATM.csproj", "{87F2FBA9-8589-4ACC-954D-E772B81FEBD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ATM.CLI", "ATM\ATM.CLI.csproj", "{87F2FBA9-8589-4ACC-954D-E772B81FEBD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATM.Models", "ATM.Models\ATM.Models.csproj", "{2DE27E97-448F-4A1F-8382-44D3C643972E}"
 EndProject
