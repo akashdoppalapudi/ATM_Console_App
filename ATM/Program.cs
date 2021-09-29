@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ATM
+namespace ATM.CLI
 {
     class Program
     {
