@@ -7,7 +7,7 @@ namespace ATM.Services
 {
     public class ConsoleUI
     {
-        public static (string, int, AccountType) getDataForAccountCreation()
+        public static (string, string, AccountType) getDataForAccountCreation()
         {
             string name;
             int pin;
@@ -18,7 +18,7 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedName))
             {
                 Console.WriteLine("Invalid Name");
-                return (null, -1, (AccountType)0);
+                return (null, null, (AccountType)0);
             }
             name = selectedName;
 
@@ -28,7 +28,7 @@ namespace ATM.Services
             if (selectedPin.Length != 4)
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, -1, (AccountType)0);
+                return (null, null, (AccountType)0);
             }
 
             try
@@ -38,7 +38,7 @@ namespace ATM.Services
             catch
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, -1, (AccountType)0);
+                return (null, null, (AccountType)0);
             }
 
             Console.WriteLine("\n__ACCOUNT TYPE__\n");
@@ -54,26 +54,27 @@ namespace ATM.Services
             try
             {
                 accountType = (AccountType)Convert.ToInt32(selectedType);
-                if((int)accountType <= 0 || (int)accountType >= i){
+                if ((int)accountType <= 0 || (int)accountType >= i)
+                {
                     Console.WriteLine("Invalid Account Type");
-                    return (null, -1, (AccountType)0);
+                    return (null, null, (AccountType)0);
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Account Type");
-                return (null, -1, (AccountType)0);
+                return (null, null, (AccountType)0);
             }
 
-            return (name, pin, accountType);
-            
+            return (name, Convert.ToString(pin), accountType);
+
         }
 
         public static Account selectAccount()
         {
             List<Account> accounts = AccountsHandler.getAllAccounts();
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
-            foreach(Account acc in accounts)
+            foreach (Account acc in accounts)
             {
                 Console.WriteLine(acc.accountNumber + ". " + acc.accountHoldersName);
             }
@@ -163,5 +164,5 @@ namespace ATM.Services
             return selectedAccount;
         }
     }
-    
+
 }

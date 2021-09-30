@@ -20,23 +20,26 @@ namespace ATM.Services
         }
         public void createNewAccount()
         {
-            (string name, int pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
-            if (String.IsNullOrEmpty(name) || pin == -1 || accountType == (AccountType)0)
+            (string name, string pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
+            if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(pin) || accountType == (AccountType)0)
             {
                 StandardMessages.accountCreationFailed();
             }
-            Account newAccount = new Account
+            else
             {
-                accountNumber = bank.accounts.Count + 1,
-                accountHoldersName = name,
-                accountType = accountType,
-                pin = pin,
-                availableBalance = 1500,
-                transactions = new List<Transaction>()
-            };
-            newAccount.transactions.Add(TransactionHandler.newTransaction(1500, (TransactionType)1));
-            bank.accounts.Add(newAccount);
-            StandardMessages.accountCreationSuccess();
+                Account newAccount = new Account
+                {
+                    accountNumber = bank.accounts.Count + 1,
+                    accountHoldersName = name,
+                    accountType = accountType,
+                    pin = Encryption.computeSha256Hash(pin),
+                    availableBalance = 1500,
+                    transactions = new List<Transaction>()
+                };
+                newAccount.transactions.Add(TransactionHandler.newTransaction(1500, (TransactionType)1));
+                bank.accounts.Add(newAccount);
+                StandardMessages.accountCreationSuccess();
+            }
         }
 
         public static List<Account> getAllAccounts()
@@ -85,11 +88,12 @@ namespace ATM.Services
             if (authenticate(account))
             {
                 decimal amount = ConsoleUI.getAmount('t');
-                if (amount <=0 || amount>account.availableBalance)
+                if (amount <= 0 || amount > account.availableBalance)
                 {
                     Console.WriteLine("Invalid Amount");
                     Console.WriteLine("Transfer Failed");
-                } else
+                }
+                else
                 {
                     Account transferToAccount = ConsoleUI.selectTransferToAccount(bank.accounts, account.accountNumber);
                     if (transferToAccount == null)
@@ -116,7 +120,8 @@ namespace ATM.Services
         private bool authenticate(Account account)
         {
             string userInput = ConsoleUI.getPinFromUser();
-            if (userInput == Convert.ToString(account.pin))
+            string hashedUserInput = Encryption.computeSha256Hash(userInput);
+            if (hashedUserInput == account.pin)
             {
                 return true;
             }
