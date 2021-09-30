@@ -11,6 +11,7 @@ namespace ATM.CLI
         {
             AccountsHandler accountsHandler = new AccountsHandler();
             accountsHandler.createNewAccount();
+            accountsHandler.createNewAccount();
             Account account = ConsoleUI.selectAccount();
             if (account==null)
             {
@@ -19,7 +20,7 @@ namespace ATM.CLI
             else
             {
                 accountsHandler.deposit(account);
-                accountsHandler.withdraw(account);
+                accountsHandler.transfer(account);
             }
             //while (true)
             //{

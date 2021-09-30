@@ -81,8 +81,8 @@ namespace ATM.Services
             string choice = Console.ReadLine();
             try
             {
-                int selectedAccountNumber = Convert.ToInt32(choice);
-                Account selectedAccount = accounts.FirstOrDefault(acc => acc.accountNumber == selectedAccountNumber);
+                int selectedaccountNumber = Convert.ToInt32(choice);
+                Account selectedAccount = accounts.FirstOrDefault(acc => acc.accountNumber == selectedaccountNumber);
                 return selectedAccount;
             }
             catch
@@ -127,6 +127,40 @@ namespace ATM.Services
             Console.Write("Enter PIN : ");
             string userInput = Console.ReadLine();
             return userInput;
+        }
+
+        public static Account selectTransferToAccount(List<Account> accounts, int fromAccNo)
+        {
+            Account selectedAccount;
+            Console.WriteLine();
+            foreach (Account acc in accounts)
+            {
+                if (fromAccNo != acc.accountNumber)
+                {
+                    Console.WriteLine(acc.accountNumber + ". " + acc.accountHoldersName);
+                }
+            }
+            Console.Write("Select an Account to transfer money to : ");
+            string userInput = Console.ReadLine();
+            try
+            {
+                int selectedaccountNumber = int.Parse(userInput);
+                if (selectedaccountNumber > 0 && selectedaccountNumber <= accounts.Count && selectedaccountNumber != fromAccNo)
+                {
+                    selectedAccount = accounts[selectedaccountNumber - 1];
+                }
+                else
+                {
+                    selectedAccount = null;
+                    Console.WriteLine("Invalid Option");
+                }
+            }
+            catch
+            {
+                selectedAccount = null;
+                Console.WriteLine("Invalid Option");
+            }
+            return selectedAccount;
         }
     }
     

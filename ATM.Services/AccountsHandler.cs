@@ -46,7 +46,7 @@ namespace ATM.Services
 
         public void deposit(Account account)
         {
-            if (this.authenticate(account))
+            if (authenticate(account))
             {
                 decimal amount = ConsoleUI.getAmount('d');
                 if (amount <= 0)
@@ -64,7 +64,7 @@ namespace ATM.Services
 
         public void withdraw(Account account)
         {
-            if (this.authenticate(account))
+            if (authenticate(account))
             {
                 decimal amount = ConsoleUI.getAmount('w');
                 if (amount <= 0 || amount > account.availableBalance)
@@ -78,6 +78,39 @@ namespace ATM.Services
                     Console.WriteLine("Withdrawl Successful");
                 }
             }
+        }
+
+        public void transfer(Account account)
+        {
+            if (authenticate(account))
+            {
+                decimal amount = ConsoleUI.getAmount('t');
+                if (amount <=0 || amount>account.availableBalance)
+                {
+                    Console.WriteLine("Invalid Amount");
+                    Console.WriteLine("Transfer Failed");
+                } else
+                {
+                    Account transferToAccount = ConsoleUI.selectTransferToAccount(bank.accounts, account.accountNumber);
+                    if (transferToAccount == null)
+                    {
+                        Console.WriteLine("Transfer Failed");
+                    }
+                    else
+                    {
+                        account.availableBalance -= amount;
+                        account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
+                        recieve(transferToAccount, amount);
+                    }
+                }
+            }
+        }
+
+        private void recieve(Account account, decimal amount)
+        {
+            account.availableBalance += amount;
+            account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
+            Console.WriteLine("Transfer Successful");
         }
 
         private bool authenticate(Account account)
