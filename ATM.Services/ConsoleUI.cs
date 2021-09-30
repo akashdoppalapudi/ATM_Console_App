@@ -153,13 +153,13 @@ namespace ATM.Services
                 else
                 {
                     selectedAccount = null;
-                    Console.WriteLine("Invalid Option");
+                    StandardMessages.invalidOptionMsg();
                 }
             }
             catch
             {
                 selectedAccount = null;
-                Console.WriteLine("Invalid Option");
+                StandardMessages.invalidOptionMsg();
             }
             return selectedAccount;
         }

@@ -8,7 +8,7 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Welcome to ALPHA BANK");
+            StandardMessages.welcomeMsg();
             while (true)
             {
                 AccountsHandler accountsHandler = new AccountsHandler();
@@ -24,7 +24,7 @@ namespace ATM.CLI
                         Account selectedAcc = ConsoleUI.selectAccount();
                         if (selectedAcc == null)
                         {
-                            Console.WriteLine("Invalid Option");
+                            StandardMessages.invalidOptionMsg();
                             break;
                         }
                         string operation = ConsoleUI.selectOperation();
@@ -54,7 +54,7 @@ namespace ATM.CLI
                         }
                         else
                         {
-                            Console.WriteLine("Invalid Option");
+                            StandardMessages.invalidOptionMsg();
                             break;
                         }
 
@@ -67,7 +67,7 @@ namespace ATM.CLI
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Option");
+                    StandardMessages.invalidOptionMsg();
                 }
             }
         }

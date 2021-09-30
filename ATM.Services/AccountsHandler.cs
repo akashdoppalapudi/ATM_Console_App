@@ -54,13 +54,13 @@ namespace ATM.Services
                 decimal amount = ConsoleUI.getAmount('d');
                 if (amount <= 0)
                 {
-                    Console.WriteLine("Invalid Amount");
+                    StandardMessages.invalidAmountMsg();
                 }
                 else
                 {
                     account.availableBalance += amount;
                     account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
-                    Console.WriteLine("Deposit Successful");
+                    StandardMessages.depositSuccess();
                 }
             }
         }
@@ -72,13 +72,13 @@ namespace ATM.Services
                 decimal amount = ConsoleUI.getAmount('w');
                 if (amount <= 0 || amount > account.availableBalance)
                 {
-                    Console.WriteLine("Invalid Amount");
+                    StandardMessages.invalidAmountMsg();
                 }
                 else
                 {
                     account.availableBalance -= amount;
                     account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
-                    Console.WriteLine("Withdrawl Successful");
+                    StandardMessages.withdrawSuccess();
                 }
             }
         }
@@ -90,15 +90,15 @@ namespace ATM.Services
                 decimal amount = ConsoleUI.getAmount('t');
                 if (amount <= 0 || amount > account.availableBalance)
                 {
-                    Console.WriteLine("Invalid Amount");
-                    Console.WriteLine("Transfer Failed");
+                    StandardMessages.invalidAmountMsg();
+                    StandardMessages.transferFailed();
                 }
                 else
                 {
                     Account transferToAccount = ConsoleUI.selectTransferToAccount(bank.accounts, account.accountNumber);
                     if (transferToAccount == null)
                     {
-                        Console.WriteLine("Transfer Failed");
+                        StandardMessages.transferFailed();
                     }
                     else
                     {
@@ -123,7 +123,7 @@ namespace ATM.Services
         {
             account.availableBalance += amount;
             account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
-            Console.WriteLine("Transfer Successful");
+            StandardMessages.transferSuccess();
         }
 
         private bool authenticate(Account account)
@@ -134,7 +134,7 @@ namespace ATM.Services
             {
                 return true;
             }
-            Console.WriteLine("Wrong PIN");
+            StandardMessages.wrongPinMsg();
             return false;
         }
     }
