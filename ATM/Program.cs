@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ATM.Services;
+using ATM.Models;
 
 namespace ATM.CLI
 {
@@ -10,6 +11,15 @@ namespace ATM.CLI
         {
             AccountsHandler accountsHandler = new AccountsHandler();
             accountsHandler.createNewAccount();
+            Account account = ConsoleUI.selectAccount();
+            if (account==null)
+            {
+                Console.WriteLine("Invalid Coice");
+            }
+            else
+            {
+                accountsHandler.deposit(account);
+            }
             //while (true)
             //{
             //    List<Account> accounts = Data.readAccounts();

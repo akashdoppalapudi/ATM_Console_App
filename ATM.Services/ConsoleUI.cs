@@ -1,5 +1,7 @@
 ﻿using ATM.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ATM.Services
 {
@@ -10,7 +12,7 @@ namespace ATM.Services
             string name;
             int pin;
             AccountType accountType;
-            Console.WriteLine("____ACCOUNT CREATION____\n");
+            Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter your name : ");
             string selectedName = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedName))
@@ -39,7 +41,7 @@ namespace ATM.Services
                 return (null, -1, (AccountType)0);
             }
 
-            Console.WriteLine("__ACCOUNT TYPE__\n");
+            Console.WriteLine("\n__ACCOUNT TYPE__\n");
             int i = 1;
             foreach (string type in Enum.GetNames(typeof(AccountType)))
             {
@@ -66,5 +68,66 @@ namespace ATM.Services
             return (name, pin, accountType);
             
         }
+
+        public static Account selectAccount()
+        {
+            List<Account> accounts = AccountsHandler.getAllAccounts();
+            Console.WriteLine("\n____ALL ACCOUNTS____\n");
+            foreach(Account acc in accounts)
+            {
+                Console.WriteLine(acc.accountNumber + ". " + acc.accountHoldersName);
+            }
+            Console.Write("\nSelect your account : ");
+            string choice = Console.ReadLine();
+            try
+            {
+                int selectedAccountNumber = Convert.ToInt32(choice);
+                Account selectedAccount = accounts.FirstOrDefault(acc => acc.accountNumber == selectedAccountNumber);
+                return selectedAccount;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static decimal getAmmount(char amtFor)
+        {
+            decimal amount;
+            switch (amtFor)
+            {
+                case 'd':
+                    Console.WriteLine("\n____DEPOSIT____\n");
+                    Console.Write("Enter Amount to be deposited : ");
+                    break;
+                case 'w':
+                    Console.WriteLine("\n____WITHDRAW____\n");
+                    Console.Write("Enter Amount to be withdrawn : ");
+                    break;
+                case 't':
+                    Console.WriteLine("\n\n____TRANSFER____\n");
+                    Console.Write("Enter Amount to be transferred : ");
+                    break;
+            }
+            string userInput = Console.ReadLine();
+            try
+            {
+                amount = decimal.Parse(userInput);
+            }
+            catch
+            {
+                amount = -1;
+            }
+            return amount;
+        }
+
+        public static string getPinFromUser()
+        {
+            Console.WriteLine("\n____AUTHENTICATION____\n");
+            Console.Write("Enter PIN : ");
+            string userInput = Console.ReadLine();
+            return userInput;
+        }
     }
+    
 }

@@ -6,7 +6,7 @@ namespace ATM.Services
 {
     public class AccountsHandler
     {
-        static Bank bank;
+        public static Bank bank;
 
         public AccountsHandler()
         {
@@ -37,6 +37,43 @@ namespace ATM.Services
             newAccount.transactions.Add(TransactionHandler.accountCreationTransaction());
             bank.accounts.Add(newAccount);
             StandardMessages.accountCreationSuccess();
+        }
+
+        public static List<Account> getAllAccounts()
+        {
+            return bank.accounts;
+        }
+
+        public void deposit(Account account)
+        {
+            if (this.authenticate(account))
+            {
+                decimal amount = ConsoleUI.getAmmount('d');
+                if (amount <= 0)
+                {
+                    Console.WriteLine("Invalid Amount");
+                }
+                else
+                {
+                    account.availableBalance += amount;
+                    account.transactions.Add(TransactionHandler.depositTransaction(amount));
+                    Console.Write("Deposit Successful");
+                }
+                
+            }
+            
+            
+        }
+
+        private bool authenticate(Account account)
+        {
+            string userInput = ConsoleUI.getPinFromUser();
+            if (userInput == Convert.ToString(account.pin))
+            {
+                return true;
+            }
+            Console.WriteLine("Wrong PIN");
+            return false;
         }
     }
 }

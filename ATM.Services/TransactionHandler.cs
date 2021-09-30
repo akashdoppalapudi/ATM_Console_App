@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ATM.Models;
+﻿using ATM.Models;
+using System;
 
 namespace ATM.Services
 {
@@ -16,6 +12,18 @@ namespace ATM.Services
                 timeStamp = DateTime.Now,
                 transactionAmount = 1500,
                 transactionType = (TransactionType)1
+            };
+
+            return newTransaction;
+        }
+
+        public static Transaction depositTransaction(decimal amount)
+        {
+            Transaction newTransaction = new Transaction
+            {
+                timeStamp = DateTime.Now,
+                transactionAmount = amount,
+                transactionType = (TransactionType)3
             };
 
             return newTransaction;
