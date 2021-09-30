@@ -91,7 +91,7 @@ namespace ATM.Services
             }
         }
 
-        public static decimal getAmmount(char amtFor)
+        public static decimal getAmount(char amtFor)
         {
             decimal amount;
             switch (amtFor)

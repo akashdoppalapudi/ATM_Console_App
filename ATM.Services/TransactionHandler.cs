@@ -5,25 +5,13 @@ namespace ATM.Services
 {
     public class TransactionHandler
     {
-        public static Transaction accountCreationTransaction()
-        {
-            Transaction newTransaction = new Transaction
-            {
-                timeStamp = DateTime.Now,
-                transactionAmount = 1500,
-                transactionType = (TransactionType)1
-            };
-
-            return newTransaction;
-        }
-
-        public static Transaction depositTransaction(decimal amount)
+        public static Transaction newTransaction(decimal amount, TransactionType transactionType)
         {
             Transaction newTransaction = new Transaction
             {
                 timeStamp = DateTime.Now,
                 transactionAmount = amount,
-                transactionType = (TransactionType)3
+                transactionType = transactionType
             };
 
             return newTransaction;

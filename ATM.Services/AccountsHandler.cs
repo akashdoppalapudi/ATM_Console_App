@@ -34,7 +34,7 @@ namespace ATM.Services
                 availableBalance = 1500,
                 transactions = new List<Transaction>()
             };
-            newAccount.transactions.Add(TransactionHandler.accountCreationTransaction());
+            newAccount.transactions.Add(TransactionHandler.newTransaction(1500, (TransactionType)1));
             bank.accounts.Add(newAccount);
             StandardMessages.accountCreationSuccess();
         }
@@ -48,7 +48,7 @@ namespace ATM.Services
         {
             if (this.authenticate(account))
             {
-                decimal amount = ConsoleUI.getAmmount('d');
+                decimal amount = ConsoleUI.getAmount('d');
                 if (amount <= 0)
                 {
                     Console.WriteLine("Invalid Amount");
@@ -56,13 +56,28 @@ namespace ATM.Services
                 else
                 {
                     account.availableBalance += amount;
-                    account.transactions.Add(TransactionHandler.depositTransaction(amount));
-                    Console.Write("Deposit Successful");
+                    account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
+                    Console.WriteLine("Deposit Successful");
                 }
-                
             }
-            
-            
+        }
+
+        public void withdraw(Account account)
+        {
+            if (this.authenticate(account))
+            {
+                decimal amount = ConsoleUI.getAmount('w');
+                if (amount <= 0 || amount > account.availableBalance)
+                {
+                    Console.WriteLine("Invalid Amount");
+                }
+                else
+                {
+                    account.availableBalance -= amount;
+                    account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
+                    Console.WriteLine("Withdrawl Successful");
+                }
+            }
         }
 
         private bool authenticate(Account account)

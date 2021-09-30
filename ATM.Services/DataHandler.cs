@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATM.Services
 {
-    class DataHandler
+    public class DataHandler
     {
     }
 }

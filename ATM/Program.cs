@@ -19,6 +19,7 @@ namespace ATM.CLI
             else
             {
                 accountsHandler.deposit(account);
+                accountsHandler.withdraw(account);
             }
             //while (true)
             //{
