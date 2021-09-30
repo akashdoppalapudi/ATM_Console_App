@@ -172,5 +172,23 @@ namespace ATM.Services
                 Console.WriteLine(transaction.timeStamp + "\t" + transaction.transactionType + "\tRs. " + transaction.transactionAmount);
             }
         }
+
+        public static string existingOrCreate()
+        {
+            Console.WriteLine("\n____ATM____\n");
+            Console.WriteLine("1. Create New Account\n2. Exixting User");
+            Console.Write("\nSelect an Option (Enter 'e' to exit) : ");
+            string option = Console.ReadLine();
+            return option;
+        }
+
+        public static string selectOperation()
+        {
+            Console.WriteLine("\n____OPERATIONS____\n");
+            Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");
+            Console.Write("\nSelect an operation (Enter 'b' to go back) : ");
+            string operation = Console.ReadLine();
+            return operation;
+        }
     }
 }

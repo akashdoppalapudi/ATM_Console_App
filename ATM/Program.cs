@@ -8,105 +8,68 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            AccountsHandler accountsHandler = new AccountsHandler();
-            accountsHandler.createNewAccount();
-            accountsHandler.createNewAccount();
-            Account selectedAccount = ConsoleUI.selectAccount();
-            if (selectedAccount == null)
+            Console.WriteLine("Welcome to ALPHA BANK");
+            while (true)
             {
-                Console.WriteLine("Stopping Program");
+                AccountsHandler accountsHandler = new AccountsHandler();
+                string option = ConsoleUI.existingOrCreate();
+                if (option == "1")
+                {
+                    accountsHandler.createNewAccount();
+                }
+                else if (option == "2")
+                {
+                    while (true)
+                    {
+                        Account selectedAcc = ConsoleUI.selectAccount();
+                        if (selectedAcc == null)
+                        {
+                            Console.WriteLine("Invalid Option");
+                            break;
+                        }
+                        string operation = ConsoleUI.selectOperation();
+                        if (operation == "1")
+                        {
+                            accountsHandler.deposit(selectedAcc);
+                            break;
+                        }
+                        else if (operation == "2")
+                        {
+                            accountsHandler.withdraw(selectedAcc);
+                            break;
+                        }
+                        else if (operation == "3")
+                        {
+                            accountsHandler.transfer(selectedAcc);
+                            break;
+                        }
+                        else if (operation == "4")
+                        {
+                            accountsHandler.transactionHistory(selectedAcc);
+                            break;
+                        }
+                        else if (operation == "b")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid Option");
+                            break;
+                        }
+
+
+                    }
+                }
+                else if (option == "e")
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid Option");
+                }
             }
-            else
-            {
-                accountsHandler.deposit(selectedAccount);
-                accountsHandler.transactionHistory(selectedAccount);
-            }
-            //while (true)
-            //{
-            //    List<Account> accounts = Data.readAccounts();
-            //    string option = ConsoleUI.welcome();
-            //    if (option == "1")
-            //    {
-            //        Account newAcc = Account.CreateInstance(accounts.Count + 1);
-            //        if (newAcc != null)
-            //        {
-            //            accounts.Add(newAcc);
-            //            Data.writeAccounts(accounts);
-            //        }
-            //    }
-            //    else if (option == "2")
-            //    {
-            //        while (true)
-            //        {
-            //            string selectedAcc = ConsoleUI.selectAccount(accounts);
-            //            int index;
-            //            try
-            //            {
-            //                index = Convert.ToInt32(selectedAcc) - 1;
-            //            }
-            //            catch
-            //            {
-            //                if (selectedAcc != "b")
-            //                {
-            //                    ConsoleUI.invalidOptionMsg();
-            //                    continue;
-            //                }
-            //                else
-            //                {
-            //                    break;
-            //                }
-            //            }
-            //            if (index >= 0 && index < accounts.Count)
-            //            {
-            //                string operation = ConsoleUI.selectOperation();
-            //                if (operation == "1")
-            //                {
-            //                    accounts[index].deposit();
-            //                    Data.writeAccounts(accounts);
-            //                    break;
-            //                }
-            //                else if (operation == "2")
-            //                {
-            //                    accounts[index].withdraw();
-            //                    Data.writeAccounts(accounts);
-            //                    break;
-            //                }
-            //                else if (operation == "3")
-            //                {
-            //                    accounts[index].Tout(accounts);
-            //                    Data.writeAccounts(accounts);
-            //                    break;
-            //                }
-            //                else if (operation == "4")
-            //                {
-            //                    accounts[index].history();
-            //                    break;
-            //                }
-            //                else if (operation == "b")
-            //                {
-            //                    continue;
-            //                }
-            //                else
-            //                {
-            //                    ConsoleUI.invalidOptionMsg();
-            //                    break;
-            //                }
-            //            }
-            //            else
-            //            {
-            //                ConsoleUI.invalidOptionMsg();
-            //            }
-            //        }
-            //    }
-            //    else if (option == "e")
-            //    {
-            //        break;
-            //    }
-            //    else
-            //    {
-            //        ConsoleUI.invalidOptionMsg();
-            //    }
-            //}
         }
     }
 }
