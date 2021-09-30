@@ -2,6 +2,7 @@
 
 namespace ATM.Models
 {
+    [Serializable]
     public class Transaction
     {
         public DateTime timeStamp { get; set; }

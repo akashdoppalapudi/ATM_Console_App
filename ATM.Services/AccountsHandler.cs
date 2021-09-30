@@ -10,6 +10,7 @@ namespace ATM.Services
 
         public AccountsHandler()
         {
+            bank = DataHandler.readBankData();
             if (bank == null)
             {
                 bank = new Bank
@@ -38,6 +39,7 @@ namespace ATM.Services
                 };
                 newAccount.transactions.Add(TransactionHandler.newTransaction(1500, (TransactionType)1));
                 bank.accounts.Add(newAccount);
+                DataHandler.writeBankData(bank);
                 StandardMessages.accountCreationSuccess();
             }
         }
@@ -60,6 +62,7 @@ namespace ATM.Services
                 {
                     account.availableBalance += amount;
                     account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
+                    DataHandler.writeBankData(bank);
                     StandardMessages.depositSuccess();
                 }
             }
@@ -78,6 +81,7 @@ namespace ATM.Services
                 {
                     account.availableBalance -= amount;
                     account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
+                    DataHandler.writeBankData(bank);
                     StandardMessages.withdrawSuccess();
                 }
             }
@@ -123,6 +127,7 @@ namespace ATM.Services
         {
             account.availableBalance += amount;
             account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
+            DataHandler.writeBankData(bank);
             StandardMessages.transferSuccess();
         }
 

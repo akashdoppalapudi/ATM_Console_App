@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ATM.Models
 {
+    [Serializable]
     public class Account
     {
         public int accountNumber { get; set; }
