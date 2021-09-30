@@ -110,6 +110,15 @@ namespace ATM.Services
             }
         }
 
+        public void transactionHistory(Account account)
+        {
+            if (authenticate(account))
+            {
+                ConsoleUI.printTransactions(account.transactions);
+                StandardMessages.availableBalanceMsg(account.availableBalance);
+            }
+        }
+
         private void recieve(Account account, decimal amount)
         {
             account.availableBalance += amount;

@@ -163,6 +163,14 @@ namespace ATM.Services
             }
             return selectedAccount;
         }
-    }
 
+        public static void printTransactions(List<Transaction> transactions)
+        {
+            Console.WriteLine("\n____TRANSACTION HISTORY____\n");
+            foreach (Transaction transaction in transactions)
+            {
+                Console.WriteLine(transaction.timeStamp + "\t" + transaction.transactionType + "\tRs. " + transaction.transactionAmount);
+            }
+        }
+    }
 }

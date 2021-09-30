@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATM.Services
 {
@@ -16,6 +12,11 @@ namespace ATM.Services
         public static void accountCreationSuccess()
         {
             Console.WriteLine("Account Created Successfully");
+        }
+
+        public static void availableBalanceMsg(decimal availBal)
+        {
+            Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
     }
 }

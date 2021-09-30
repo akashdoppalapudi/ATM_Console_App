@@ -19,6 +19,7 @@ namespace ATM.CLI
             else
             {
                 accountsHandler.deposit(selectedAccount);
+                accountsHandler.transactionHistory(selectedAccount);
             }
             //while (true)
             //{
