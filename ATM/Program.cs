@@ -19,6 +19,7 @@ namespace ATM.CLI
                     try
                     {
                         accountsHandler.createNewAccount(name, pin, accountType);
+                        StandardMessages.accountCreationSuccess();
                     }
                     catch (AccountCreationFailedException)
                     {
@@ -108,8 +109,6 @@ namespace ATM.CLI
                             StandardMessages.invalidOptionMsg();
                             break;
                         }
-
-
                     }
                 }
                 else if (option == "e")

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ATM.Services
 {
-    public class Encryption
+    public class EncryptionService
     {
         public static string computeSha256Hash(string rawData)
         {

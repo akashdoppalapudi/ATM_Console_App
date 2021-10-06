@@ -32,7 +32,7 @@ namespace ATM.Services
                     accountNumber = bank.accounts.Count + 1,
                     accountHoldersName = name,
                     accountType = accountType,
-                    pin = Encryption.computeSha256Hash(pin),
+                    pin = EncryptionService.computeSha256Hash(pin),
                     availableBalance = 1500,
                     transactions = new List<Transaction>()
                 };
@@ -114,7 +114,7 @@ namespace ATM.Services
 
         public void authenticate(Account account, string userInput)
         {
-            string hashedUserInput = Encryption.computeSha256Hash(userInput);
+            string hashedUserInput = EncryptionService.computeSha256Hash(userInput);
             if (hashedUserInput != account.pin)
             {
                 throw new AuthenticationFailedException();
