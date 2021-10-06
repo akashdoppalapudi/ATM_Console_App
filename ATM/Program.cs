@@ -8,97 +8,97 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            StandardMessages.welcomeMsg();
+            StandardMessages.WelcomeMsg();
             while (true)
             {
                 AccountsHandler accountsHandler = new AccountsHandler();
-                string option = ConsoleUI.existingOrCreate();
+                string option = ConsoleUI.ExistingOrCreate();
                 if (option == "1")
                 {
-                    (string name, string pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
+                    (string name, string pin, AccountType accountType) = ConsoleUI.GetDataForAccountCreation();
                     try
                     {
-                        accountsHandler.createNewAccount(name, pin, accountType);
-                        StandardMessages.accountCreationSuccess();
+                        accountsHandler.CreateNewAccount(name, pin, accountType);
+                        StandardMessages.AccountCreationSuccess();
                     }
                     catch (AccountCreationFailedException)
                     {
-                        StandardMessages.accountCreationFailed();
+                        StandardMessages.AccountCreationFailed();
                     }
                 }
                 else if (option == "2")
                 {
                     while (true)
                     {
-                        List<Account> allAccounts = accountsHandler.getAllAccounts();
-                        Account selectedAcc = ConsoleUI.selectAccount(allAccounts);
+                        List<Account> allAccounts = accountsHandler.GetAllAccounts();
+                        Account selectedAcc = ConsoleUI.SelectAccount(allAccounts);
                         if (selectedAcc == null)
                         {
-                            StandardMessages.invalidOptionMsg();
+                            StandardMessages.InvalidOptionMsg();
                             break;
                         }
-                        string userInputPin = ConsoleUI.getPinFromUser();
+                        string userInputPin = ConsoleUI.GetPinFromUser();
                         try
                         {
-                            accountsHandler.authenticate(selectedAcc, userInputPin);
+                            accountsHandler.Authenticate(selectedAcc, userInputPin);
                         }
                         catch (AuthenticationFailedException)
                         {
-                            StandardMessages.wrongPinMsg();
+                            StandardMessages.WrongPinMsg();
                             break;
                         }
-                        string operation = ConsoleUI.selectOperation();
+                        string operation = ConsoleUI.SelectOperation();
                         if (operation == "1")
                         {
-                            decimal amount = ConsoleUI.getAmount('d');
+                            decimal amount = ConsoleUI.GetAmount('d');
                             try
                             {
-                                accountsHandler.deposit(selectedAcc, amount);
-                                StandardMessages.depositSuccess();
+                                accountsHandler.Deposit(selectedAcc, amount);
+                                StandardMessages.DepositSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.invalidAmountMsg();
+                                StandardMessages.InvalidAmountMsg();
                             }
                             break;
                         }
                         else if (operation == "2")
                         {
-                            decimal amount = ConsoleUI.getAmount('w');
+                            decimal amount = ConsoleUI.GetAmount('w');
                             try
                             {
-                                accountsHandler.withdraw(selectedAcc, amount);
-                                StandardMessages.withdrawSuccess();
+                                accountsHandler.Withdraw(selectedAcc, amount);
+                                StandardMessages.WithdrawSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.invalidAmountMsg();
+                                StandardMessages.InvalidAmountMsg();
                             }
                             break;
                         }
                         else if (operation == "3")
                         {
-                            decimal amount = ConsoleUI.getAmount('t');
-                            Account transferToAccount = ConsoleUI.selectTransferToAccount(selectedAcc.accountNumber, allAccounts);
+                            decimal amount = ConsoleUI.GetAmount('t');
+                            Account transferToAccount = ConsoleUI.SelectTransferToAccount(selectedAcc.accountNumber, allAccounts);
                             try
                             {
-                                accountsHandler.transfer(selectedAcc, transferToAccount, amount);
-                                StandardMessages.transferSuccess();
+                                accountsHandler.Transfer(selectedAcc, transferToAccount, amount);
+                                StandardMessages.TransferSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.invalidAmountMsg();
+                                StandardMessages.InvalidAmountMsg();
                             }
                             catch (TransferFailedException)
                             {
-                                StandardMessages.transferFailed();
+                                StandardMessages.TransferFailed();
                             }
                             break;
                         }
                         else if (operation == "4")
                         {
-                            List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc);
-                            ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
+                            List<Transaction> transactions = accountsHandler.GetTransactions(selectedAcc);
+                            ConsoleUI.PrintTransactions(transactions, selectedAcc.availableBalance);
                         }
                         else if (operation == "b")
                         {
@@ -106,7 +106,7 @@ namespace ATM.CLI
                         }
                         else
                         {
-                            StandardMessages.invalidOptionMsg();
+                            StandardMessages.InvalidOptionMsg();
                             break;
                         }
                     }
@@ -117,7 +117,7 @@ namespace ATM.CLI
                 }
                 else
                 {
-                    StandardMessages.invalidOptionMsg();
+                    StandardMessages.InvalidOptionMsg();
                 }
             }
         }

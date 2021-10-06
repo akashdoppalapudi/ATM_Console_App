@@ -9,7 +9,7 @@ namespace ATM.Services
         private const string FILEPATH = "../../../../bankdata.dat";
         private static BinaryFormatter formatter = new BinaryFormatter();
 
-        public static Bank readBankData()
+        public static Bank ReadBankData()
         {
             if (File.Exists(FILEPATH))
             {
@@ -24,7 +24,7 @@ namespace ATM.Services
             }
         }
 
-        public static void writeBankData(Bank updatedBank)
+        public static void WriteBankData(Bank updatedBank)
         {
             FileStream writerFileStream = new FileStream(FILEPATH, FileMode.Create, FileAccess.Write);
             formatter.Serialize(writerFileStream, updatedBank);

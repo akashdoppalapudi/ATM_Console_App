@@ -7,7 +7,7 @@ namespace ATM.Services
 {
     public class ConsoleUI
     {
-        public static (string, string, AccountType) getDataForAccountCreation()
+        public static (string, string, AccountType) GetDataForAccountCreation()
         {
             string name;
             int pin;
@@ -70,7 +70,7 @@ namespace ATM.Services
 
         }
 
-        public static Account selectAccount(List<Account> accounts)
+        public static Account SelectAccount(List<Account> accounts)
         {
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
             foreach (Account acc in accounts)
@@ -91,7 +91,7 @@ namespace ATM.Services
             }
         }
 
-        public static decimal getAmount(char amtFor)
+        public static decimal GetAmount(char amtFor)
         {
             decimal amount;
             switch (amtFor)
@@ -121,7 +121,7 @@ namespace ATM.Services
             return amount;
         }
 
-        public static string getPinFromUser()
+        public static string GetPinFromUser()
         {
             Console.WriteLine("\n____AUTHENTICATION____\n");
             Console.Write("Enter PIN : ");
@@ -129,7 +129,7 @@ namespace ATM.Services
             return userInput;
         }
 
-        public static Account selectTransferToAccount(int fromAccNo, List<Account> accounts)
+        public static Account SelectTransferToAccount(int fromAccNo, List<Account> accounts)
         {
             Account selectedAccount;
             Console.WriteLine();
@@ -152,18 +152,18 @@ namespace ATM.Services
                 else
                 {
                     selectedAccount = null;
-                    StandardMessages.invalidOptionMsg();
+                    StandardMessages.InvalidOptionMsg();
                 }
             }
             catch
             {
                 selectedAccount = null;
-                StandardMessages.invalidOptionMsg();
+                StandardMessages.InvalidOptionMsg();
             }
             return selectedAccount;
         }
 
-        public static void printTransactions(List<Transaction> transactions, decimal availBal)
+        public static void PrintTransactions(List<Transaction> transactions, decimal availBal)
         {
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             foreach (Transaction transaction in transactions)
@@ -173,7 +173,7 @@ namespace ATM.Services
             Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
 
-        public static string existingOrCreate()
+        public static string ExistingOrCreate()
         {
             Console.WriteLine("\n____ATM____\n");
             Console.WriteLine("1. Create New Account\n2. Exixting User");
@@ -182,7 +182,7 @@ namespace ATM.Services
             return option;
         }
 
-        public static string selectOperation()
+        public static string SelectOperation()
         {
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");
