@@ -1,4 +1,5 @@
 ﻿using ATM.Models;
+using ATM.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,9 +71,8 @@ namespace ATM.Services
 
         }
 
-        public static Account selectAccount()
+        public static Account selectAccount(List<Account> accounts)
         {
-            List<Account> accounts = AccountsHandler.getAllAccounts();
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
             foreach (Account acc in accounts)
             {
@@ -130,7 +130,7 @@ namespace ATM.Services
             return userInput;
         }
 
-        public static Account selectTransferToAccount(List<Account> accounts, int fromAccNo)
+        public static Account selectTransferToAccount(int fromAccNo, List<Account> accounts)
         {
             Account selectedAccount;
             Console.WriteLine();
@@ -164,13 +164,14 @@ namespace ATM.Services
             return selectedAccount;
         }
 
-        public static void printTransactions(List<Transaction> transactions)
+        public static void printTransactions(List<Transaction> transactions, decimal availBal)
         {
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             foreach (Transaction transaction in transactions)
             {
                 Console.WriteLine(transaction.timeStamp + "\t" + transaction.transactionType + "\tRs. " + transaction.transactionAmount);
             }
+            Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
 
         public static string existingOrCreate()

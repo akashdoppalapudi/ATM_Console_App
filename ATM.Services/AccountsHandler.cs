@@ -19,9 +19,8 @@ namespace ATM.Services
                 };
             }
         }
-        public void createNewAccount()
+        public void createNewAccount(string name, string pin, AccountType accountType)
         {
-            (string name, string pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
             if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(pin) || accountType == (AccountType)0)
             {
                 StandardMessages.accountCreationFailed();
@@ -44,16 +43,15 @@ namespace ATM.Services
             }
         }
 
-        public static List<Account> getAllAccounts()
+        public List<Account> getAllAccounts()
         {
             return bank.accounts;
         }
 
-        public void deposit(Account account)
+        public void deposit(Account account, decimal amount, string userInputPin)
         {
-            if (authenticate(account))
+            if (authenticate(account, userInputPin))
             {
-                decimal amount = ConsoleUI.getAmount('d');
                 if (amount <= 0)
                 {
                     StandardMessages.invalidAmountMsg();
@@ -68,11 +66,10 @@ namespace ATM.Services
             }
         }
 
-        public void withdraw(Account account)
+        public void withdraw(Account account, decimal amount, string userInputPin)
         {
-            if (authenticate(account))
+            if (authenticate(account, userInputPin))
             {
-                decimal amount = ConsoleUI.getAmount('w');
                 if (amount <= 0 || amount > account.availableBalance)
                 {
                     StandardMessages.invalidAmountMsg();
@@ -87,11 +84,10 @@ namespace ATM.Services
             }
         }
 
-        public void transfer(Account account)
+        public void transfer(Account account, Account transferToAccount, decimal amount, string userInputPin)
         {
-            if (authenticate(account))
+            if (authenticate(account, userInputPin))
             {
-                decimal amount = ConsoleUI.getAmount('t');
                 if (amount <= 0 || amount > account.availableBalance)
                 {
                     StandardMessages.invalidAmountMsg();
@@ -99,7 +95,6 @@ namespace ATM.Services
                 }
                 else
                 {
-                    Account transferToAccount = ConsoleUI.selectTransferToAccount(bank.accounts, account.accountNumber);
                     if (transferToAccount == null)
                     {
                         StandardMessages.transferFailed();
@@ -114,13 +109,13 @@ namespace ATM.Services
             }
         }
 
-        public void transactionHistory(Account account)
+        public List<Transaction> getTransactions(Account account, string userInputPin)
         {
-            if (authenticate(account))
+            if (authenticate(account, userInputPin))
             {
-                ConsoleUI.printTransactions(account.transactions);
-                StandardMessages.availableBalanceMsg(account.availableBalance);
+                return account.transactions;
             }
+            return null;
         }
 
         private void recieve(Account account, decimal amount)
@@ -131,9 +126,8 @@ namespace ATM.Services
             StandardMessages.transferSuccess();
         }
 
-        private bool authenticate(Account account)
+        private static bool authenticate(Account account, string userInput)
         {
-            string userInput = ConsoleUI.getPinFromUser();
             string hashedUserInput = Encryption.computeSha256Hash(userInput);
             if (hashedUserInput == account.pin)
             {

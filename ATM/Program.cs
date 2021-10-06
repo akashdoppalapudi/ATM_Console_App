@@ -1,5 +1,6 @@
 ﻿using ATM.Models;
 using ATM.Services;
+using System.Collections.Generic;
 
 namespace ATM.CLI
 {
@@ -14,37 +15,45 @@ namespace ATM.CLI
                 string option = ConsoleUI.existingOrCreate();
                 if (option == "1")
                 {
-                    accountsHandler.createNewAccount();
+                    (string name, string pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
+                    accountsHandler.createNewAccount(name, pin, accountType);
                 }
                 else if (option == "2")
                 {
                     while (true)
                     {
-                        Account selectedAcc = ConsoleUI.selectAccount();
+                        List<Account> allAccounts = accountsHandler.getAllAccounts();
+                        Account selectedAcc = ConsoleUI.selectAccount(allAccounts);
                         if (selectedAcc == null)
                         {
                             StandardMessages.invalidOptionMsg();
                             break;
                         }
+                        string userInputPin = ConsoleUI.getPinFromUser();
                         string operation = ConsoleUI.selectOperation();
                         if (operation == "1")
                         {
-                            accountsHandler.deposit(selectedAcc);
+                            decimal amount = ConsoleUI.getAmount('d');
+                            accountsHandler.deposit(selectedAcc, amount, userInputPin);
                             break;
                         }
                         else if (operation == "2")
                         {
-                            accountsHandler.withdraw(selectedAcc);
+                            decimal amount = ConsoleUI.getAmount('w');
+                            accountsHandler.withdraw(selectedAcc, amount, userInputPin);
                             break;
                         }
                         else if (operation == "3")
                         {
-                            accountsHandler.transfer(selectedAcc);
+                            decimal amount = ConsoleUI.getAmount('t');
+                            Account transferToAccount = ConsoleUI.selectTransferToAccount(selectedAcc.accountNumber, allAccounts);
+                            accountsHandler.transfer(selectedAcc, transferToAccount, amount, userInputPin);
                             break;
                         }
                         else if (operation == "4")
                         {
-                            accountsHandler.transactionHistory(selectedAcc);
+                            List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc, userInputPin);
+                            ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
                             break;
                         }
                         else if (operation == "b")
