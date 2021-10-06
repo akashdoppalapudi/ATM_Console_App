@@ -16,7 +16,14 @@ namespace ATM.CLI
                 if (option == "1")
                 {
                     (string name, string pin, AccountType accountType) = ConsoleUI.getDataForAccountCreation();
-                    accountsHandler.createNewAccount(name, pin, accountType);
+                    try
+                    {
+                        accountsHandler.createNewAccount(name, pin, accountType);
+                    }
+                    catch (AccountCreationFailedException)
+                    {
+                        StandardMessages.accountCreationFailed();
+                    }
                 }
                 else if (option == "2")
                 {
@@ -30,38 +37,67 @@ namespace ATM.CLI
                             break;
                         }
                         string userInputPin = ConsoleUI.getPinFromUser();
-                        accountsHandler.authenticate(selectedAcc, userInputPin);
+                        try
+                        {
+                            accountsHandler.authenticate(selectedAcc, userInputPin);
+                        }
+                        catch (AuthenticationFailedException)
+                        {
+                            StandardMessages.wrongPinMsg();
+                            break;
+                        }
                         string operation = ConsoleUI.selectOperation();
                         if (operation == "1")
                         {
                             decimal amount = ConsoleUI.getAmount('d');
-                            accountsHandler.deposit(selectedAcc, amount);
+                            try
+                            {
+                                accountsHandler.deposit(selectedAcc, amount);
+                                StandardMessages.depositSuccess();
+                            }
+                            catch (InvalidAmountException)
+                            {
+                                StandardMessages.invalidAmountMsg();
+                            }
                             break;
                         }
                         else if (operation == "2")
                         {
                             decimal amount = ConsoleUI.getAmount('w');
-                            accountsHandler.withdraw(selectedAcc, amount);
+                            try
+                            {
+                                accountsHandler.withdraw(selectedAcc, amount);
+                                StandardMessages.withdrawSuccess();
+                            }
+                            catch (InvalidAmountException)
+                            {
+                                StandardMessages.invalidAmountMsg();
+                            }
                             break;
                         }
                         else if (operation == "3")
                         {
                             decimal amount = ConsoleUI.getAmount('t');
                             Account transferToAccount = ConsoleUI.selectTransferToAccount(selectedAcc.accountNumber, allAccounts);
-                            accountsHandler.transfer(selectedAcc, transferToAccount, amount);
+                            try
+                            {
+                                accountsHandler.transfer(selectedAcc, transferToAccount, amount);
+                                StandardMessages.transferSuccess();
+                            }
+                            catch (InvalidAmountException)
+                            {
+                                StandardMessages.invalidAmountMsg();
+                            }
+                            catch (TransferFailedException)
+                            {
+                                StandardMessages.transferFailed();
+                            }
                             break;
                         }
                         else if (operation == "4")
                         {
-                            try 
-                            {
-                                List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc);
-                                ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
-                            } catch (AuthenticationFailedException)
-                            {
-                                StandardMessages.wrongPinMsg();
-                            }
-                            
+                            List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc);
+                            ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
                         }
                         else if (operation == "b")
                         {

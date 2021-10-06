@@ -14,11 +14,6 @@ namespace ATM.Services
             Console.WriteLine("Account Created Successfully");
         }
 
-        public static void availableBalanceMsg(decimal availBal)
-        {
-            Console.WriteLine("\t\tAvailable Balance : " + availBal);
-        }
-
         public static void welcomeMsg()
         {
             Console.WriteLine("Welcome to ALPHA BANK");
@@ -36,7 +31,7 @@ namespace ATM.Services
 
         public static void wrongPinMsg()
         {
-            Console.WriteLine("Wrong PIN");
+            Console.WriteLine("Wrong PIN! Authentication Failed");
         }
 
         public static void transferSuccess()

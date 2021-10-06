@@ -112,14 +112,13 @@ namespace ATM.Services
             DataHandler.writeBankData(bank);
         }
 
-        public bool authenticate(Account account, string userInput)
+        public void authenticate(Account account, string userInput)
         {
             string hashedUserInput = Encryption.computeSha256Hash(userInput);
-            if (hashedUserInput == account.pin)
+            if (hashedUserInput != account.pin)
             {
-                return true;
+                throw new AuthenticationFailedException();
             }
-            return false;
         }
     }
 }
