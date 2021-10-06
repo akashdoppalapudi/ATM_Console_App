@@ -23,7 +23,7 @@ namespace ATM.Services
         {
             if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(pin) || accountType == (AccountType)0)
             {
-                StandardMessages.accountCreationFailed();
+                throw new AccountCreationFailedException();
             }
             else
             {
@@ -39,7 +39,6 @@ namespace ATM.Services
                 newAccount.transactions.Add(TransactionHandler.newTransaction(1500, (TransactionType)1));
                 bank.accounts.Add(newAccount);
                 DataHandler.writeBankData(bank);
-                StandardMessages.accountCreationSuccess();
             }
         }
 
@@ -48,74 +47,62 @@ namespace ATM.Services
             return bank.accounts;
         }
 
-        public void deposit(Account account, decimal amount, string userInputPin)
+        public void deposit(Account account, decimal amount)
         {
-            if (authenticate(account, userInputPin))
+            if (amount <= 0)
             {
-                if (amount <= 0)
-                {
-                    StandardMessages.invalidAmountMsg();
-                }
-                else
-                {
-                    account.availableBalance += amount;
-                    account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
-                    DataHandler.writeBankData(bank);
-                    StandardMessages.depositSuccess();
-                }
+                throw new InvalidAmountException();
+            }
+            else
+            {
+                account.availableBalance += amount;
+                account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
+                DataHandler.writeBankData(bank);
             }
         }
 
-        public void withdraw(Account account, decimal amount, string userInputPin)
+
+        public void withdraw(Account account, decimal amount)
         {
-            if (authenticate(account, userInputPin))
+            if (amount <= 0 || amount > account.availableBalance)
             {
-                if (amount <= 0 || amount > account.availableBalance)
+                throw new InvalidAmountException();
+            }
+            else
+            {
+                account.availableBalance -= amount;
+                account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
+                DataHandler.writeBankData(bank);
+            }
+        }
+
+
+        public void transfer(Account account, Account transferToAccount, decimal amount)
+        {
+            if (amount <= 0 || amount > account.availableBalance)
+            {
+                throw new InvalidAmountException();
+                throw new TransferFailedException();
+            }
+            else
+            {
+                if (transferToAccount == null)
                 {
-                    StandardMessages.invalidAmountMsg();
+                    throw new TransferFailedException();
                 }
                 else
                 {
                     account.availableBalance -= amount;
                     account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
-                    DataHandler.writeBankData(bank);
-                    StandardMessages.withdrawSuccess();
+                    recieve(transferToAccount, amount);
                 }
             }
+
         }
 
-        public void transfer(Account account, Account transferToAccount, decimal amount, string userInputPin)
+        public List<Transaction> getTransactions(Account account)
         {
-            if (authenticate(account, userInputPin))
-            {
-                if (amount <= 0 || amount > account.availableBalance)
-                {
-                    StandardMessages.invalidAmountMsg();
-                    StandardMessages.transferFailed();
-                }
-                else
-                {
-                    if (transferToAccount == null)
-                    {
-                        StandardMessages.transferFailed();
-                    }
-                    else
-                    {
-                        account.availableBalance -= amount;
-                        account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)2));
-                        recieve(transferToAccount, amount);
-                    }
-                }
-            }
-        }
-
-        public List<Transaction> getTransactions(Account account, string userInputPin)
-        {
-            if (authenticate(account, userInputPin))
-            {
-                return account.transactions;
-            }
-            return null;
+            return account.transactions;
         }
 
         private void recieve(Account account, decimal amount)
@@ -123,17 +110,15 @@ namespace ATM.Services
             account.availableBalance += amount;
             account.transactions.Add(TransactionHandler.newTransaction(amount, (TransactionType)3));
             DataHandler.writeBankData(bank);
-            StandardMessages.transferSuccess();
         }
 
-        private static bool authenticate(Account account, string userInput)
+        public bool authenticate(Account account, string userInput)
         {
             string hashedUserInput = Encryption.computeSha256Hash(userInput);
             if (hashedUserInput == account.pin)
             {
                 return true;
             }
-            StandardMessages.wrongPinMsg();
             return false;
         }
     }

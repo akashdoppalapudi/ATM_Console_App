@@ -30,31 +30,38 @@ namespace ATM.CLI
                             break;
                         }
                         string userInputPin = ConsoleUI.getPinFromUser();
+                        accountsHandler.authenticate(selectedAcc, userInputPin);
                         string operation = ConsoleUI.selectOperation();
                         if (operation == "1")
                         {
                             decimal amount = ConsoleUI.getAmount('d');
-                            accountsHandler.deposit(selectedAcc, amount, userInputPin);
+                            accountsHandler.deposit(selectedAcc, amount);
                             break;
                         }
                         else if (operation == "2")
                         {
                             decimal amount = ConsoleUI.getAmount('w');
-                            accountsHandler.withdraw(selectedAcc, amount, userInputPin);
+                            accountsHandler.withdraw(selectedAcc, amount);
                             break;
                         }
                         else if (operation == "3")
                         {
                             decimal amount = ConsoleUI.getAmount('t');
                             Account transferToAccount = ConsoleUI.selectTransferToAccount(selectedAcc.accountNumber, allAccounts);
-                            accountsHandler.transfer(selectedAcc, transferToAccount, amount, userInputPin);
+                            accountsHandler.transfer(selectedAcc, transferToAccount, amount);
                             break;
                         }
                         else if (operation == "4")
                         {
-                            List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc, userInputPin);
-                            ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
-                            break;
+                            try 
+                            {
+                                List<Transaction> transactions = accountsHandler.getTransactions(selectedAcc);
+                                ConsoleUI.printTransactions(transactions, selectedAcc.availableBalance);
+                            } catch (AuthenticationFailedException)
+                            {
+                                StandardMessages.wrongPinMsg();
+                            }
+                            
                         }
                         else if (operation == "b")
                         {
