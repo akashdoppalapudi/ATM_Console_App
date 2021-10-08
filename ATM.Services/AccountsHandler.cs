@@ -94,7 +94,9 @@ namespace ATM.Services
                 {
                     account.availableBalance -= amount;
                     account.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
-                    Recieve(transferToAccount, amount);
+                    transferToAccount.availableBalance += amount;
+                    transferToAccount.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
+                    DataHandler.WriteBankData(bank);
                 }
             }
 
@@ -103,13 +105,6 @@ namespace ATM.Services
         public List<Transaction> GetTransactions(Account account)
         {
             return account.transactions;
-        }
-
-        private void Recieve(Account account, decimal amount)
-        {
-            account.availableBalance += amount;
-            account.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
-            DataHandler.WriteBankData(bank);
         }
 
         public void Authenticate(Account account, string userInput)
