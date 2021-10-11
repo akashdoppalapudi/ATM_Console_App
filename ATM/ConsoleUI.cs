@@ -1,7 +1,6 @@
 ﻿using ATM.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ATM.Services
 {
@@ -70,24 +69,26 @@ namespace ATM.Services
 
         }
 
-        public static Account SelectAccount(List<Account> accounts)
+        public static int SelectAccount(List<string> accountNames)
         {
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
-            foreach (Account acc in accounts)
+            int i = 1;
+            foreach (string accountName in accountNames)
             {
-                Console.WriteLine(acc.AccountId + ". " + acc.AccountHoldersName);
+                Console.WriteLine(i + ". " + accountName);
+                i++;
             }
             Console.Write("\nSelect your account : ");
             string choice = Console.ReadLine();
             try
             {
-                int selectedaccountNumber = Convert.ToInt32(choice);
-                Account selectedAccount = accounts.FirstOrDefault(acc => acc.AccountId == selectedaccountNumber);
-                return selectedAccount;
+                int selectedAccountId = Convert.ToInt32(choice);
+                return selectedAccountId;
             }
             catch
             {
-                return null;
+                ConsoleMessages.InvalidOptionMsg();
+                return -1;
             }
         }
 
@@ -129,38 +130,39 @@ namespace ATM.Services
             return userInput;
         }
 
-        public static Account SelectTransferToAccount(int fromAccNo, List<Account> accounts)
+        public static int SelectTransferToAccountId(int fromAccId, List<string> accountNames)
         {
-            Account selectedAccount;
+            int selectedAccountId;
             Console.WriteLine();
-            foreach (Account acc in accounts)
+            int i = 1;
+            foreach (string accountName in accountNames)
             {
-                if (fromAccNo != acc.AccountId)
+                if (i != fromAccId)
                 {
-                    Console.WriteLine(acc.AccountId + ". " + acc.AccountHoldersName);
+                    Console.WriteLine(i + ". " + accountName);
                 }
+                i++;
             }
             Console.Write("Select an Account to transfer money to : ");
             string userInput = Console.ReadLine();
             try
             {
-                int selectedaccountNumber = int.Parse(userInput);
-                if (selectedaccountNumber > 0 && selectedaccountNumber <= accounts.Count && selectedaccountNumber != fromAccNo)
+                selectedAccountId = int.Parse(userInput);
+                if (selectedAccountId > 0 && selectedAccountId <= i && selectedAccountId != fromAccId)
                 {
-                    selectedAccount = accounts[selectedaccountNumber - 1];
+                    return selectedAccountId;
                 }
                 else
                 {
-                    selectedAccount = null;
                     ConsoleMessages.InvalidOptionMsg();
+                    return -1;
                 }
             }
             catch
             {
-                selectedAccount = null;
                 ConsoleMessages.InvalidOptionMsg();
+                return -1;
             }
-            return selectedAccount;
         }
 
         public static void PrintTransactions(List<Transaction> transactions, decimal availBal)

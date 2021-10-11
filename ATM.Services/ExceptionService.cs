@@ -9,5 +9,7 @@ namespace ATM.Services
 
     public class AuthenticationFailedException : Exception { }
 
+    public class UserNotFoundException : Exception { }
+
     public class TransferFailedException : Exception { }
 }

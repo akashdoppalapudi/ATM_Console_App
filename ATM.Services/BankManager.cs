@@ -1,20 +1,23 @@
 ﻿using ATM.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ATM.Services
 {
     public class BankManager
     {
-        public static Bank bank;
+        public Bank bank;
 
         public BankManager()
         {
-            bank = DataHandler.ReadBankData();
-            if (bank == null)
+            this.bank = DataHandler.ReadBankData();
+            if (this.bank == null)
             {
-                bank = new Bank
+                this.bank = new Bank
                 {
+                    Name = "Alpha Bank",
+                    Address = "hyderbad",
                     Accounts = new List<Account>()
                 };
             }
@@ -29,7 +32,7 @@ namespace ATM.Services
             {
                 Account newAccount = new Account
                 {
-                    AccountId = bank.Accounts.Count + 1,
+                    AccountId = this.bank.Accounts.Count + 1,
                     AccountHoldersName = name,
                     AccountType = accountType,
                     Pin = EncryptionService.ComputeSha256Hash(pin),
@@ -37,18 +40,24 @@ namespace ATM.Services
                     Transactions = new List<Transaction>()
                 };
                 newAccount.Transactions.Add(TransactionHandler.NewTransaction(1500, (TransactionType)1));
-                bank.Accounts.Add(newAccount);
-                DataHandler.WriteBankData(bank);
+                this.bank.Accounts.Add(newAccount);
+                DataHandler.WriteBankData(this.bank);
             }
         }
 
-        public List<Account> GetAllAccounts()
+        public List<string> GetAllAccounts()
         {
-            return bank.Accounts;
+            List<string> accountNames = new List<string>();
+            foreach (Account account in this.bank.Accounts)
+            {
+                accountNames.Add(account.AccountHoldersName);
+            }
+            return accountNames;
         }
 
-        public void Deposit(Account account, decimal amount)
+        public void Deposit(int accountId, decimal amount)
         {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
             if (amount <= 0)
             {
                 throw new InvalidAmountException();
@@ -57,13 +66,14 @@ namespace ATM.Services
             {
                 account.Balance += amount;
                 account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
-                DataHandler.WriteBankData(bank);
+                DataHandler.WriteBankData(this.bank);
             }
         }
 
 
-        public void Withdraw(Account account, decimal amount)
+        public void Withdraw(int accountId, decimal amount)
         {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
@@ -72,13 +82,15 @@ namespace ATM.Services
             {
                 account.Balance -= amount;
                 account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
-                DataHandler.WriteBankData(bank);
+                DataHandler.WriteBankData(this.bank);
             }
         }
 
 
-        public void Transfer(Account account, Account transferToAccount, decimal amount)
+        public void Transfer(int selectedAccountId, int transferToAccountId, decimal amount)
         {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == selectedAccountId);
+            Account transferToAccount = this.bank.Accounts.Find(a => a.AccountId == transferToAccountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
@@ -96,19 +108,36 @@ namespace ATM.Services
                     account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
                     transferToAccount.Balance += amount;
                     transferToAccount.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
-                    DataHandler.WriteBankData(bank);
+                    DataHandler.WriteBankData(this.bank);
                 }
             }
 
         }
 
-        public List<Transaction> GetTransactions(Account account)
+        public List<Transaction> GetTransactions(int accountId)
         {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
             return account.Transactions;
         }
 
-        public void Authenticate(Account account, string userInput)
+        public decimal GetBalance(int accountId)
         {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            return account.Balance;
+        }
+
+        public void CheckAccountExistance(int accountId)
+        {
+            Account account = this.bank.Accounts.FirstOrDefault(a => a.AccountId == accountId);
+            if (account == null)
+            {
+                throw new UserNotFoundException();
+            }
+        }
+
+        public void Authenticate(int accountId, string userInput)
+        {
+            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
             string hashedUserInput = EncryptionService.ComputeSha256Hash(userInput);
             if (hashedUserInput != account.Pin)
             {

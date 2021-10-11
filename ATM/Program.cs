@@ -30,17 +30,21 @@ namespace ATM.CLI
                 {
                     while (true)
                     {
-                        List<Account> allAccounts = bankManager.GetAllAccounts();
-                        Account selectedAcc = ConsoleUI.SelectAccount(allAccounts);
-                        if (selectedAcc == null)
+                        List<string> allAccountNames = bankManager.GetAllAccounts();
+                        int selectedAccountId = ConsoleUI.SelectAccount(allAccountNames);
+                        try
                         {
-                            ConsoleMessages.InvalidOptionMsg();
+                            bankManager.CheckAccountExistance(selectedAccountId);
+                        }
+                        catch(UserNotFoundException)
+                        {
+                            ConsoleMessages.UserNotFoundMsg();
                             break;
                         }
                         string userInputPin = ConsoleUI.GetPinFromUser();
                         try
                         {
-                            bankManager.Authenticate(selectedAcc, userInputPin);
+                            bankManager.Authenticate(selectedAccountId, userInputPin);
                         }
                         catch (AuthenticationFailedException)
                         {
@@ -53,7 +57,7 @@ namespace ATM.CLI
                             decimal amount = ConsoleUI.GetAmount('d');
                             try
                             {
-                                bankManager.Deposit(selectedAcc, amount);
+                                bankManager.Deposit(selectedAccountId, amount);
                                 ConsoleMessages.DepositSuccess();
                             }
                             catch (InvalidAmountException)
@@ -67,7 +71,7 @@ namespace ATM.CLI
                             decimal amount = ConsoleUI.GetAmount('w');
                             try
                             {
-                                bankManager.Withdraw(selectedAcc, amount);
+                                bankManager.Withdraw(selectedAccountId, amount);
                                 ConsoleMessages.WithdrawSuccess();
                             }
                             catch (InvalidAmountException)
@@ -79,10 +83,18 @@ namespace ATM.CLI
                         else if (operation == "3")
                         {
                             decimal amount = ConsoleUI.GetAmount('t');
-                            Account transferToAccount = ConsoleUI.SelectTransferToAccount(selectedAcc.AccountId, allAccounts);
+                            int transferToAccountId = ConsoleUI.SelectTransferToAccountId(selectedAccountId, allAccountNames);
                             try
                             {
-                                bankManager.Transfer(selectedAcc, transferToAccount, amount);
+                                bankManager.CheckAccountExistance(transferToAccountId);
+                            }
+                            catch (UserNotFoundException)
+                            {
+                                ConsoleMessages.UserNotFoundMsg();
+                            }
+                            try
+                            {
+                                bankManager.Transfer(selectedAccountId, transferToAccountId, amount);
                                 ConsoleMessages.TransferSuccess();
                             }
                             catch (InvalidAmountException)
@@ -97,8 +109,9 @@ namespace ATM.CLI
                         }
                         else if (operation == "4")
                         {
-                            List<Transaction> transactions = bankManager.GetTransactions(selectedAcc);
-                            ConsoleUI.PrintTransactions(transactions, selectedAcc.Balance);
+                            List<Transaction> transactions = bankManager.GetTransactions(selectedAccountId);
+                            decimal balance = bankManager.GetBalance(selectedAccountId);
+                            ConsoleUI.PrintTransactions(transactions, balance);
                             break;
                         }
                         else

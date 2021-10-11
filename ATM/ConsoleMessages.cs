@@ -53,5 +53,10 @@ namespace ATM.Services
         {
             Console.WriteLine("Amount Withdrawn Successfully");
         }
+
+        public static void UserNotFoundMsg()
+        {
+            Console.WriteLine("User Not Found");
+        }
     }
 }
