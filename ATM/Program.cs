@@ -11,14 +11,14 @@ namespace ATM.CLI
             StandardMessages.WelcomeMsg();
             while (true)
             {
-                AccountsHandler accountsHandler = new AccountsHandler();
+                BankManager bankManager = new BankManager();
                 string option = ConsoleUI.ExistingOrCreate();
                 if (option == "1")
                 {
                     (string name, string pin, AccountType accountType) = ConsoleUI.GetDataForAccountCreation();
                     try
                     {
-                        accountsHandler.CreateNewAccount(name, pin, accountType);
+                        bankManager.CreateNewAccount(name, pin, accountType);
                         StandardMessages.AccountCreationSuccess();
                     }
                     catch (AccountCreationFailedException)
@@ -30,7 +30,7 @@ namespace ATM.CLI
                 {
                     while (true)
                     {
-                        List<Account> allAccounts = accountsHandler.GetAllAccounts();
+                        List<Account> allAccounts = bankManager.GetAllAccounts();
                         Account selectedAcc = ConsoleUI.SelectAccount(allAccounts);
                         if (selectedAcc == null)
                         {
@@ -40,7 +40,7 @@ namespace ATM.CLI
                         string userInputPin = ConsoleUI.GetPinFromUser();
                         try
                         {
-                            accountsHandler.Authenticate(selectedAcc, userInputPin);
+                            bankManager.Authenticate(selectedAcc, userInputPin);
                         }
                         catch (AuthenticationFailedException)
                         {
@@ -53,7 +53,7 @@ namespace ATM.CLI
                             decimal amount = ConsoleUI.GetAmount('d');
                             try
                             {
-                                accountsHandler.Deposit(selectedAcc, amount);
+                                bankManager.Deposit(selectedAcc, amount);
                                 StandardMessages.DepositSuccess();
                             }
                             catch (InvalidAmountException)
@@ -67,7 +67,7 @@ namespace ATM.CLI
                             decimal amount = ConsoleUI.GetAmount('w');
                             try
                             {
-                                accountsHandler.Withdraw(selectedAcc, amount);
+                                bankManager.Withdraw(selectedAcc, amount);
                                 StandardMessages.WithdrawSuccess();
                             }
                             catch (InvalidAmountException)
@@ -82,7 +82,7 @@ namespace ATM.CLI
                             Account transferToAccount = ConsoleUI.SelectTransferToAccount(selectedAcc.accountNumber, allAccounts);
                             try
                             {
-                                accountsHandler.Transfer(selectedAcc, transferToAccount, amount);
+                                bankManager.Transfer(selectedAcc, transferToAccount, amount);
                                 StandardMessages.TransferSuccess();
                             }
                             catch (InvalidAmountException)
@@ -97,13 +97,9 @@ namespace ATM.CLI
                         }
                         else if (operation == "4")
                         {
-                            List<Transaction> transactions = accountsHandler.GetTransactions(selectedAcc);
+                            List<Transaction> transactions = bankManager.GetTransactions(selectedAcc);
                             ConsoleUI.PrintTransactions(transactions, selectedAcc.availableBalance);
                             break;
-                        }
-                        else if (operation == "b")
-                        {
-                            continue;
                         }
                         else
                         {

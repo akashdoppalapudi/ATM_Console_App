@@ -176,8 +176,8 @@ namespace ATM.Services
         public static string ExistingOrCreate()
         {
             Console.WriteLine("\n____ATM____\n");
-            Console.WriteLine("1. Create New Account\n2. Exixting User");
-            Console.Write("\nSelect an Option (Enter 'e' to exit) : ");
+            Console.WriteLine("1. Create New Account\n2. Exixting User\n3. Exit");
+            Console.Write("\nSelect an Option : ");
             string option = Console.ReadLine();
             return option;
         }
@@ -186,7 +186,7 @@ namespace ATM.Services
         {
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");
-            Console.Write("\nSelect an operation (Enter 'b' to go back) : ");
+            Console.Write("\nSelect an operation : ");
             string operation = Console.ReadLine();
             return operation;
         }

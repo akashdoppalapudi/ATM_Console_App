@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace ATM.Services
 {
-    public class AccountsHandler
+    public class BankManager
     {
         public static Bank bank;
 
-        public AccountsHandler()
+        public BankManager()
         {
             bank = DataHandler.ReadBankData();
             if (bank == null)
