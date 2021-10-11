@@ -79,7 +79,7 @@ namespace ATM.CLI
                         else if (operation == "3")
                         {
                             decimal amount = ConsoleUI.GetAmount('t');
-                            Account transferToAccount = ConsoleUI.SelectTransferToAccount(selectedAcc.accountNumber, allAccounts);
+                            Account transferToAccount = ConsoleUI.SelectTransferToAccount(selectedAcc.AccountId, allAccounts);
                             try
                             {
                                 bankManager.Transfer(selectedAcc, transferToAccount, amount);
@@ -98,7 +98,7 @@ namespace ATM.CLI
                         else if (operation == "4")
                         {
                             List<Transaction> transactions = bankManager.GetTransactions(selectedAcc);
-                            ConsoleUI.PrintTransactions(transactions, selectedAcc.availableBalance);
+                            ConsoleUI.PrintTransactions(transactions, selectedAcc.Balance);
                             break;
                         }
                         else

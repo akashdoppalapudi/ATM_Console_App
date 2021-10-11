@@ -75,14 +75,14 @@ namespace ATM.Services
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
             foreach (Account acc in accounts)
             {
-                Console.WriteLine(acc.accountNumber + ". " + acc.accountHoldersName);
+                Console.WriteLine(acc.AccountId + ". " + acc.AccountHoldersName);
             }
             Console.Write("\nSelect your account : ");
             string choice = Console.ReadLine();
             try
             {
                 int selectedaccountNumber = Convert.ToInt32(choice);
-                Account selectedAccount = accounts.FirstOrDefault(acc => acc.accountNumber == selectedaccountNumber);
+                Account selectedAccount = accounts.FirstOrDefault(acc => acc.AccountId == selectedaccountNumber);
                 return selectedAccount;
             }
             catch
@@ -135,9 +135,9 @@ namespace ATM.Services
             Console.WriteLine();
             foreach (Account acc in accounts)
             {
-                if (fromAccNo != acc.accountNumber)
+                if (fromAccNo != acc.AccountId)
                 {
-                    Console.WriteLine(acc.accountNumber + ". " + acc.accountHoldersName);
+                    Console.WriteLine(acc.AccountId + ". " + acc.AccountHoldersName);
                 }
             }
             Console.Write("Select an Account to transfer money to : ");
@@ -168,7 +168,7 @@ namespace ATM.Services
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             foreach (Transaction transaction in transactions)
             {
-                Console.WriteLine(transaction.timeStamp + "\t" + transaction.transactionType + "\tRs. " + transaction.transactionAmount);
+                Console.WriteLine(transaction.TransactionDate + "\t" + transaction.TransactionType + "\tRs. " + transaction.TransactionAmount);
             }
             Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }

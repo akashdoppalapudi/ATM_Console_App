@@ -15,7 +15,7 @@ namespace ATM.Services
             {
                 bank = new Bank
                 {
-                    accounts = new List<Account>()
+                    Accounts = new List<Account>()
                 };
             }
         }
@@ -29,22 +29,22 @@ namespace ATM.Services
             {
                 Account newAccount = new Account
                 {
-                    accountNumber = bank.accounts.Count + 1,
-                    accountHoldersName = name,
-                    accountType = accountType,
-                    pin = EncryptionService.ComputeSha256Hash(pin),
-                    availableBalance = 1500,
-                    transactions = new List<Transaction>()
+                    AccountId = bank.Accounts.Count + 1,
+                    AccountHoldersName = name,
+                    AccountType = accountType,
+                    Pin = EncryptionService.ComputeSha256Hash(pin),
+                    Balance = 1500,
+                    Transactions = new List<Transaction>()
                 };
-                newAccount.transactions.Add(TransactionHandler.NewTransaction(1500, (TransactionType)1));
-                bank.accounts.Add(newAccount);
+                newAccount.Transactions.Add(TransactionHandler.NewTransaction(1500, (TransactionType)1));
+                bank.Accounts.Add(newAccount);
                 DataHandler.WriteBankData(bank);
             }
         }
 
         public List<Account> GetAllAccounts()
         {
-            return bank.accounts;
+            return bank.Accounts;
         }
 
         public void Deposit(Account account, decimal amount)
@@ -55,8 +55,8 @@ namespace ATM.Services
             }
             else
             {
-                account.availableBalance += amount;
-                account.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
+                account.Balance += amount;
+                account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
                 DataHandler.WriteBankData(bank);
             }
         }
@@ -64,14 +64,14 @@ namespace ATM.Services
 
         public void Withdraw(Account account, decimal amount)
         {
-            if (amount <= 0 || amount > account.availableBalance)
+            if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
             }
             else
             {
-                account.availableBalance -= amount;
-                account.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
+                account.Balance -= amount;
+                account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
                 DataHandler.WriteBankData(bank);
             }
         }
@@ -79,7 +79,7 @@ namespace ATM.Services
 
         public void Transfer(Account account, Account transferToAccount, decimal amount)
         {
-            if (amount <= 0 || amount > account.availableBalance)
+            if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
                 throw new TransferFailedException();
@@ -92,10 +92,10 @@ namespace ATM.Services
                 }
                 else
                 {
-                    account.availableBalance -= amount;
-                    account.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
-                    transferToAccount.availableBalance += amount;
-                    transferToAccount.transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
+                    account.Balance -= amount;
+                    account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
+                    transferToAccount.Balance += amount;
+                    transferToAccount.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
                     DataHandler.WriteBankData(bank);
                 }
             }
@@ -104,13 +104,13 @@ namespace ATM.Services
 
         public List<Transaction> GetTransactions(Account account)
         {
-            return account.transactions;
+            return account.Transactions;
         }
 
         public void Authenticate(Account account, string userInput)
         {
             string hashedUserInput = EncryptionService.ComputeSha256Hash(userInput);
-            if (hashedUserInput != account.pin)
+            if (hashedUserInput != account.Pin)
             {
                 throw new AuthenticationFailedException();
             }

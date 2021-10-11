@@ -5,8 +5,8 @@ namespace ATM.Models
     [Serializable]
     public class Transaction
     {
-        public DateTime timeStamp { get; set; }
-        public TransactionType transactionType { get; set; }
-        public decimal transactionAmount { get; set; }
+        public DateTime TransactionDate { get; set; }
+        public TransactionType TransactionType { get; set; }
+        public decimal TransactionAmount { get; set; }
     }
 }

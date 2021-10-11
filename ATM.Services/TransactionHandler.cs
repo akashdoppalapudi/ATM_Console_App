@@ -9,9 +9,9 @@ namespace ATM.Services
         {
             Transaction newTransaction = new Transaction
             {
-                timeStamp = DateTime.Now,
-                transactionAmount = amount,
-                transactionType = transactionType
+                TransactionDate = DateTime.Now,
+                TransactionAmount = amount,
+                TransactionType = transactionType
             };
 
             return newTransaction;
