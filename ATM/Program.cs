@@ -99,6 +99,7 @@ namespace ATM.CLI
                         {
                             List<Transaction> transactions = accountsHandler.GetTransactions(selectedAcc);
                             ConsoleUI.PrintTransactions(transactions, selectedAcc.availableBalance);
+                            break;
                         }
                         else if (operation == "b")
                         {
