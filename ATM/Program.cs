@@ -8,7 +8,7 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            StandardMessages.WelcomeMsg();
+            ConsoleMessages.WelcomeMsg();
             while (true)
             {
                 BankManager bankManager = new BankManager();
@@ -19,11 +19,11 @@ namespace ATM.CLI
                     try
                     {
                         bankManager.CreateNewAccount(name, pin, accountType);
-                        StandardMessages.AccountCreationSuccess();
+                        ConsoleMessages.AccountCreationSuccess();
                     }
                     catch (AccountCreationFailedException)
                     {
-                        StandardMessages.AccountCreationFailed();
+                        ConsoleMessages.AccountCreationFailed();
                     }
                 }
                 else if (option == "2")
@@ -34,7 +34,7 @@ namespace ATM.CLI
                         Account selectedAcc = ConsoleUI.SelectAccount(allAccounts);
                         if (selectedAcc == null)
                         {
-                            StandardMessages.InvalidOptionMsg();
+                            ConsoleMessages.InvalidOptionMsg();
                             break;
                         }
                         string userInputPin = ConsoleUI.GetPinFromUser();
@@ -44,7 +44,7 @@ namespace ATM.CLI
                         }
                         catch (AuthenticationFailedException)
                         {
-                            StandardMessages.WrongPinMsg();
+                            ConsoleMessages.WrongPinMsg();
                             break;
                         }
                         string operation = ConsoleUI.SelectOperation();
@@ -54,11 +54,11 @@ namespace ATM.CLI
                             try
                             {
                                 bankManager.Deposit(selectedAcc, amount);
-                                StandardMessages.DepositSuccess();
+                                ConsoleMessages.DepositSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.InvalidAmountMsg();
+                                ConsoleMessages.InvalidAmountMsg();
                             }
                             break;
                         }
@@ -68,11 +68,11 @@ namespace ATM.CLI
                             try
                             {
                                 bankManager.Withdraw(selectedAcc, amount);
-                                StandardMessages.WithdrawSuccess();
+                                ConsoleMessages.WithdrawSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.InvalidAmountMsg();
+                                ConsoleMessages.InvalidAmountMsg();
                             }
                             break;
                         }
@@ -83,15 +83,15 @@ namespace ATM.CLI
                             try
                             {
                                 bankManager.Transfer(selectedAcc, transferToAccount, amount);
-                                StandardMessages.TransferSuccess();
+                                ConsoleMessages.TransferSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                StandardMessages.InvalidAmountMsg();
+                                ConsoleMessages.InvalidAmountMsg();
                             }
                             catch (TransferFailedException)
                             {
-                                StandardMessages.TransferFailed();
+                                ConsoleMessages.TransferFailed();
                             }
                             break;
                         }
@@ -103,7 +103,7 @@ namespace ATM.CLI
                         }
                         else
                         {
-                            StandardMessages.InvalidOptionMsg();
+                            ConsoleMessages.InvalidOptionMsg();
                             break;
                         }
                     }
@@ -114,7 +114,7 @@ namespace ATM.CLI
                 }
                 else
                 {
-                    StandardMessages.InvalidOptionMsg();
+                    ConsoleMessages.InvalidOptionMsg();
                 }
             }
         }

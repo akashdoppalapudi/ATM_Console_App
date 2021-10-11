@@ -2,7 +2,7 @@
 
 namespace ATM.Services
 {
-    public class StandardMessages
+    public class ConsoleMessages
     {
         public static void AccountCreationFailed()
         {
