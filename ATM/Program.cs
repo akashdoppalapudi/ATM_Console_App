@@ -36,7 +36,7 @@ namespace ATM.CLI
                         {
                             bankManager.CheckAccountExistance(selectedAccountId);
                         }
-                        catch(UserNotFoundException)
+                        catch (UserNotFoundException)
                         {
                             ConsoleMessages.UserNotFoundMsg();
                             break;

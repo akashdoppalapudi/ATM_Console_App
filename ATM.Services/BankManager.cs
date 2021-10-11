@@ -7,7 +7,7 @@ namespace ATM.Services
 {
     public class BankManager
     {
-        public Bank bank;
+        private Bank bank;
 
         public BankManager()
         {
