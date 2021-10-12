@@ -4,57 +4,57 @@ namespace ATM.Services
 {
     public class ConsoleMessages
     {
-        public static void AccountCreationFailed()
+        public void AccountCreationFailed()
         {
             Console.WriteLine("Account Creation Failed");
         }
 
-        public static void AccountCreationSuccess()
+        public void AccountCreationSuccess()
         {
             Console.WriteLine("Account Created Successfully");
         }
 
-        public static void WelcomeMsg()
+        public void WelcomeMsg()
         {
             Console.WriteLine("Welcome to ALPHA BANK");
         }
 
-        public static void InvalidOptionMsg()
+        public void InvalidOptionMsg()
         {
             Console.WriteLine("Invalid Option");
         }
 
-        public static void InvalidAmountMsg()
+        public void InvalidAmountMsg()
         {
             Console.WriteLine("Invalid Amount");
         }
 
-        public static void WrongPinMsg()
+        public void WrongPinMsg()
         {
             Console.WriteLine("Wrong PIN! Authentication Failed");
         }
 
-        public static void TransferSuccess()
+        public void TransferSuccess()
         {
             Console.WriteLine("Amount Transfered Successfully");
         }
 
-        public static void TransferFailed()
+        public void TransferFailed()
         {
             Console.WriteLine("Transfer Failed");
         }
 
-        public static void DepositSuccess()
+        public void DepositSuccess()
         {
             Console.WriteLine("Amount Deposited Successfully");
         }
 
-        public static void WithdrawSuccess()
+        public void WithdrawSuccess()
         {
             Console.WriteLine("Amount Withdrawn Successfully");
         }
 
-        public static void UserNotFoundMsg()
+        public void UserNotFoundMsg()
         {
             Console.WriteLine("User Not Found");
         }

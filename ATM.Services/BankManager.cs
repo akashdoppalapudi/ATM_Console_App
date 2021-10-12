@@ -8,10 +8,16 @@ namespace ATM.Services
     public class BankManager
     {
         private Bank bank;
+        private TransactionHandler transactionHandler;
+        private EncryptionService encryptionService;
+        private DataHandler dataHandler;
 
         public BankManager()
         {
-            this.bank = DataHandler.ReadBankData();
+            transactionHandler = new TransactionHandler();
+            encryptionService = new EncryptionService();
+            dataHandler = new DataHandler();
+            this.bank = dataHandler.ReadBankData();
             if (this.bank == null)
             {
                 this.bank = new Bank
@@ -35,13 +41,13 @@ namespace ATM.Services
                     AccountId = this.bank.Accounts.Count + 1,
                     AccountHoldersName = name,
                     AccountType = accountType,
-                    Pin = EncryptionService.ComputeSha256Hash(pin),
+                    Pin = encryptionService.ComputeSha256Hash(pin),
                     Balance = 1500,
                     Transactions = new List<Transaction>()
                 };
-                newAccount.Transactions.Add(TransactionHandler.NewTransaction(1500, (TransactionType)1));
+                newAccount.Transactions.Add(transactionHandler.NewTransaction(1500, (TransactionType)1));
                 this.bank.Accounts.Add(newAccount);
-                DataHandler.WriteBankData(this.bank);
+                dataHandler.WriteBankData(this.bank);
             }
         }
 
@@ -65,8 +71,8 @@ namespace ATM.Services
             else
             {
                 account.Balance += amount;
-                account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
-                DataHandler.WriteBankData(this.bank);
+                account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
+                dataHandler.WriteBankData(this.bank);
             }
         }
 
@@ -81,8 +87,8 @@ namespace ATM.Services
             else
             {
                 account.Balance -= amount;
-                account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
-                DataHandler.WriteBankData(this.bank);
+                account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
+                dataHandler.WriteBankData(this.bank);
             }
         }
 
@@ -105,10 +111,10 @@ namespace ATM.Services
                 else
                 {
                     account.Balance -= amount;
-                    account.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)2));
+                    account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
                     transferToAccount.Balance += amount;
-                    transferToAccount.Transactions.Add(TransactionHandler.NewTransaction(amount, (TransactionType)3));
-                    DataHandler.WriteBankData(this.bank);
+                    transferToAccount.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
+                    dataHandler.WriteBankData(this.bank);
                 }
             }
 
@@ -138,7 +144,7 @@ namespace ATM.Services
         public void Authenticate(int accountId, string userInput)
         {
             Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
-            string hashedUserInput = EncryptionService.ComputeSha256Hash(userInput);
+            string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
             if (hashedUserInput != account.Pin)
             {
                 throw new AuthenticationFailedException();

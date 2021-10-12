@@ -5,7 +5,7 @@ namespace ATM.Services
 {
     public class TransactionHandler
     {
-        public static Transaction NewTransaction(decimal amount, TransactionType transactionType)
+        public Transaction NewTransaction(decimal amount, TransactionType transactionType)
         {
             Transaction newTransaction = new Transaction
             {

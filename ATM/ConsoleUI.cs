@@ -6,7 +6,8 @@ namespace ATM.Services
 {
     public class ConsoleUI
     {
-        public static (string, string, AccountType) GetDataForAccountCreation()
+        ConsoleMessages consoleMessages = new ConsoleMessages();
+        public (string, string, AccountType) GetDataForAccountCreation()
         {
             string name;
             int pin;
@@ -69,7 +70,7 @@ namespace ATM.Services
 
         }
 
-        public static int SelectAccount(List<string> accountNames)
+        public int SelectAccount(List<string> accountNames)
         {
             Console.WriteLine("\n____ALL ACCOUNTS____\n");
             int i = 1;
@@ -87,12 +88,12 @@ namespace ATM.Services
             }
             catch
             {
-                ConsoleMessages.InvalidOptionMsg();
+                consoleMessages.InvalidOptionMsg();
                 return -1;
             }
         }
 
-        public static decimal GetAmount(char amtFor)
+        public decimal GetAmount(char amtFor)
         {
             decimal amount;
             switch (amtFor)
@@ -122,7 +123,7 @@ namespace ATM.Services
             return amount;
         }
 
-        public static string GetPinFromUser()
+        public string GetPinFromUser()
         {
             Console.WriteLine("\n____AUTHENTICATION____\n");
             Console.Write("Enter PIN : ");
@@ -130,7 +131,7 @@ namespace ATM.Services
             return userInput;
         }
 
-        public static int SelectTransferToAccountId(int fromAccId, List<string> accountNames)
+        public int SelectTransferToAccountId(int fromAccId, List<string> accountNames)
         {
             int selectedAccountId;
             Console.WriteLine();
@@ -154,18 +155,18 @@ namespace ATM.Services
                 }
                 else
                 {
-                    ConsoleMessages.InvalidOptionMsg();
+                    consoleMessages.InvalidOptionMsg();
                     return -1;
                 }
             }
             catch
             {
-                ConsoleMessages.InvalidOptionMsg();
+                consoleMessages.InvalidOptionMsg();
                 return -1;
             }
         }
 
-        public static void PrintTransactions(List<Transaction> transactions, decimal availBal)
+        public void PrintTransactions(List<Transaction> transactions, decimal availBal)
         {
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             foreach (Transaction transaction in transactions)
@@ -175,7 +176,7 @@ namespace ATM.Services
             Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
 
-        public static string ExistingOrCreate()
+        public string ExistingOrCreate()
         {
             Console.WriteLine("\n____ATM____\n");
             Console.WriteLine("1. Create New Account\n2. Exixting User\n3. Exit");
@@ -184,7 +185,7 @@ namespace ATM.Services
             return option;
         }
 
-        public static string SelectOperation()
+        public string SelectOperation()
         {
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");

@@ -8,22 +8,24 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            ConsoleMessages.WelcomeMsg();
+            ConsoleUI consoleUI = new ConsoleUI();
+            ConsoleMessages consoleMessages = new ConsoleMessages();
+            consoleMessages.WelcomeMsg();
             while (true)
             {
                 BankManager bankManager = new BankManager();
-                string option = ConsoleUI.ExistingOrCreate();
+                string option = consoleUI.ExistingOrCreate();
                 if (option == "1")
                 {
-                    (string name, string pin, AccountType accountType) = ConsoleUI.GetDataForAccountCreation();
+                    (string name, string pin, AccountType accountType) = consoleUI.GetDataForAccountCreation();
                     try
                     {
                         bankManager.CreateNewAccount(name, pin, accountType);
-                        ConsoleMessages.AccountCreationSuccess();
+                        consoleMessages.AccountCreationSuccess();
                     }
                     catch (AccountCreationFailedException)
                     {
-                        ConsoleMessages.AccountCreationFailed();
+                        consoleMessages.AccountCreationFailed();
                     }
                 }
                 else if (option == "2")
@@ -31,79 +33,79 @@ namespace ATM.CLI
                     while (true)
                     {
                         List<string> allAccountNames = bankManager.GetAllAccounts();
-                        int selectedAccountId = ConsoleUI.SelectAccount(allAccountNames);
+                        int selectedAccountId = consoleUI.SelectAccount(allAccountNames);
                         try
                         {
                             bankManager.CheckAccountExistance(selectedAccountId);
                         }
                         catch (UserNotFoundException)
                         {
-                            ConsoleMessages.UserNotFoundMsg();
+                            consoleMessages.UserNotFoundMsg();
                             break;
                         }
-                        string userInputPin = ConsoleUI.GetPinFromUser();
+                        string userInputPin = consoleUI.GetPinFromUser();
                         try
                         {
                             bankManager.Authenticate(selectedAccountId, userInputPin);
                         }
                         catch (AuthenticationFailedException)
                         {
-                            ConsoleMessages.WrongPinMsg();
+                            consoleMessages.WrongPinMsg();
                             break;
                         }
-                        string operation = ConsoleUI.SelectOperation();
+                        string operation = consoleUI.SelectOperation();
                         if (operation == "1")
                         {
-                            decimal amount = ConsoleUI.GetAmount('d');
+                            decimal amount = consoleUI.GetAmount('d');
                             try
                             {
                                 bankManager.Deposit(selectedAccountId, amount);
-                                ConsoleMessages.DepositSuccess();
+                                consoleMessages.DepositSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                ConsoleMessages.InvalidAmountMsg();
+                                consoleMessages.InvalidAmountMsg();
                             }
                             break;
                         }
                         else if (operation == "2")
                         {
-                            decimal amount = ConsoleUI.GetAmount('w');
+                            decimal amount = consoleUI.GetAmount('w');
                             try
                             {
                                 bankManager.Withdraw(selectedAccountId, amount);
-                                ConsoleMessages.WithdrawSuccess();
+                                consoleMessages.WithdrawSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                ConsoleMessages.InvalidAmountMsg();
+                                consoleMessages.InvalidAmountMsg();
                             }
                             break;
                         }
                         else if (operation == "3")
                         {
-                            decimal amount = ConsoleUI.GetAmount('t');
-                            int transferToAccountId = ConsoleUI.SelectTransferToAccountId(selectedAccountId, allAccountNames);
+                            decimal amount = consoleUI.GetAmount('t');
+                            int transferToAccountId = consoleUI.SelectTransferToAccountId(selectedAccountId, allAccountNames);
                             try
                             {
                                 bankManager.CheckAccountExistance(transferToAccountId);
                             }
                             catch (UserNotFoundException)
                             {
-                                ConsoleMessages.UserNotFoundMsg();
+                                consoleMessages.UserNotFoundMsg();
                             }
                             try
                             {
                                 bankManager.Transfer(selectedAccountId, transferToAccountId, amount);
-                                ConsoleMessages.TransferSuccess();
+                                consoleMessages.TransferSuccess();
                             }
                             catch (InvalidAmountException)
                             {
-                                ConsoleMessages.InvalidAmountMsg();
+                                consoleMessages.InvalidAmountMsg();
                             }
                             catch (TransferFailedException)
                             {
-                                ConsoleMessages.TransferFailed();
+                                consoleMessages.TransferFailed();
                             }
                             break;
                         }
@@ -111,12 +113,12 @@ namespace ATM.CLI
                         {
                             List<Transaction> transactions = bankManager.GetTransactions(selectedAccountId);
                             decimal balance = bankManager.GetBalance(selectedAccountId);
-                            ConsoleUI.PrintTransactions(transactions, balance);
+                            consoleUI.PrintTransactions(transactions, balance);
                             break;
                         }
                         else
                         {
-                            ConsoleMessages.InvalidOptionMsg();
+                            consoleMessages.InvalidOptionMsg();
                             break;
                         }
                     }
@@ -127,7 +129,7 @@ namespace ATM.CLI
                 }
                 else
                 {
-                    ConsoleMessages.InvalidOptionMsg();
+                    consoleMessages.InvalidOptionMsg();
                 }
             }
         }
