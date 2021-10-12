@@ -1,4 +1,5 @@
-﻿using ATM.Models;
+﻿using ATM.CLI;
+using ATM.Models;
 using System;
 using System.Collections.Generic;
 
@@ -176,21 +177,39 @@ namespace ATM.Services
             Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
 
-        public string ExistingOrCreate()
+        public Option ExistingOrCreate()
         {
+            Option option;
             Console.WriteLine("\n____ATM____\n");
             Console.WriteLine("1. Create New Account\n2. Exixting User\n3. Exit");
             Console.Write("\nSelect an Option : ");
-            string option = Console.ReadLine();
+            string userInput = Console.ReadLine();
+            try
+            {
+                option = (Option)Convert.ToInt32(userInput);
+            }
+            catch
+            {
+                option = (Option)0;
+            }
             return option;
         }
 
-        public string SelectOperation()
+        public Option SelectOperation()
         {
+            Option operation;
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");
             Console.Write("\nSelect an operation : ");
-            string operation = Console.ReadLine();
+            string userInput = Console.ReadLine();
+            try
+            {
+                operation = (Option)(Convert.ToInt32(userInput) + 3);
+            }
+            catch
+            {
+                operation = (Option)0;
+            }
             return operation;
         }
     }

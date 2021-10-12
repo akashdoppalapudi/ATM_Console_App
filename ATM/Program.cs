@@ -14,8 +14,8 @@ namespace ATM.CLI
             while (true)
             {
                 BankManager bankManager = new BankManager();
-                string option = consoleUI.ExistingOrCreate();
-                if (option == "1")
+                Option option = consoleUI.ExistingOrCreate();
+                if (option == Option.CreateNewAccount)
                 {
                     (string name, string pin, AccountType accountType) = consoleUI.GetDataForAccountCreation();
                     try
@@ -28,7 +28,7 @@ namespace ATM.CLI
                         consoleMessages.AccountCreationFailed();
                     }
                 }
-                else if (option == "2")
+                else if (option == Option.ExistingUser)
                 {
                     while (true)
                     {
@@ -53,8 +53,8 @@ namespace ATM.CLI
                             consoleMessages.WrongPinMsg();
                             break;
                         }
-                        string operation = consoleUI.SelectOperation();
-                        if (operation == "1")
+                        Option operation = consoleUI.SelectOperation();
+                        if (operation == Option.Deposit)
                         {
                             decimal amount = consoleUI.GetAmount('d');
                             try
@@ -68,7 +68,7 @@ namespace ATM.CLI
                             }
                             break;
                         }
-                        else if (operation == "2")
+                        else if (operation == Option.Withdraw)
                         {
                             decimal amount = consoleUI.GetAmount('w');
                             try
@@ -82,7 +82,7 @@ namespace ATM.CLI
                             }
                             break;
                         }
-                        else if (operation == "3")
+                        else if (operation == Option.Transfer)
                         {
                             decimal amount = consoleUI.GetAmount('t');
                             int transferToAccountId = consoleUI.SelectTransferToAccountId(selectedAccountId, allAccountNames);
@@ -109,7 +109,7 @@ namespace ATM.CLI
                             }
                             break;
                         }
-                        else if (operation == "4")
+                        else if (operation == Option.TransactionHistory)
                         {
                             List<Transaction> transactions = bankManager.GetTransactions(selectedAccountId);
                             decimal balance = bankManager.GetBalance(selectedAccountId);
@@ -123,7 +123,7 @@ namespace ATM.CLI
                         }
                     }
                 }
-                else if (option == "e")
+                else if (option == Option.Exit)
                 {
                     break;
                 }
