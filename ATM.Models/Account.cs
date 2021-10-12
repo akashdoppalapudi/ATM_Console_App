@@ -6,8 +6,9 @@ namespace ATM.Models
     [Serializable]
     public class Account
     {
-        public int AccountId { get; set; }
-        public string AccountHoldersName { get; set; }
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Name { get; set; }
         public AccountType AccountType { get; set; }
         public string Pin { get; set; }
         public decimal Balance { get; set; }

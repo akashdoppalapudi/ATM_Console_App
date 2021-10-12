@@ -7,7 +7,7 @@ namespace ATM.Services
 {
     public class BankManager
     {
-        private Bank bank;
+        private List<Bank> banks;
         private TransactionHandler transactionHandler;
         private EncryptionService encryptionService;
         private DataHandler dataHandler;
@@ -17,19 +17,52 @@ namespace ATM.Services
             transactionHandler = new TransactionHandler();
             encryptionService = new EncryptionService();
             dataHandler = new DataHandler();
-            this.bank = dataHandler.ReadBankData();
-            if (this.bank == null)
+            this.banks = dataHandler.ReadBankData();
+            if (this.banks == null)
             {
-                this.bank = new Bank
-                {
-                    Name = "Alpha Bank",
-                    Address = "hyderbad",
-                    Accounts = new List<Account>()
-                };
+                this.banks = new List<Bank>();
             }
         }
-        public void CreateNewAccount(string name, string pin, AccountType accountType)
+
+        public Dictionary<string, string> GetBankNames()
         {
+            Dictionary<string, string> bankNames = new Dictionary<string, string>();
+            foreach(Bank bank in this.banks)
+            {
+                bankNames.Add(bank.Id, bank.Name);
+            }
+            return bankNames;
+        }
+
+        public string CreateNewBank(string name)
+        {
+            if (String.IsNullOrEmpty(name))
+            {
+                throw new BankCreationFailedException();
+            }
+            if (this.banks.FirstOrDefault(b => b.Name == name) != null)
+            {
+                throw new BankNameAlreadyExistsException();
+            }
+            Bank newBank = new Bank
+            {
+                Name = name,
+                Id = Guid.NewGuid().ToString("N"),
+                Accounts = new List<Account>()
+            };
+            this.banks.Add(newBank);
+            dataHandler.WriteBankData(this.banks);
+            return newBank.Id;
+        }
+
+        public void CreateNewAccount(string bankId, string name, string pin, string username, AccountType accountType)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.FirstOrDefault(a => a.Username == username);
+            if (account != null)
+            {
+                throw new UsernameAlreadyExistsException();
+            }
             if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(pin) || accountType == (AccountType)0)
             {
                 throw new AccountCreationFailedException();
@@ -38,32 +71,24 @@ namespace ATM.Services
             {
                 Account newAccount = new Account
                 {
-                    AccountId = this.bank.Accounts.Count + 1,
-                    AccountHoldersName = name,
+                    Id = Guid.NewGuid().ToString("N"),
+                    Username = username,
+                    Name = name,
                     AccountType = accountType,
                     Pin = encryptionService.ComputeSha256Hash(pin),
                     Balance = 1500,
                     Transactions = new List<Transaction>()
                 };
                 newAccount.Transactions.Add(transactionHandler.NewTransaction(1500, (TransactionType)1));
-                this.bank.Accounts.Add(newAccount);
-                dataHandler.WriteBankData(this.bank);
+                bank.Accounts.Add(newAccount);
+                dataHandler.WriteBankData(this.banks);
             }
         }
 
-        public List<string> GetAllAccounts()
+        public void Deposit(string bankId, string accountId, decimal amount)
         {
-            List<string> accountNames = new List<string>();
-            foreach (Account account in this.bank.Accounts)
-            {
-                accountNames.Add(account.AccountHoldersName);
-            }
-            return accountNames;
-        }
-
-        public void Deposit(int accountId, decimal amount)
-        {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.Find(a => a.Id == accountId);
             if (amount <= 0)
             {
                 throw new InvalidAmountException();
@@ -72,14 +97,15 @@ namespace ATM.Services
             {
                 account.Balance += amount;
                 account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
-                dataHandler.WriteBankData(this.bank);
+                dataHandler.WriteBankData(this.banks);
             }
         }
 
 
-        public void Withdraw(int accountId, decimal amount)
+        public void Withdraw(string bankId, string accountId, decimal amount)
         {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.Find(a => a.Id == accountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
@@ -88,15 +114,17 @@ namespace ATM.Services
             {
                 account.Balance -= amount;
                 account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
-                dataHandler.WriteBankData(this.bank);
+                dataHandler.WriteBankData(this.banks);
             }
         }
 
 
-        public void Transfer(int selectedAccountId, int transferToAccountId, decimal amount)
+        public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == selectedAccountId);
-            Account transferToAccount = this.bank.Accounts.Find(a => a.AccountId == transferToAccountId);
+            Bank bank = this.banks.Find(b => b.Id == selectedBankId);
+            Bank toBank = this.banks.Find(b => b.Id == selectedBankId);
+            Account account = bank.Accounts.Find(a => a.Id == selectedAccountId);
+            Account transferToAccount = toBank.Accounts.Find(a => a.Id == transferToAccountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
@@ -114,36 +142,51 @@ namespace ATM.Services
                     account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
                     transferToAccount.Balance += amount;
                     transferToAccount.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
-                    dataHandler.WriteBankData(this.bank);
+                    dataHandler.WriteBankData(this.banks);
                 }
             }
 
         }
 
-        public List<Transaction> GetTransactions(int accountId)
+        public List<Transaction> GetTransactions(string bankId, string accountId)
         {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.Find(a => a.Id == accountId);
             return account.Transactions;
         }
 
-        public decimal GetBalance(int accountId)
+        public decimal GetBalance(string bankId, string accountId)
         {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.Find(a => a.Id == accountId);
             return account.Balance;
         }
 
-        public void CheckAccountExistance(int accountId)
+        public string CheckAccountExistance(string bankId, string username)
         {
-            Account account = this.bank.Accounts.FirstOrDefault(a => a.AccountId == accountId);
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.FirstOrDefault(a => a.Username == username);
             if (account == null)
             {
                 throw new UserNotFoundException();
             }
+            return account.Id;
         }
 
-        public void Authenticate(int accountId, string userInput)
+        public bool CheckBankExistance(string bankId)
         {
-            Account account = this.bank.Accounts.Find(a => a.AccountId == accountId);
+            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId);
+            if (bank == null)
+            {
+                throw new BankDoesnotExistException();
+            }
+            return true;
+        }
+
+        public void Authenticate(string bankId, string accountId, string userInput)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId);
+            Account account = bank.Accounts.Find(a => a.Id == accountId);
             string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
             if (hashedUserInput != account.Pin)
             {

@@ -16,7 +16,7 @@ namespace ATM.Services
 
         public void WelcomeMsg()
         {
-            Console.WriteLine("Welcome to ALPHA BANK");
+            Console.WriteLine("Welcome to Banking Service");
         }
 
         public void InvalidOptionMsg()
@@ -57,6 +57,31 @@ namespace ATM.Services
         public void UserNotFoundMsg()
         {
             Console.WriteLine("User Not Found");
+        }
+
+        public void BankCreationFailedMsg()
+        {
+            Console.WriteLine("Bank Creation Failed");
+        }
+
+        public void BankCreationSuccess()
+        {
+            Console.WriteLine("Bank Created Successfully");
+        }
+
+        public void BankNameExistsMsg()
+        {
+            Console.WriteLine("Bank Name Already Exists");
+        }
+
+        public void BankDoesnotExistMsg()
+        {
+            Console.WriteLine("Bank Doesnot Exist");
+        }
+
+        public void UsernameAlreadyExists()
+        {
+            Console.WriteLine("Account with given username already exists");
         }
     }
 }

@@ -2,13 +2,14 @@
 using ATM.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ATM.Services
 {
     public class ConsoleUI
     {
         ConsoleMessages consoleMessages = new ConsoleMessages();
-        public (string, string, AccountType) GetDataForAccountCreation()
+        public (string, string, string, AccountType) GetDataForAccountCreation()
         {
             string name;
             int pin;
@@ -19,7 +20,7 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedName))
             {
                 Console.WriteLine("Invalid Name");
-                return (null, null, (AccountType)0);
+                return (null, null, null, (AccountType)0);
             }
             name = selectedName;
 
@@ -29,7 +30,7 @@ namespace ATM.Services
             if (selectedPin.Length != 4)
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, null, (AccountType)0);
+                return (null, null, null, (AccountType)0);
             }
 
             try
@@ -39,7 +40,7 @@ namespace ATM.Services
             catch
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, null, (AccountType)0);
+                return (null, null, null, (AccountType)0);
             }
 
             Console.WriteLine("\n__ACCOUNT TYPE__\n");
@@ -58,39 +59,66 @@ namespace ATM.Services
                 if ((int)accountType <= 0 || (int)accountType >= i)
                 {
                     Console.WriteLine("Invalid Account Type");
-                    return (null, null, (AccountType)0);
+                    return (null, null, null, (AccountType)0);
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Account Type");
-                return (null, null, (AccountType)0);
+                return (null, null, null, (AccountType)0);
             }
 
-            return (name, Convert.ToString(pin), accountType);
+            Console.Write("\nEnter a Username : ");
+            string selectedUsername = Console.ReadLine();
+            if (String.IsNullOrEmpty(selectedUsername))
+            {
+                return (null, null, null, (AccountType)0);
+            }
 
+            return (name, Convert.ToString(pin), selectedUsername, accountType);
         }
 
-        public int SelectAccount(List<string> accountNames)
+        public string GetBankName()
         {
-            Console.WriteLine("\n____ALL ACCOUNTS____\n");
-            int i = 1;
-            foreach (string accountName in accountNames)
+            Console.WriteLine("\n____Bank Creation____\n");
+            Console.Write("Enter Bank Name : ");
+            string name = Console.ReadLine();
+            if (String.IsNullOrEmpty(name))
             {
-                Console.WriteLine(i + ". " + accountName);
+                Console.WriteLine("Invalid Bank Name");
+                return null;
+            }
+            return name;
+        }
+
+        public string SelectBank(Dictionary<string, string> bankNames)
+        {
+            Console.WriteLine("\n____BANKS____\n");
+            int i = 1;
+            foreach (string name in bankNames.Values)
+            {
+                Console.WriteLine(i + ". " + name);
                 i++;
             }
-            Console.Write("\nSelect your account : ");
-            string choice = Console.ReadLine();
+            Console.Write("\nSelect a Bank : ");
+            string userInput = Console.ReadLine();
             try
             {
-                int selectedAccountId = Convert.ToInt32(choice);
-                return selectedAccountId;
+                int selectedOption = Convert.ToInt32(userInput);
+                if (selectedOption >= 1 && selectedOption <= bankNames.Count)
+                {
+                    return bankNames.ElementAt(selectedOption-1).Key;
+                }
+                else
+                {
+                    consoleMessages.InvalidOptionMsg();
+                    return null;
+                }
             }
             catch
             {
                 consoleMessages.InvalidOptionMsg();
-                return -1;
+                return null;
             }
         }
 
@@ -124,47 +152,26 @@ namespace ATM.Services
             return amount;
         }
 
+        public string GetUsername()
+        {
+            Console.Write("\nEnter your Username : ");
+            string username = Console.ReadLine();
+            return username;
+        }
+
+        public string GetTransferToUsername()
+        {
+            Console.Write("\nEnter Reciever's Username : ");
+            string username = Console.ReadLine();
+            return username;
+        }
+
         public string GetPinFromUser()
         {
             Console.WriteLine("\n____AUTHENTICATION____\n");
             Console.Write("Enter PIN : ");
             string userInput = Console.ReadLine();
             return userInput;
-        }
-
-        public int SelectTransferToAccountId(int fromAccId, List<string> accountNames)
-        {
-            int selectedAccountId;
-            Console.WriteLine();
-            int i = 1;
-            foreach (string accountName in accountNames)
-            {
-                if (i != fromAccId)
-                {
-                    Console.WriteLine(i + ". " + accountName);
-                }
-                i++;
-            }
-            Console.Write("Select an Account to transfer money to : ");
-            string userInput = Console.ReadLine();
-            try
-            {
-                selectedAccountId = int.Parse(userInput);
-                if (selectedAccountId > 0 && selectedAccountId <= i && selectedAccountId != fromAccId)
-                {
-                    return selectedAccountId;
-                }
-                else
-                {
-                    consoleMessages.InvalidOptionMsg();
-                    return -1;
-                }
-            }
-            catch
-            {
-                consoleMessages.InvalidOptionMsg();
-                return -1;
-            }
         }
 
         public void PrintTransactions(List<Transaction> transactions, decimal availBal)
@@ -177,16 +184,34 @@ namespace ATM.Services
             Console.WriteLine("\t\tAvailable Balance : " + availBal);
         }
 
-        public Option ExistingOrCreate()
+        public Option SelectOrCreateBank()
         {
             Option option;
-            Console.WriteLine("\n____ATM____\n");
-            Console.WriteLine("1. Create New Account\n2. Exixting User\n3. Exit");
+            Console.WriteLine("\n____OPTIONS____\n");
+            Console.WriteLine("1. Create New Bank\n2. Select a Bank\n3. Exit");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
             {
                 option = (Option)Convert.ToInt32(userInput);
+            }
+            catch
+            {
+                option = (Option)0;
+            }
+            return option;
+        }
+
+        public Option ExistingOrCreate()
+        {
+            Option option;
+            Console.WriteLine("\n____OPTIONS____\n");
+            Console.WriteLine("1. Create New Account\n2. Exixting User");
+            Console.Write("\nSelect an Option : ");
+            string userInput = Console.ReadLine();
+            try
+            {
+                option = (Option)(Convert.ToInt32(userInput) + 3);
             }
             catch
             {
@@ -204,7 +229,7 @@ namespace ATM.Services
             string userInput = Console.ReadLine();
             try
             {
-                operation = (Option)(Convert.ToInt32(userInput) + 3);
+                operation = (Option)(Convert.ToInt32(userInput) + 5);
             }
             catch
             {

@@ -2,9 +2,11 @@
 {
     public enum Option
     {
-        CreateNewAccount = 1,
-        ExistingUser,
+        CreateNewBank = 1,
+        SelectBank,
         Exit,
+        CreateNewAccount,
+        ExistingUser,
         Deposit,
         Withdraw,
         Transfer,
