@@ -139,6 +139,7 @@ namespace ATM.CLI
                             catch (UserNotFoundException)
                             {
                                 consoleMessages.UserNotFoundMsg();
+                                consoleMessages.TransferFailed();
                             }
                             try
                             {
@@ -148,6 +149,7 @@ namespace ATM.CLI
                             catch (InvalidAmountException)
                             {
                                 consoleMessages.InvalidAmountMsg();
+                                consoleMessages.TransferFailed();
                             }
                             catch (TransferFailedException)
                             {
@@ -168,7 +170,7 @@ namespace ATM.CLI
                             continue;
                         }
 
-                    } 
+                    }
                     else
                     {
                         consoleMessages.InvalidOptionMsg();

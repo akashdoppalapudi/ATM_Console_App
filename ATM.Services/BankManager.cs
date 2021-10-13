@@ -27,7 +27,7 @@ namespace ATM.Services
         public Dictionary<string, string> GetBankNames()
         {
             Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            foreach(Bank bank in this.banks)
+            foreach (Bank bank in this.banks)
             {
                 bankNames.Add(bank.Id, bank.Name);
             }
@@ -122,13 +122,12 @@ namespace ATM.Services
         public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
             Bank bank = this.banks.Find(b => b.Id == selectedBankId);
-            Bank toBank = this.banks.Find(b => b.Id == selectedBankId);
+            Bank toBank = this.banks.Find(b => b.Id == transferToBankId);
             Account account = bank.Accounts.Find(a => a.Id == selectedAccountId);
             Account transferToAccount = toBank.Accounts.Find(a => a.Id == transferToAccountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
-                throw new TransferFailedException();
             }
             else
             {
