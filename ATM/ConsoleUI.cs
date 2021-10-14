@@ -205,9 +205,9 @@ namespace ATM.Services
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             foreach (Transaction transaction in transactions)
             {
-                Console.WriteLine(transaction.TransactionDate + "\t" + transaction.TransactionType + "\tRs. " + transaction.TransactionAmount);
+                Console.WriteLine(transaction.Id + "\t" + transaction.TransactionDate + "\t" + transaction.TransactionType + "\tRs. " + transaction.TransactionAmount);
             }
-            Console.WriteLine("\t\tAvailable Balance : " + availBal);
+            Console.WriteLine("\t\t\t\tAvailable Balance : " + availBal);
         }
 
         public Option SelectOrCreateBank()
