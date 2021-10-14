@@ -1,5 +1,6 @@
 ﻿using ATM.CLI;
 using ATM.Models;
+using ATM.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace ATM.Services
     public class ConsoleUI
     {
         ConsoleMessages consoleMessages = new ConsoleMessages();
-        public (string, string, string, AccountType) GetDataForAccountCreation()
+        public (string, string, string, Gender, AccountType) GetDataForAccountCreation()
         {
             string name;
             int pin;
@@ -20,9 +21,34 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedName))
             {
                 Console.WriteLine("Invalid Name");
-                return (null, null, null, (AccountType)0);
+                return (null, null, null, (Gender)0, (AccountType)0);
             }
             name = selectedName;
+
+            Console.WriteLine("\n__GENDER__\b");
+            Gender gender;
+            int i = 1;
+            foreach (string g in Enum.GetNames(typeof(Gender)))
+            {
+                Console.WriteLine(i + ". " + g);
+                i++;
+            }
+            Console.Write("\nSelect a Gender : ");
+            string selectedGender = Console.ReadLine();
+            try
+            {
+                gender = (Gender)Convert.ToInt32(selectedGender);
+                if ((int)gender <= 0 || (int)gender >= i)
+                {
+                    Console.WriteLine("Invalid Gender");
+                    return (null, null, null, (Gender)0, (AccountType)0);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Invalid Account Type");
+                return (null, null, null, (Gender)0, (AccountType)0);
+            }
 
             Console.Write("Please set a 4-digit PIN : ");
             string selectedPin = Console.ReadLine();
@@ -30,7 +56,7 @@ namespace ATM.Services
             if (selectedPin.Length != 4)
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, null, null, (AccountType)0);
+                return (null, null, null, (Gender)0, (AccountType)0);
             }
 
             try
@@ -40,11 +66,11 @@ namespace ATM.Services
             catch
             {
                 Console.WriteLine("Invalid PIN");
-                return (null, null, null, (AccountType)0);
+                return (null, null, null, (Gender)0, (AccountType)0);
             }
 
             Console.WriteLine("\n__ACCOUNT TYPE__\n");
-            int i = 1;
+            i = 1;
             foreach (string type in Enum.GetNames(typeof(AccountType)))
             {
                 Console.WriteLine(i + ". " + type);
@@ -59,23 +85,23 @@ namespace ATM.Services
                 if ((int)accountType <= 0 || (int)accountType >= i)
                 {
                     Console.WriteLine("Invalid Account Type");
-                    return (null, null, null, (AccountType)0);
+                    return (null, null, null, (Gender)0, (AccountType)0);
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Account Type");
-                return (null, null, null, (AccountType)0);
+                return (null, null, null, (Gender)0, (AccountType)0);
             }
 
             Console.Write("\nEnter a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                return (null, null, null, (AccountType)0);
+                return (null, null, null, (Gender)0, (AccountType)0);
             }
 
-            return (name, Convert.ToString(pin), selectedUsername, accountType);
+            return (name, Convert.ToString(pin), selectedUsername, gender, accountType);
         }
 
         public string GetBankName()
@@ -107,7 +133,7 @@ namespace ATM.Services
                 int selectedOption = Convert.ToInt32(userInput);
                 if (selectedOption >= 1 && selectedOption <= bankNames.Count)
                 {
-                    return bankNames.ElementAt(selectedOption-1).Key;
+                    return bankNames.ElementAt(selectedOption - 1).Key;
                 }
                 else
                 {

@@ -1,4 +1,5 @@
 ﻿using ATM.Models;
+using ATM.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace ATM.Services
             return newBank.Id;
         }
 
-        public void CreateNewAccount(string bankId, string name, string pin, string username, AccountType accountType)
+        public void CreateNewAccount(string bankId, string name, Gender gender, string pin, string username, AccountType accountType)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId);
             Account account = bank.Accounts.FirstOrDefault(a => a.Username == username);
@@ -74,6 +75,7 @@ namespace ATM.Services
                     Id = Guid.NewGuid().ToString("N"),
                     Username = username,
                     Name = name,
+                    Gender = gender,
                     AccountType = accountType,
                     Pin = encryptionService.ComputeSha256Hash(pin),
                     Balance = 1500,
@@ -144,7 +146,6 @@ namespace ATM.Services
                     dataHandler.WriteBankData(this.banks);
                 }
             }
-
         }
 
         public List<Transaction> GetTransactions(string bankId, string accountId)
