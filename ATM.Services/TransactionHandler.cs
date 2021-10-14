@@ -1,4 +1,5 @@
 ﻿using ATM.Models;
+using ATM.Models.Enums;
 using System;
 
 namespace ATM.Services

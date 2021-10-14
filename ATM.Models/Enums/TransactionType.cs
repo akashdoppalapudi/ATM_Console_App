@@ -1,4 +1,4 @@
-﻿namespace ATM.Models
+﻿namespace ATM.Models.Enums
 {
     public enum TransactionType
     {
