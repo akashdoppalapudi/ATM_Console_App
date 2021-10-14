@@ -83,7 +83,7 @@ namespace ATM.Services
                     Balance = 1500,
                     Transactions = new List<Transaction>()
                 };
-                newAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id),1500, (TransactionType)1));
+                newAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id), 1500, (TransactionType)1));
                 bank.Accounts.Add(newAccount);
                 dataHandler.WriteBankData(this.banks);
             }

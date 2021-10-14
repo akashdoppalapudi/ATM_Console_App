@@ -1,5 +1,5 @@
-﻿using System;
-using ATM.Models.Enums;
+﻿using ATM.Models.Enums;
+using System;
 
 namespace ATM.Models
 {

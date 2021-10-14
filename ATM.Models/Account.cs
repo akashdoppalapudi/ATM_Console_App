@@ -1,6 +1,6 @@
-﻿using System;
+﻿using ATM.Models.Enums;
+using System;
 using System.Collections.Generic;
-using ATM.Models.Enums;
 
 namespace ATM.Models
 {
