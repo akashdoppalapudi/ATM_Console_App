@@ -232,7 +232,7 @@ namespace ATM.Services
         {
             Option option;
             Console.WriteLine("\n____OPTIONS____\n");
-            Console.WriteLine("1. Create New Account\n2. Exixting User");
+            Console.WriteLine("1. Create New Account\n2. Existing User");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
