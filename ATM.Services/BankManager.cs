@@ -12,12 +12,14 @@ namespace ATM.Services
         private TransactionHandler transactionHandler;
         private EncryptionService encryptionService;
         private DataHandler dataHandler;
+        private IDGenService idGenService;
 
         public BankManager()
         {
             transactionHandler = new TransactionHandler();
             encryptionService = new EncryptionService();
             dataHandler = new DataHandler();
+            idGenService = new IDGenService();
             this.banks = dataHandler.ReadBankData();
             if (this.banks == null)
             {
@@ -48,7 +50,7 @@ namespace ATM.Services
             Bank newBank = new Bank
             {
                 Name = name,
-                Id = Guid.NewGuid().ToString("N"),
+                Id = idGenService.GenBankId(name),
                 Accounts = new List<Account>()
             };
             this.banks.Add(newBank);
@@ -72,7 +74,7 @@ namespace ATM.Services
             {
                 Account newAccount = new Account
                 {
-                    Id = Guid.NewGuid().ToString("N"),
+                    Id = idGenService.GenAccountId(name),
                     Username = username,
                     Name = name,
                     Gender = gender,
@@ -81,7 +83,7 @@ namespace ATM.Services
                     Balance = 1500,
                     Transactions = new List<Transaction>()
                 };
-                newAccount.Transactions.Add(transactionHandler.NewTransaction(1500, (TransactionType)1));
+                newAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id),1500, (TransactionType)1));
                 bank.Accounts.Add(newAccount);
                 dataHandler.WriteBankData(this.banks);
             }
@@ -98,7 +100,7 @@ namespace ATM.Services
             else
             {
                 account.Balance += amount;
-                account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
+                account.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, (TransactionType)3));
                 dataHandler.WriteBankData(this.banks);
             }
         }
@@ -115,7 +117,7 @@ namespace ATM.Services
             else
             {
                 account.Balance -= amount;
-                account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
+                account.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, (TransactionType)2));
                 dataHandler.WriteBankData(this.banks);
             }
         }
@@ -140,9 +142,9 @@ namespace ATM.Services
                 else
                 {
                     account.Balance -= amount;
-                    account.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)2));
+                    account.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(selectedBankId, selectedAccountId), amount, (TransactionType)2));
                     transferToAccount.Balance += amount;
-                    transferToAccount.Transactions.Add(transactionHandler.NewTransaction(amount, (TransactionType)3));
+                    transferToAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, (TransactionType)3));
                     dataHandler.WriteBankData(this.banks);
                 }
             }
