@@ -7,7 +7,7 @@ namespace ATM.Services
 {
     public class DataHandler
     {
-        private const string FILEPATH = "../../../../bankdata.dat";
+        private const string FILEPATH = "bankdata.dat";
         private BinaryFormatter formatter = new BinaryFormatter();
 
         public List<Bank> ReadBankData()
