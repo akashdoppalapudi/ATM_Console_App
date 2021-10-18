@@ -38,6 +38,11 @@ namespace ATM.CLI
                 else if (option1 == Option.SelectBank)
                 {
                     Dictionary<string, string> bankNames = bankManager.GetBankNames();
+                    if (bankNames==null || bankNames.Count <= 0)
+                    {
+                        consoleMessages.NoBanksMsg();
+                        continue;
+                    }
                     string bankId = consoleUI.SelectBank(bankNames);
                     try
                     {

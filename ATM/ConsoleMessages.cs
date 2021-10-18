@@ -83,5 +83,10 @@ namespace ATM.Services
         {
             Console.WriteLine("Account with given username already exists");
         }
+
+        public void NoBanksMsg()
+        {
+            Console.WriteLine("Currently there are no banks.\nTry Creating a new bank.");
+        }
     }
 }
