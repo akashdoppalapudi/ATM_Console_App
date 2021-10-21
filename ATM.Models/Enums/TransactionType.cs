@@ -2,8 +2,7 @@
 {
     public enum TransactionType
     {
-        AccountCreation = 1,
-        Debit,
+        Debit = 1,
         Credit
     }
 }
