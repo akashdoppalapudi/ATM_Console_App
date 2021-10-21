@@ -6,14 +6,17 @@ namespace ATM.Services
 {
     public class TransactionHandler
     {
-        public Transaction NewTransaction(string TXNID, decimal amount, TransactionType transactionType)
+        public Transaction NewTransaction(string TXNID, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toAccId = null)
         {
             Transaction newTransaction = new Transaction
             {
                 Id = TXNID,
                 TransactionDate = DateTime.Now,
-                TransactionAmount = amount,
-                TransactionType = transactionType
+                TransactionType = transactionType,
+                FromAccountId = fromAccId,
+                ToAccountId = toAccId,
+                TransactionNarrative = transactionNarrative,
+                TransactionAmount = amount
             };
 
             return newTransaction;
