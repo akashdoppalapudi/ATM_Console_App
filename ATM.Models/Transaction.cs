@@ -9,6 +9,8 @@ namespace ATM.Models
         public string Id { get; set; }
         public DateTime TransactionDate { get; set; }
         public TransactionType TransactionType { get; set; }
+        public string FromAccountId { get; set; }
+        public string ToAccountId { get; set; }
         public decimal TransactionAmount { get; set; }
     }
 }
