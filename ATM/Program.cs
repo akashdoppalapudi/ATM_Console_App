@@ -17,8 +17,8 @@ namespace ATM.CLI
             while (true)
             {
                 bankManager = new BankManager();
-                Option option1 = consoleUI.SelectOrCreateBank();
-                if (option1 == Option.CreateNewBank)
+                Option1 option1 = consoleUI.SelectOrCreateBank();
+                if (option1 == Option1.CreateNewBank)
                 {
                     string bankName = consoleUI.GetBankName();
                     try
@@ -36,7 +36,7 @@ namespace ATM.CLI
                         consoleMessages.BankCreationFailedMsg();
                     }
                 }
-                else if (option1 == Option.SelectBank)
+                else if (option1 == Option1.SelectBank)
                 {
                     Dictionary<string, string> bankNames = bankManager.GetBankNames();
                     if (bankNames==null || bankNames.Count <= 0)
@@ -54,8 +54,8 @@ namespace ATM.CLI
                         consoleMessages.BankDoesnotExistMsg();
                         continue;
                     }
-                    Option option2 = consoleUI.ExistingOrCreate();
-                    if (option2 == Option.CreateNewAccount)
+                    Option1 option2 = consoleUI.ExistingOrCreate();
+                    if (option2 == Option1.CreateNewAccount)
                     {
                         Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                         try
@@ -73,7 +73,7 @@ namespace ATM.CLI
                             consoleMessages.AccountCreationFailed();
                         }
                     }
-                    else if (option2 == Option.ExistingUser)
+                    else if (option2 == Option1.ExistingUser)
                     {
                         string accountId;
                         string username = consoleUI.GetUsername();
@@ -96,8 +96,8 @@ namespace ATM.CLI
                             consoleMessages.WrongPinMsg();
                             continue;
                         }
-                        Option operation = consoleUI.SelectOperation();
-                        if (operation == Option.Deposit)
+                        Option1 operation = consoleUI.SelectOperation();
+                        if (operation == Option1.Deposit)
                         {
                             decimal amount = consoleUI.GetAmount('d');
                             try
@@ -111,7 +111,7 @@ namespace ATM.CLI
                             }
                             continue;
                         }
-                        else if (operation == Option.Withdraw)
+                        else if (operation == Option1.Withdraw)
                         {
                             decimal amount = consoleUI.GetAmount('w');
                             try
@@ -125,7 +125,7 @@ namespace ATM.CLI
                             }
                             continue;
                         }
-                        else if (operation == Option.Transfer)
+                        else if (operation == Option1.Transfer)
                         {
                             decimal amount = consoleUI.GetAmount('t');
                             string toBankId = consoleUI.SelectBank(bankNames);
@@ -164,7 +164,7 @@ namespace ATM.CLI
                             }
                             continue;
                         }
-                        else if (operation == Option.TransactionHistory)
+                        else if (operation == Option1.TransactionHistory)
                         {
                             List<Transaction> transactions = bankManager.GetTransactions(bankId, accountId);
                             decimal balance = bankManager.GetBalance(bankId, accountId);
@@ -183,7 +183,7 @@ namespace ATM.CLI
                         consoleMessages.InvalidOptionMsg();
                     }
                 }
-                else if (option1 == Option.Exit)
+                else if (option1 == Option1.Exit)
                 {
                     break;
                 }
