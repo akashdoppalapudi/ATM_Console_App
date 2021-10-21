@@ -200,56 +200,56 @@ namespace ATM.Services
             Console.WriteLine("\t\t\t\tAvailable Balance : " + availBal);
         }
 
-        public Option SelectOrCreateBank()
+        public Option1 SelectOrCreateBank()
         {
-            Option option;
+            Option1 option;
             Console.WriteLine("\n____OPTIONS____\n");
             Console.WriteLine("1. Create New Bank\n2. Select a Bank\n3. Exit");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
             {
-                option = (Option)Convert.ToInt32(userInput);
+                option = (Option1)Convert.ToInt32(userInput);
             }
             catch
             {
-                option = (Option)0;
+                option = (Option1)0;
             }
             return option;
         }
 
-        public Option ExistingOrCreate()
+        public Option1 ExistingOrCreate()
         {
-            Option option;
+            Option1 option;
             Console.WriteLine("\n____OPTIONS____\n");
             Console.WriteLine("1. Create New Account\n2. Existing User");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
             {
-                option = (Option)(Convert.ToInt32(userInput) + 3);
+                option = (Option1)(Convert.ToInt32(userInput) + 3);
             }
             catch
             {
-                option = (Option)0;
+                option = (Option1)0;
             }
             return option;
         }
 
-        public Option SelectOperation()
+        public Option1 SelectOperation()
         {
-            Option operation;
+            Option1 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("1. Deposit\n2. Withdraw\n3. Transfer\n4. Show Transaction History");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
             {
-                operation = (Option)(Convert.ToInt32(userInput) + 5);
+                operation = (Option1)(Convert.ToInt32(userInput) + 5);
             }
             catch
             {
-                operation = (Option)0;
+                operation = (Option1)0;
             }
             return operation;
         }

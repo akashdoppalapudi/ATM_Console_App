@@ -1,6 +1,6 @@
 ﻿namespace ATM.CLI
 {
-    public enum Option
+    public enum Option1
     {
         CreateNewBank = 1,
         SelectBank,
