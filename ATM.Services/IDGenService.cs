@@ -22,6 +22,12 @@ namespace ATM.Services
             return AccountId;
         }
 
+        public string GenEmployeeId(string empName)
+        {
+            string EmployeeId = GenAccountId(empName) + 'S';
+            return EmployeeId;
+        }
+
         public string GenTransactionId(string bankId, string accId)
         {
             string TXNId;
