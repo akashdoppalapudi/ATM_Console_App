@@ -10,23 +10,22 @@ namespace ATM.Services
     public class ConsoleUI
     {
         ConsoleMessages consoleMessages = new ConsoleMessages();
-        public (string, string, string, Gender, AccountType) GetDataForAccountCreation()
+        public Tuple<string, Gender, string, string, AccountType> GetDataForAccountCreation()
         {
-            string name;
-            int pin;
+            string name, username, password;
+            Gender gender;
             AccountType accountType;
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
-            Console.Write("Please Enter your name : ");
+            Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedName))
             {
                 Console.WriteLine("Invalid Name");
-                return (null, null, null, (Gender)0, (AccountType)0);
+                return null;
             }
             name = selectedName;
 
-            Console.WriteLine("\n__GENDER__\b");
-            Gender gender;
+            Console.WriteLine("\n__GENDER__\n");
             int i = 1;
             foreach (string g in Enum.GetNames(typeof(Gender)))
             {
@@ -41,33 +40,31 @@ namespace ATM.Services
                 if ((int)gender <= 0 || (int)gender >= i)
                 {
                     Console.WriteLine("Invalid Gender");
-                    return (null, null, null, (Gender)0, (AccountType)0);
+                    return null;
                 }
             }
             catch
             {
-                Console.WriteLine("Invalid Account Type");
-                return (null, null, null, (Gender)0, (AccountType)0);
+                Console.WriteLine("Invalid Gender");
+                return null;
             }
 
-            Console.Write("Please set a 4-digit PIN : ");
-            string selectedPin = Console.ReadLine();
+            Console.Write("\nPlease set a Username : ");
+            string selectedUsername = Console.ReadLine();
+            if (String.IsNullOrEmpty(selectedUsername))
+            {
+                return null;
+            }
+            username = selectedUsername;
 
-            if (selectedPin.Length != 4)
+            Console.Write("Please set a Password : ");
+            string selectedPassword = Console.ReadLine();
+            if (String.IsNullOrEmpty(selectedPassword))
             {
-                Console.WriteLine("Invalid PIN");
-                return (null, null, null, (Gender)0, (AccountType)0);
+                Console.WriteLine("Invalid Password");
+                return null;
             }
-
-            try
-            {
-                pin = Convert.ToInt32(selectedPin);
-            }
-            catch
-            {
-                Console.WriteLine("Invalid PIN");
-                return (null, null, null, (Gender)0, (AccountType)0);
-            }
+            password = selectedPassword;
 
             Console.WriteLine("\n__ACCOUNT TYPE__\n");
             i = 1;
@@ -85,23 +82,16 @@ namespace ATM.Services
                 if ((int)accountType <= 0 || (int)accountType >= i)
                 {
                     Console.WriteLine("Invalid Account Type");
-                    return (null, null, null, (Gender)0, (AccountType)0);
+                    return null;
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Account Type");
-                return (null, null, null, (Gender)0, (AccountType)0);
+                return null;
             }
 
-            Console.Write("\nEnter a Username : ");
-            string selectedUsername = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedUsername))
-            {
-                return (null, null, null, (Gender)0, (AccountType)0);
-            }
-
-            return (name, Convert.ToString(pin), selectedUsername, gender, accountType);
+            return Tuple.Create(name, gender, selectedUsername, password, accountType);
         }
 
         public string GetBankName()

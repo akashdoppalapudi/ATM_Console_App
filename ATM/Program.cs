@@ -1,6 +1,7 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services;
+using System;
 using System.Collections.Generic;
 
 namespace ATM.CLI
@@ -56,10 +57,10 @@ namespace ATM.CLI
                     Option option2 = consoleUI.ExistingOrCreate();
                     if (option2 == Option.CreateNewAccount)
                     {
-                        (string name, string pin, string username, Gender gender, AccountType accountType) = consoleUI.GetDataForAccountCreation();
+                        Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                         try
                         {
-                            bankManager.CreateNewAccount(bankId, name, gender, pin, username, accountType);
+                            bankManager.CreateNewAccount(bankId, accountDetails);
                             consoleMessages.AccountCreationSuccess();
                         }
                         catch (AccountCreationFailedException)
