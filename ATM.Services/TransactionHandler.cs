@@ -18,5 +18,19 @@ namespace ATM.Services
 
             return newTransaction;
         }
+
+        public EmployeeAction NewEmployeeAction(string ACNID, EmployeeActionType actionType, string accId = null, string TXNID = null)
+        {
+            EmployeeAction newEmployeeAction = new EmployeeAction
+            {
+                Id = ACNID,
+                TXNId = TXNID,
+                AccountId = accId,
+                ActionDate = DateTime.Now,
+                ActionType = actionType
+            };
+
+            return newEmployeeAction;
+        }
     }
 }
