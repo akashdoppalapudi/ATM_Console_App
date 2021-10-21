@@ -58,15 +58,15 @@ namespace ATM.Services
             return newBank.Id;
         }
 
-        public void CreateNewAccount(string bankId, string name, Gender gender, string pin, string username, AccountType accountType)
+        public void CreateNewAccount(string bankId, Tuple<string, Gender, string, string, AccountType> accountDetails)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId);
-            Account account = bank.Accounts.FirstOrDefault(a => a.Username == username);
+            Account account = bank.Accounts.FirstOrDefault(a => a.Username == accountDetails.Item3);
             if (account != null)
             {
                 throw new UsernameAlreadyExistsException();
             }
-            if (String.IsNullOrEmpty(name) || String.IsNullOrEmpty(pin) || accountType == (AccountType)0)
+            if (accountDetails == null)
             {
                 throw new AccountCreationFailedException();
             }
@@ -74,12 +74,12 @@ namespace ATM.Services
             {
                 Account newAccount = new Account
                 {
-                    Id = idGenService.GenAccountId(name),
-                    Username = username,
-                    Name = name,
-                    Gender = gender,
-                    AccountType = accountType,
-                    Pin = encryptionService.ComputeSha256Hash(pin),
+                    Id = idGenService.GenAccountId(accountDetails.Item1),
+                    Username = accountDetails.Item3,
+                    Name = accountDetails.Item1,
+                    Gender = accountDetails.Item2,
+                    AccountType =accountDetails.Item5,
+                    Password = encryptionService.ComputeSha256Hash(accountDetails.Item4),
                     Balance = 1500,
                     Transactions = new List<Transaction>()
                 };
@@ -190,7 +190,7 @@ namespace ATM.Services
             Bank bank = this.banks.Find(b => b.Id == bankId);
             Account account = bank.Accounts.Find(a => a.Id == accountId);
             string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
-            if (hashedUserInput != account.Pin)
+            if (hashedUserInput != account.Password)
             {
                 throw new AuthenticationFailedException();
             }
