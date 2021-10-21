@@ -1,4 +1,5 @@
 ﻿using ATM.Models.Enums;
+using System.Collections.Generic;
 using System;
 
 namespace ATM.Models
@@ -7,5 +8,6 @@ namespace ATM.Models
     public class Employee: Person
     {
         public EmployeeType EmployeeType { get; set; }
+        public List<EmployeeAction> EmployeeActions { get; set; }
     }
 }
