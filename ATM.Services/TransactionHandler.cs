@@ -6,7 +6,7 @@ namespace ATM.Services
 {
     public class TransactionHandler
     {
-        public Transaction NewTransaction(string TXNID, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toAccId = null)
+        public Transaction NewTransaction(string TXNID, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
         {
             Transaction newTransaction = new Transaction
             {

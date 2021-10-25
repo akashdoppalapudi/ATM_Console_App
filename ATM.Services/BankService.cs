@@ -317,5 +317,84 @@ namespace ATM.Services
             Employee employee = bank.Employees.Find(e => e.Id == employeeId && e.IsActive);
             return employee.EmployeeActions;
         }
+
+        public string Deposit(string bankId, string accountId, decimal amount)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            if (amount <= 0)
+            {
+                throw new InvalidAmountException();
+            }
+            account.Balance += amount;
+            string TXNId = idGenService.GenTransactionId(bankId, accountId);
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)2, (TransactionNarrative)2, accountId));
+            account.UpdatedOn = DateTime.Now;
+            bank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+            return TXNId;
+        }
+
+        public string Withdraw(string bankId, string accountId, decimal amount)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            if (amount <= 0 || amount > account.Balance)
+            {
+                throw new InvalidAmountException();
+            }
+            account.Balance -= amount;
+            string TXNId = idGenService.GenTransactionId(bankId, accountId);
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, accountId));
+            account.UpdatedOn = DateTime.Now;
+            bank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+            return TXNId;
+        }
+
+        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
+        {
+            Bank bank = this.banks.Find(b => b.Id == selectedBankId && b.IsActive);
+            Bank toBank = this.banks.Find(b => b.Id == transferToBankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == selectedAccountId && a.IsActive);
+            Account transferToAccount = toBank.Accounts.Find(a => a.Id == transferToAccountId && a.IsActive);
+            if (amount <= 0 || amount> account.Balance)
+            {
+                throw new InvalidAmountException();
+            }
+            account.Balance -= amount;
+            string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
+            account.UpdatedOn = DateTime.Now;
+            bank.UpdatedOn = DateTime.Now;
+            transferToAccount.Balance += amount;
+            transferToAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, (TransactionType)2, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
+            transferToAccount.UpdatedOn = DateTime.Now;
+            toBank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+            return TXNId;
+        }
+
+        public void AuthenticateUser(string bankId, string accountId, string userInput)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
+            if(hashedUserInput != account.Password)
+            {
+                throw new AuthenticationFailedException();
+            }
+        }
+
+        public void AuthenticateEmployee(string bankId, string employeeId, string userInput)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Employee employee = bank.Employees.Find(e => e.Id == employeeId && e.IsActive);
+            string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
+            if (hashedUserInput != employee.Password)
+            {
+                throw new AuthenticationFailedException();
+            }
+        }
     }
 }
