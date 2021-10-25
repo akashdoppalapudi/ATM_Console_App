@@ -525,10 +525,10 @@ namespace ATM.Services
             return username;
         }
 
-        public string GetPinFromUser()
+        public string GetPasswordFromUser()
         {
             Console.WriteLine("\n____AUTHENTICATION____\n");
-            Console.Write("Enter PIN : ");
+            Console.Write("Enter Password : ");
             string userInput = Console.ReadLine();
             return userInput;
         }
@@ -539,7 +539,7 @@ namespace ATM.Services
             Console.WriteLine("Date\tTXN ID\tDebit/Credit\tFrom\tTo\tNarrative\tAmount\n");
             foreach (Transaction transaction in transactions)
             {
-                Console.WriteLine(transaction.TransactionDate+"\t"+transaction.Id + "\t" + transaction.TransactionType+"\t"+transaction.FromAccountId+"\t"+transaction.ToAccountId + "\t" + transaction.TransactionNarrative + "\tRs. " + transaction.TransactionAmount);
+                Console.WriteLine(transaction.TransactionDate + "\t" + transaction.Id + "\t" + transaction.TransactionType + "\t" + transaction.FromAccountId + "\t" + transaction.ToAccountId + "\t" + transaction.TransactionNarrative + "\tRs. " + transaction.TransactionAmount);
             }
             Console.WriteLine("\t\t\t\tAvailable Balance : " + availBal);
         }
@@ -548,7 +548,7 @@ namespace ATM.Services
         {
             Console.WriteLine("\n____ACTION HISTORY____\n");
             Console.WriteLine("Date\tACN ID\tAction Type\tAccount ID\tTXN ID\n");
-            foreach(EmployeeAction action in employeeActions)
+            foreach (EmployeeAction action in employeeActions)
             {
                 Console.WriteLine(action.ActionDate + "\t" + action.Id + "\t" + action.ActionType + "\t" + action.AccountId + "\n" + action.TXNId);
             }
@@ -630,7 +630,7 @@ namespace ATM.Services
         {
             Option5 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Deposit\n2. Withdraw\n3. Transfer\n4. View Action History");
+            Console.WriteLine("\n1. Deposit\n2. Withdraw\n3. Transfer\n4. View Action History\n5. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try

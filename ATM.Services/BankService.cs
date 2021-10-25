@@ -296,14 +296,14 @@ namespace ATM.Services
             throw new BankDoesnotExistException();
         }
 
-        public string CheckEmployeeExistance(string bankId, string username)
+        public Tuple<string, EmployeeType> CheckEmployeeExistance(string bankId, string username)
         {
             Employee employee = this.banks.Find(b => b.Id == bankId && b.IsActive).Employees.FirstOrDefault(e => e.Username == username && e.IsActive);
             if (employee == null)
             {
                 throw new EmployeeDoesNotExistException();
             }
-            return employee.Id;
+            return Tuple.Create(employee.Id, employee.EmployeeType);
         }
 
         public string CheckAccountExistance(string bankId, string username)

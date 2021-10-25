@@ -5,6 +5,7 @@
         Deposit = 1,
         Withdraw,
         Transfer,
-        TransactionHistory
+        TransactionHistory,
+        Back
     }
 }

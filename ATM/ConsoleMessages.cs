@@ -29,9 +29,9 @@ namespace ATM.Services
             Console.WriteLine("Invalid Amount");
         }
 
-        public void WrongPinMsg()
+        public void WrongPasswordMsg()
         {
-            Console.WriteLine("Wrong PIN! Authentication Failed");
+            Console.WriteLine("Wrong Password! Authentication Failed");
         }
 
         public void TransferSuccess()
