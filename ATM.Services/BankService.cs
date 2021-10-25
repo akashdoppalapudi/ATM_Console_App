@@ -151,7 +151,7 @@ namespace ATM.Services
             return newAccount.Id;
         }
 
-        public string UpdateBank(string bankId, string employeeId, string name)
+        public string UpdateBank(string bankId, string employeeId, Tuple<string> bankDetails)
         {
             Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
             Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
@@ -159,11 +159,11 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            if (this.banks.FindAll(b => b.IsActive && b.Id != bankId).Exists(b => b.Name == name))
+            if (this.banks.FindAll(b => b.IsActive && b.Id != bankId).Exists(b => b.Name == bankDetails.Item1))
             {
                 throw new BankNameAlreadyExistsException();
             }
-            bank.Name = name;
+            bank.Name = bankDetails.Item1;
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)4));
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
@@ -187,7 +187,10 @@ namespace ATM.Services
             updateEmployee.Name = employeeDetails.Item1;
             updateEmployee.Gender = employeeDetails.Item2;
             updateEmployee.Username = employeeDetails.Item3;
-            updateEmployee.Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4);
+            if (!String.IsNullOrEmpty(employeeDetails.Item4))
+            {
+                updateEmployee.Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4);
+            }
             updateEmployee.EmployeeType = employeeDetails.Item5;
             updateEmployee.UpdatedOn = DateTime.Now;
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)2, updateEmployee.Id));
@@ -213,7 +216,10 @@ namespace ATM.Services
             account.Name = accountDetails.Item1;
             account.Gender = accountDetails.Item2;
             account.Username = accountDetails.Item3;
-            account.Password = accountDetails.Item4;
+            if (!String.IsNullOrEmpty(accountDetails.Item4))
+            {
+                account.Password = accountDetails.Item4;
+            }
             account.AccountType = accountDetails.Item5;
             account.UpdatedOn = DateTime.Now;
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)2, account.Id));
@@ -236,6 +242,7 @@ namespace ATM.Services
             bank.IsActive = false;
             bank.UpdatedOn = DateTime.Now;
             bank.DeletedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
             return bankId;
         }
 
@@ -247,7 +254,7 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            Employee deleteEmployee = bank.Employees.FindAll(e => e.IsActive).Find(e => e.Id == deleteEmployeeId);
+            Employee deleteEmployee = bank.Employees.FirstOrDefault(e => e.Id == deleteEmployeeId && e.IsActive);
             deleteEmployee.IsActive = false;
             deleteEmployee.UpdatedOn = DateTime.Now;
             deleteEmployee.DeletedOn = DateTime.Now;
@@ -280,7 +287,7 @@ namespace ATM.Services
         public Dictionary<string, string> GetAllBankNames()
         {
             Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            foreach (Bank bank in this.banks)
+            foreach (Bank bank in this.banks.FindAll(b => b.IsActive))
             {
                 bankNames.Add(bank.Id, bank.Name);
             }

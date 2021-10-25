@@ -70,7 +70,7 @@ namespace ATM.Services
             return (bankDetails, employeeDetails);
         }
 
-        public Tuple<string, Gender, string, string, EmployeeType> GetEmployeeDetailsForCreation()
+        public Tuple<string, Gender, string, string, EmployeeType> GetDataForEmployeeCreation()
         {
             string name, username, password;
             Gender gender;
@@ -151,7 +151,7 @@ namespace ATM.Services
                 return null;
             }
 
-            return Tuple.Create(name, gender, selectedUsername, password, employeeType);
+            return Tuple.Create(name, gender, username, password, employeeType);
         }
         public Tuple<string, Gender, string, string, AccountType> GetDataForAccountCreation()
         {
@@ -234,7 +234,7 @@ namespace ATM.Services
                 return null;
             }
 
-            return Tuple.Create(name, gender, selectedUsername, password, accountType);
+            return Tuple.Create(name, gender, username, password, accountType);
         }
 
         public Tuple<string> GetDataForBankUpdate(Tuple<string> bankDetails)
@@ -312,6 +312,7 @@ namespace ATM.Services
 
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
             string selectedPassword = Console.ReadLine();
+            
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 password = null;
@@ -594,7 +595,7 @@ namespace ATM.Services
         {
             Option3 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Update Bank\n9. Delete Bank\n10. View Transaction History\n11. View Action History");
+            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Update Bank\n9. Delete Bank\n10. View Transaction History\n11. View Action History\n12. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
@@ -612,7 +613,7 @@ namespace ATM.Services
         {
             Option4 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. View Transaction History\n5. View Action History");
+            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. View Transaction History\n5. View Action History\n6. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try

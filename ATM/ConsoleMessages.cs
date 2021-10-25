@@ -88,5 +88,40 @@ namespace ATM.Services
         {
             Console.WriteLine("Currently there are no banks.\nTry Creating a new bank.");
         }
+
+        public void AccessDeniedMsg()
+        {
+            Console.WriteLine("User don't have access to do this operation");
+        }
+
+        public void EmployeeUpdateSuccess()
+        {
+            Console.WriteLine("Employee Updated Successfully");
+        }
+
+        public void EmployeeDeleteSuccess()
+        {
+            Console.WriteLine("Employee Deleted Successfully");
+        }
+
+        public void AccountUpdateSuccess()
+        {
+            Console.WriteLine("Account Updated Successfully");
+        }
+
+        public void AccountDeleteSuccess()
+        {
+            Console.WriteLine("Account Deleted Successfully");
+        }
+
+        public void BankUpdateSuccess()
+        {
+            Console.WriteLine("Bank Updated Successfully");
+        }
+
+        public void BankDeleteSuccess()
+        {
+            Console.WriteLine("bank Deleted Successfully");
+        }
     }
 }
