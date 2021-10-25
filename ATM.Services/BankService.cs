@@ -28,20 +28,38 @@ namespace ATM.Services
             }
         }
 
-        public string CreateNewBank(string name)
+        public string CreateNewBank(Tuple<string> bankDetails, Tuple<string, Gender, string, string> employeeDetails)
         {
-            if (String.IsNullOrEmpty(name))
+            if (String.IsNullOrEmpty(bankDetails.Item1))
             {
                 throw new BankCreationFailedException();
             }
-            if (this.banks.FindAll(b => b.IsActive).Exists(b => b.Name == name))
+            if (employeeDetails == null)
+            {
+                throw new AccountCreationFailedException();
+            }
+            if (this.banks.FindAll(b => b.IsActive).Exists(b => b.Name == bankDetails.Item1))
             {
                 throw new BankNameAlreadyExistsException();
             }
+            Employee newEmployee = new Employee
+            {
+                Id = idGenService.GenEmployeeId(employeeDetails.Item1),
+                Name = employeeDetails.Item1,
+                Gender = employeeDetails.Item2,
+                Username = employeeDetails.Item3,
+                Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4),
+                EmployeeType = EmployeeType.Admin,
+                IsActive = true,
+                CreatedOn = DateTime.Now,
+                UpdatedOn = DateTime.Now,
+                DeletedOn = null,
+                EmployeeActions = new List<EmployeeAction>()
+            };
             Bank newBank = new Bank
             {
-                Name = name,
-                Id = idGenService.GenBankId(name),
+                Name = bankDetails.Item1,
+                Id = idGenService.GenBankId(bankDetails.Item1),
                 Accounts = new List<Account>(),
                 Employees = new List<Employee>(),
                 IsActive = true,
@@ -49,6 +67,7 @@ namespace ATM.Services
                 UpdatedOn = DateTime.Now,
                 DeletedOn = null
             };
+            newBank.Employees.Add(newEmployee);
             this.banks.Add(newBank);
             dataHandler.WriteBankData(this.banks);
             return newBank.Id;
@@ -62,13 +81,13 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            if (bank.Employees.FindAll(e => e.IsActive).Exists(e => e.Username == employeeDetails.Item3))
-            {
-                throw new UsernameAlreadyExistsException();
-            }
             if (employeeDetails == null)
             {
                 throw new AccountCreationFailedException();
+            }
+            if (bank.Employees.FindAll(e => e.IsActive).Exists(e => e.Username == employeeDetails.Item3))
+            {
+                throw new UsernameAlreadyExistsException();
             }
             Employee newEmployee = new Employee
             {
@@ -242,7 +261,7 @@ namespace ATM.Services
         public string DeleteAccount(string bankId, string employeeId, string accountId)
         {
             Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive); ;
+            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
             if (employee == null)
             {
                 throw new AccessDeniedException();
@@ -354,6 +373,10 @@ namespace ATM.Services
 
         public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
+            if (selectedAccountId==transferToAccountId && selectedBankId == transferToBankId)
+            {
+                throw new AccessDeniedException();
+            }
             Bank bank = this.banks.Find(b => b.Id == selectedBankId && b.IsActive);
             Bank toBank = this.banks.Find(b => b.Id == transferToBankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == selectedAccountId && a.IsActive);
@@ -395,6 +418,26 @@ namespace ATM.Services
             {
                 throw new AuthenticationFailedException();
             }
+        }
+
+        public Tuple<string> GetBankDetails(string bankId)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            return Tuple.Create(bank.Name);
+        }
+
+        public Tuple<string, Gender, string, EmployeeType> GetEmployeeDetails(string bankId, string employeeId)
+        {
+            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
+            return Tuple.Create(employee.Name, employee.Gender, employee.Username, employee.EmployeeType);
+        }
+
+        public Tuple<string, Gender, string, AccountType> GetAccountDetails(string bankId, string accountId)
+        {
+            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.FirstOrDefault(a => a.Id == accountId && a.IsActive);
+            return Tuple.Create(account.Name, account.Gender, account.Username, account.AccountType);
         }
     }
 }

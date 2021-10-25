@@ -9,7 +9,8 @@
         UpdateAccount,
         DeleteAccount,
         AddCurrency,
-        UpdateServiceCharges,
+        UpdateBank,
+        DeleteBank,
         TransactionHistory,
         ActionHistory
     }
