@@ -296,5 +296,26 @@ namespace ATM.Services
             }
             return account.Id;
         }
+
+        public decimal GetBalance(string bankId, string accountId)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            return account.Balance;
+        }
+
+        public List<Transaction> GetTransactions(string bankId, string accountId)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            return account.Transactions;
+        }
+
+        public List<EmployeeAction> GetEmployeeActions(string bankId, string employeeId)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Employee employee = bank.Employees.Find(e => e.Id == employeeId && e.IsActive);
+            return employee.EmployeeActions;
+        }
     }
 }
