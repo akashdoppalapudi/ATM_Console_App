@@ -5,8 +5,6 @@
         CreateAccount = 1,
         UpdateAccount,
         DeleteAccount,
-        AddCurrency,
-        UpdateServiceCharges,
         TransactionHistory,
         ActionHistory
     }
