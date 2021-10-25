@@ -536,11 +536,22 @@ namespace ATM.Services
         public void PrintTransactions(List<Transaction> transactions, decimal availBal)
         {
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
+            Console.WriteLine("Date\tTXN ID\tDebit/Credit\tFrom\tTo\tNarrative\tAmount\n");
             foreach (Transaction transaction in transactions)
             {
-                Console.WriteLine(transaction.Id + "\t" + transaction.TransactionDate + "\t" + transaction.TransactionType + "\tRs. " + transaction.TransactionAmount);
+                Console.WriteLine(transaction.TransactionDate+"\t"+transaction.Id + "\t" + transaction.TransactionType+"\t"+transaction.FromAccountId+"\t"+transaction.ToAccountId + "\t" + transaction.TransactionNarrative + "\tRs. " + transaction.TransactionAmount);
             }
             Console.WriteLine("\t\t\t\tAvailable Balance : " + availBal);
+        }
+
+        public void PrintEmployeeActions(List<EmployeeAction> employeeActions)
+        {
+            Console.WriteLine("\n____ACTION HISTORY____\n");
+            Console.WriteLine("Date\tACN ID\tAction Type\tAccount ID\tTXN ID\n");
+            foreach(EmployeeAction action in employeeActions)
+            {
+                Console.WriteLine(action.ActionDate + "\t" + action.Id + "\t" + action.ActionType + "\t" + action.AccountId + "\n" + action.TXNId);
+            }
         }
 
         public Option1 SelectOrCreateBank()
