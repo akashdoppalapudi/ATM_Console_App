@@ -5,7 +5,8 @@
         NewAccount = 1,
         UpdateAccount,
         DeleteAccount,
-        ServiceChargeUpdate,
+        UpdateBank,
+        DeleteBank,
         RevertTransaction
     }
 }
