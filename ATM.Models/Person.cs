@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ATM.Models.Enums;
+using System;
 
 namespace ATM.Models
 {
     [Serializable]
-    public class Bank
+    public class Person
     {
-        public string Name { get; set; }
         public string Id { get; set; }
-        public List<Account> Accounts { get; set; }
-        public List<Employee> Employees { get; set; }
+        public string Name { get; set; }
+        public Gender Gender { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }

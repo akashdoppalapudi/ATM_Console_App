@@ -22,6 +22,12 @@ namespace ATM.Services
             return AccountId;
         }
 
+        public string GenEmployeeId(string empName)
+        {
+            string EmployeeId = GenAccountId(empName) + 'S';
+            return EmployeeId;
+        }
+
         public string GenTransactionId(string bankId, string accId)
         {
             string TXNId;
@@ -29,6 +35,15 @@ namespace ATM.Services
             string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
             TXNId = "TXN" + bankId + accId + dateStr;
             return TXNId;
+        }
+
+        public string GenEmployeeActionId(string bankId, string empId)
+        {
+            string ACNId;
+            DateTime date = DateTime.Today;
+            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
+            ACNId = "ACN" + bankId + empId + dateStr;
+            return ACNId;
         }
     }
 }
