@@ -530,9 +530,11 @@ namespace ATM.CLI
                                 if (option5 == Option5.Deposit)
                                 {
                                     amount = consoleUI.GetAmount('d');
+                                    string currencyName = consoleUI.GetCurrency();
+                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
                                     try
                                     {
-                                        txnId = bankService.Deposit(bankId, accountId, amount);
+                                        txnId = bankService.Deposit(bankId, accountId, currency, amount);
                                         consoleMessages.DepositSuccess();
                                     }
                                     catch (InvalidAmountException)
@@ -544,9 +546,11 @@ namespace ATM.CLI
                                 else if (option5 == Option5.Withdraw)
                                 {
                                     amount = consoleUI.GetAmount('w');
+                                    string currencyName = consoleUI.GetCurrency();
+                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
                                     try
                                     {
-                                        txnId = bankService.Withdraw(bankId, accountId, amount);
+                                        txnId = bankService.Withdraw(bankId, accountId, currency, amount);
                                         consoleMessages.WithdrawSuccess();
                                     }
                                     catch (InvalidAmountException)
@@ -558,6 +562,8 @@ namespace ATM.CLI
                                 else if (option5 == Option5.Transfer)
                                 {
                                     amount = consoleUI.GetAmount('t');
+                                    string currencyName = consoleUI.GetCurrency();
+                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
                                     string toBankId, toAccountId;
                                     string selectedToBankId = consoleUI.SelectBank(bankNames);
                                     try
@@ -581,7 +587,7 @@ namespace ATM.CLI
                                     }
                                     try
                                     {
-                                        txnId = bankService.Transfer(bankId, accountId, toBankId, toAccountId, amount);
+                                        txnId = bankService.Transfer(bankId, accountId, toBankId, toAccountId, currency, amount);
                                         consoleMessages.TransferSuccess();
                                     }
                                     catch (InvalidAmountException)

@@ -30,7 +30,7 @@ namespace ATM.Services
 
         public string CreateNewBank(Tuple<string> bankDetails, Tuple<string, Gender, string, string> employeeDetails)
         {
-            if (String.IsNullOrEmpty(bankDetails.Item1))
+            if (bankDetails == null)
             {
                 throw new BankCreationFailedException();
             }
@@ -350,7 +350,7 @@ namespace ATM.Services
             return employee.EmployeeActions;
         }
 
-        public string Deposit(string bankId, string accountId, decimal amount)
+        public string Deposit(string bankId, string accountId, Currency currency, decimal amount)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
@@ -358,6 +358,7 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
+            amount = amount * (decimal)currency.ExchangeRate;
             account.Balance += amount;
             string TXNId = idGenService.GenTransactionId(bankId, accountId);
             account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)2, (TransactionNarrative)2, accountId));
@@ -367,7 +368,7 @@ namespace ATM.Services
             return TXNId;
         }
 
-        public string Withdraw(string bankId, string accountId, decimal amount)
+        public string Withdraw(string bankId, string accountId, Currency currency, decimal amount)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
@@ -375,6 +376,7 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
+            amount = amount * (decimal)currency.ExchangeRate;
             account.Balance -= amount;
             string TXNId = idGenService.GenTransactionId(bankId, accountId);
             account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, accountId));
@@ -384,7 +386,7 @@ namespace ATM.Services
             return TXNId;
         }
 
-        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
+        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, Currency currency, decimal amount)
         {
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
@@ -398,6 +400,7 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
+            amount = amount * (decimal)currency.ExchangeRate;
             account.Balance -= amount;
             string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
             account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
@@ -464,6 +467,17 @@ namespace ATM.Services
             bank.Currencies.Remove(currency);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
+        }
+
+        public Currency CheckCurrencyExistance(string bankId, string currencyName)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            if (currency == null)
+            {
+                throw new CurrencyDoesNotExistException();
+            }
+            return currency;
         }
 
         public void AuthenticateUser(string bankId, string accountId, string userInput)

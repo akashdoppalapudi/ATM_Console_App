@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATM.Models
 {
+    [Serializable]
     public class Currency
     {
         public string Name { get; set; }
