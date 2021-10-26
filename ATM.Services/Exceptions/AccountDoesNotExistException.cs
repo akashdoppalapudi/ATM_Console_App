@@ -2,7 +2,7 @@
 
 namespace ATM.Services.Exceptions
 {
-    class AccountDoesNotExistException : Exception
+    public class AccountDoesNotExistException : Exception
     {
     }
 }

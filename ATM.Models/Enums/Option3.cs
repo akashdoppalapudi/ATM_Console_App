@@ -12,6 +12,7 @@
         UpdateBank,
         DeleteBank,
         TransactionHistory,
-        ActionHistory
+        ActionHistory,
+        Back
     }
 }
