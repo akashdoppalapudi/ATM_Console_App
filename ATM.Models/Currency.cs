@@ -8,7 +8,7 @@ namespace ATM.Models
 {
     public class Currency
     {
-        string Name { get; set; }
-        decimal ExchangeRate { get; set; }
+        public string Name { get; set; }
+        public double ExchangeRate { get; set; }
     }
 }

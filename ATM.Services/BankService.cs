@@ -405,6 +405,61 @@ namespace ATM.Services
             return TXNId;
         }
 
+        public void AddCurrency(string bankId, string currencyName, double exchangeRate)
+        {
+            if (String.IsNullOrEmpty(currencyName) || exchangeRate <= 0)
+            {
+                throw new AddingCurrencyFailedException();
+            }
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            if (bank.Currencies.Exists(c => c.Name == currencyName))
+            {
+                throw new CurrencyAlreadyExistsException();
+            }
+            Currency newCurrency = new Currency
+            {
+                Name = currencyName,
+                ExchangeRate = exchangeRate
+            };
+            bank.Currencies.Add(newCurrency);
+            bank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+        }
+
+        public void UpdateCurrency(string bankId, string currencyName, double exchangeRate)
+        {
+            if (String.IsNullOrEmpty(currencyName) || exchangeRate <= 0)
+            {
+                throw new AddingCurrencyFailedException();
+            }
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            if (currency == null)
+            {
+                throw new CurrencyDoesNotExist();
+            }
+            currency.ExchangeRate = exchangeRate;
+            bank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+        }
+
+        public void DeleteCurrency(string bankId, string currencyName)
+        {
+            if (String.IsNullOrEmpty(currencyName))
+            {
+                throw new AddingCurrencyFailedException();
+            }
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            if (currency == null)
+            {
+                throw new CurrencyDoesNotExist();
+            }
+            bank.Currencies.Remove(currency);
+            bank.UpdatedOn = DateTime.Now;
+            dataHandler.WriteBankData(this.banks);
+        }
+
         public void AuthenticateUser(string bankId, string accountId, string userInput)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);

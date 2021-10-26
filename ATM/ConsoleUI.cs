@@ -519,6 +519,45 @@ namespace ATM.Services
             return username;
         }
 
+        public string GetCurrency()
+        {
+            Console.Write("Enter Currency Name : ");
+            string userInput = Console.ReadLine();
+            if (userInput == null || userInput.Length != 3)
+            {
+                Console.WriteLine("Invalid Name");
+                return null;
+            }
+            return userInput;
+        }
+
+        public double GetExchangeRate()
+        {
+            Console.Write("Enter Exchange Rate : ");
+            string userInput = Console.ReadLine();
+            double exchangeRate;
+            if (String.IsNullOrEmpty(userInput))
+            {
+                Console.WriteLine("Invalid Exchange Rate");
+                return 0;
+            }
+            try
+            {
+                exchangeRate = Convert.ToDouble(userInput);
+                if (exchangeRate <= 0)
+                {
+                    Console.WriteLine("Invalid Exchange Rate");
+                    return 0;
+                }
+                return exchangeRate;
+            }
+            catch
+            {
+                Console.WriteLine("Invalid Exchange Rate");
+                return 0;
+            }
+        }
+
         public string GetTransferToUsername()
         {
             Console.Write("\nEnter Reciever's Username : ");
