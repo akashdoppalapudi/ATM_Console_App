@@ -1,5 +1,5 @@
-﻿using ATM.Models.Enums;
-using ATM.Models;
+﻿using ATM.Models;
+using ATM.Models.Enums;
 using ATM.Services;
 using ATM.Services.Exceptions;
 using System;
@@ -521,7 +521,7 @@ namespace ATM.CLI
                                     {
                                         toBankId = bankService.CheckBankExistance(selectedToBankId);
                                     }
-                                    catch(BankDoesnotExistException)
+                                    catch (BankDoesnotExistException)
                                     {
                                         consoleMessages.BankDoesnotExistMsg();
                                         continue;
@@ -577,7 +577,7 @@ namespace ATM.CLI
                             consoleMessages.InvalidOptionMsg();
                         }
                     }
-                    
+
                 }
                 else if (option1 == Option1.Exit)
                 {

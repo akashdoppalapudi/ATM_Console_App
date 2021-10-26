@@ -312,7 +312,7 @@ namespace ATM.Services
 
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
             string selectedPassword = Console.ReadLine();
-            
+
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 password = null;

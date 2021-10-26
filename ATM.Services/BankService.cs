@@ -380,7 +380,7 @@ namespace ATM.Services
 
         public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
-            if (selectedAccountId==transferToAccountId && selectedBankId == transferToBankId)
+            if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
             }
@@ -388,7 +388,7 @@ namespace ATM.Services
             Bank toBank = this.banks.Find(b => b.Id == transferToBankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == selectedAccountId && a.IsActive);
             Account transferToAccount = toBank.Accounts.Find(a => a.Id == transferToAccountId && a.IsActive);
-            if (amount <= 0 || amount> account.Balance)
+            if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
             }
@@ -410,7 +410,7 @@ namespace ATM.Services
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
             string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
-            if(hashedUserInput != account.Password)
+            if (hashedUserInput != account.Password)
             {
                 throw new AuthenticationFailedException();
             }
