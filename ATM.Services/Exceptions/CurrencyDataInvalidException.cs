@@ -2,7 +2,7 @@
 
 namespace ATM.Services.Exceptions
 {
-    public class AddingCurrencyFailedException : Exception
+    public class CurrencyDataInvalidException : Exception
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATM.Services.Exceptions
 {
-    public class CurrencyDoesNotExist: Exception
+    public class CurrencyDoesNotExistException: Exception
     {
     }
 }

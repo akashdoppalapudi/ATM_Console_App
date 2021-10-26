@@ -256,7 +256,50 @@ namespace ATM.CLI
                                     }
                                     else if (option3 == Option3.AddCurrency)
                                     {
-
+                                        string currencyName = consoleUI.GetCurrency();
+                                        double exchangeRate = consoleUI.GetExchangeRate();
+                                        try
+                                        {
+                                            bankService.AddCurrency(bankId, currencyName, exchangeRate);
+                                            consoleMessages.CurrencyAddedSuccess();
+                                        }
+                                        catch (CurrencyAlreadyExistsException)
+                                        {
+                                            consoleMessages.CurrencyAlreadyExists();
+                                            continue;
+                                        }
+                                        catch (CurrencyDataInvalidException) { }
+                                    }
+                                    else if (option3 == Option3.ChangeCurrency)
+                                    {
+                                        string currencyName = consoleUI.GetCurrency();
+                                        double exchangeRate = consoleUI.GetExchangeRate();
+                                        try
+                                        {
+                                            bankService.UpdateCurrency(bankId, currencyName, exchangeRate);
+                                            consoleMessages.CurrencyUpdateSuccess();
+                                        }
+                                        catch (CurrencyDoesNotExistException)
+                                        {
+                                            consoleMessages.CurrencyDoesNotExist();
+                                            continue;
+                                        }
+                                        catch (CurrencyDataInvalidException) { }
+                                    }
+                                    else if (option3 == Option3.RemoveCurrency)
+                                    {
+                                        string currencyName = consoleUI.GetCurrency();
+                                        try
+                                        {
+                                            bankService.DeleteCurrency(bankId, currencyName);
+                                            consoleMessages.CurrencyDeleteSuccess();
+                                        }
+                                        catch (CurrencyDoesNotExistException)
+                                        {
+                                            consoleMessages.CurrencyDoesNotExist();
+                                            continue;
+                                        }
+                                        catch (CurrencyDataInvalidException) { }
                                     }
                                     else if (option3 == Option3.UpdateBank)
                                     {

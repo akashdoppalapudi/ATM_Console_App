@@ -62,12 +62,18 @@ namespace ATM.Services
                 Id = idGenService.GenBankId(bankDetails.Item1),
                 Accounts = new List<Account>(),
                 Employees = new List<Employee>(),
+                Currencies = new List<Currency>(),
                 IsActive = true,
                 CreatedOn = DateTime.Now,
                 UpdatedOn = DateTime.Now,
                 DeletedOn = null
             };
             newBank.Employees.Add(newEmployee);
+            newBank.Currencies.Add(new Currency
+            {
+                Name = "INR",
+                ExchangeRate = 1
+            });
             this.banks.Add(newBank);
             dataHandler.WriteBankData(this.banks);
             return newBank.Id;
@@ -409,7 +415,7 @@ namespace ATM.Services
         {
             if (String.IsNullOrEmpty(currencyName) || exchangeRate <= 0)
             {
-                throw new AddingCurrencyFailedException();
+                throw new CurrencyDataInvalidException();
             }
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             if (bank.Currencies.Exists(c => c.Name == currencyName))
@@ -430,13 +436,13 @@ namespace ATM.Services
         {
             if (String.IsNullOrEmpty(currencyName) || exchangeRate <= 0)
             {
-                throw new AddingCurrencyFailedException();
+                throw new CurrencyDataInvalidException();
             }
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
             if (currency == null)
             {
-                throw new CurrencyDoesNotExist();
+                throw new CurrencyDoesNotExistException();
             }
             currency.ExchangeRate = exchangeRate;
             bank.UpdatedOn = DateTime.Now;
@@ -447,13 +453,13 @@ namespace ATM.Services
         {
             if (String.IsNullOrEmpty(currencyName))
             {
-                throw new AddingCurrencyFailedException();
+                throw new CurrencyDataInvalidException();
             }
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
             if (currency == null)
             {
-                throw new CurrencyDoesNotExist();
+                throw new CurrencyDoesNotExistException();
             }
             bank.Currencies.Remove(currency);
             bank.UpdatedOn = DateTime.Now;
