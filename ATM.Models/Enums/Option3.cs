@@ -9,6 +9,8 @@
         UpdateAccount,
         DeleteAccount,
         AddCurrency,
+        ChangeCurrency,
+        RemoveCurrency,
         UpdateBank,
         DeleteBank,
         TransactionHistory,
