@@ -519,6 +519,45 @@ namespace ATM.Services
             return username;
         }
 
+        public string GetCurrency()
+        {
+            Console.Write("Enter Currency Name : ");
+            string userInput = Console.ReadLine();
+            if (userInput == null || userInput.Length != 3)
+            {
+                Console.WriteLine("Invalid Name");
+                return null;
+            }
+            return userInput;
+        }
+
+        public double GetExchangeRate()
+        {
+            Console.Write("Enter Exchange Rate : ");
+            string userInput = Console.ReadLine();
+            double exchangeRate;
+            if (String.IsNullOrEmpty(userInput))
+            {
+                Console.WriteLine("Invalid Exchange Rate");
+                return 0;
+            }
+            try
+            {
+                exchangeRate = Convert.ToDouble(userInput);
+                if (exchangeRate <= 0)
+                {
+                    Console.WriteLine("Invalid Exchange Rate");
+                    return 0;
+                }
+                return exchangeRate;
+            }
+            catch
+            {
+                Console.WriteLine("Invalid Exchange Rate");
+                return 0;
+            }
+        }
+
         public string GetTransferToUsername()
         {
             Console.Write("\nEnter Reciever's Username : ");
@@ -595,7 +634,7 @@ namespace ATM.Services
         {
             Option3 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Update Bank\n9. Delete Bank\n10. View Transaction History\n11. View Action History\n12. Back");
+            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Change Currency\n9. Remove Currency\n10. Update Bank\n11. Delete Bank\n12. View Transaction History\n13. View Action History\n14. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try

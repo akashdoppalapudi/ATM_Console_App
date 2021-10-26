@@ -121,7 +121,32 @@ namespace ATM.Services
 
         public void BankDeleteSuccess()
         {
-            Console.WriteLine("bank Deleted Successfully");
+            Console.WriteLine("Bank Deleted Successfully");
+        }
+
+        public void CurrencyAddedSuccess()
+        {
+            Console.WriteLine("Currency Added Successfully");
+        }
+
+        public void CurrencyUpdateSuccess()
+        {
+            Console.WriteLine("Currency Updated Successfully");
+        }
+
+        public void CurrencyDeleteSuccess()
+        {
+            Console.WriteLine("Currency Deleted Successfully");
+        }
+
+        public void CurrencyDoesNotExist()
+        {
+            Console.WriteLine("Currency doesn't exist with that name");
+        }
+
+        public void CurrencyAlreadyExists()
+        {
+            Console.WriteLine("Currency with that name already exists");
         }
     }
 }
