@@ -10,6 +10,7 @@ namespace ATM.Models
         public string Id { get; set; }
         public List<Account> Accounts { get; set; }
         public List<Employee> Employees { get; set; }
+        public List<Currency> Currencies { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }

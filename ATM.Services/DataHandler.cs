@@ -15,7 +15,15 @@ namespace ATM.Services
             if (File.Exists(FILEPATH))
             {
                 FileStream readerFileStream = new FileStream(FILEPATH, FileMode.Open, FileAccess.Read);
-                List<Bank> retrievedBanks = (List<Bank>)formatter.Deserialize(readerFileStream);
+                List<Bank> retrievedBanks;
+                try
+                {
+                    retrievedBanks = (List<Bank>)formatter.Deserialize(readerFileStream);
+                }
+                catch
+                {
+                    return null;
+                }
                 readerFileStream.Close();
                 return retrievedBanks;
             }
