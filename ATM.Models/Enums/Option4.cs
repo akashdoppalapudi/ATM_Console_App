@@ -6,6 +6,7 @@
         UpdateAccount,
         DeleteAccount,
         TransactionHistory,
-        ActionHistory
+        ActionHistory,
+        Back
     }
 }

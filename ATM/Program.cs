@@ -266,6 +266,7 @@ namespace ATM.CLI
                                         {
                                             string updatebankId = bankService.UpdateBank(bankId, employeeId, updateBankDetails);
                                             consoleMessages.BankUpdateSuccess();
+                                            goto EndOfProgram;
                                         }
                                         catch (AccessDeniedException)
                                         {
@@ -284,7 +285,7 @@ namespace ATM.CLI
                                         {
                                             string deleteBankId = bankService.DeleteBank(bankId, employeeId);
                                             consoleMessages.BankDeleteSuccess();
-                                            break;
+                                            goto EndOfProgram;
                                         }
                                         catch (AccessDeniedException)
                                         {
@@ -338,7 +339,121 @@ namespace ATM.CLI
                             }
                             else
                             {
-
+                                while (true)
+                                {
+                                    Option4 option4 = consoleUI.StaffOptions();
+                                    if (option4 == Option4.CreateAccount)
+                                    {
+                                        Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
+                                        try
+                                        {
+                                            string newAccountId = bankService.CreateNewAccount(bankId, employeeId, accountDetails);
+                                            consoleMessages.AccountCreationSuccess();
+                                        }
+                                        catch (AccessDeniedException)
+                                        {
+                                            consoleMessages.AccessDeniedMsg();
+                                            continue;
+                                        }
+                                        catch (AccountCreationFailedException)
+                                        {
+                                            consoleMessages.AccountCreationFailed();
+                                            continue;
+                                        }
+                                        catch (UsernameAlreadyExistsException)
+                                        {
+                                            consoleMessages.UsernameAlreadyExists();
+                                            continue;
+                                        }
+                                    }
+                                    else if (option4 == Option4.UpdateAccount)
+                                    {
+                                        string selecteUsername = consoleUI.GetUsername();
+                                        string updateAccountId;
+                                        Tuple<string, Gender, string, AccountType> currentAccountDetails;
+                                        Tuple<string, Gender, string, string, AccountType> updatedAccountDetails;
+                                        try
+                                        {
+                                            updateAccountId = bankService.CheckAccountExistance(bankId, selecteUsername);
+                                        }
+                                        catch (AccountDoesNotExistException)
+                                        {
+                                            consoleMessages.UserNotFoundMsg();
+                                            continue;
+                                        }
+                                        currentAccountDetails = bankService.GetAccountDetails(bankId, updateAccountId);
+                                        updatedAccountDetails = consoleUI.GetDataForAccountUpdate(currentAccountDetails);
+                                        try
+                                        {
+                                            string updatedAccountId = bankService.UpdateAccount(bankId, employeeId, updateAccountId, updatedAccountDetails);
+                                            consoleMessages.AccountUpdateSuccess();
+                                        }
+                                        catch (AccessDeniedException)
+                                        {
+                                            consoleMessages.AccessDeniedMsg();
+                                            continue;
+                                        }
+                                        catch (UsernameAlreadyExistsException)
+                                        {
+                                            consoleMessages.UsernameAlreadyExists();
+                                            continue;
+                                        }
+                                    }
+                                    else if (option4 == Option4.DeleteAccount)
+                                    {
+                                        string selectedUsername = consoleUI.GetUsername();
+                                        string deleteAccountId;
+                                        try
+                                        {
+                                            deleteAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                        }
+                                        catch (AccountDoesNotExistException)
+                                        {
+                                            consoleMessages.UserNotFoundMsg();
+                                            continue;
+                                        }
+                                        try
+                                        {
+                                            deleteAccountId = bankService.DeleteAccount(bankId, employeeId, deleteAccountId);
+                                            consoleMessages.AccountDeleteSuccess();
+                                        }
+                                        catch (AccessDeniedException)
+                                        {
+                                            consoleMessages.AccessDeniedMsg();
+                                            continue;
+                                        }
+                                    }
+                                    else if (option4 == Option4.TransactionHistory)
+                                    {
+                                        string selectedUsername = consoleUI.GetUsername();
+                                        string selectedAccountId;
+                                        try
+                                        {
+                                            selectedAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                        }
+                                        catch (AccountDoesNotExistException)
+                                        {
+                                            consoleMessages.UserNotFoundMsg();
+                                            continue;
+                                        }
+                                        List<Transaction> transactions = bankService.GetTransactions(bankId, selectedAccountId);
+                                        decimal balance = bankService.GetBalance(bankId, selectedAccountId);
+                                        consoleUI.PrintTransactions(transactions, balance);
+                                    }
+                                    else if (option4 == Option4.ActionHistory)
+                                    {
+                                        List<EmployeeAction> actions = bankService.GetEmployeeActions(bankId, employeeId);
+                                        consoleUI.PrintEmployeeActions(actions);
+                                    }
+                                    else if (option4 == Option4.Back)
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        consoleMessages.InvalidOptionMsg();
+                                    }
+                                }
                             }
                         }
                         else if (option2 == Option2.UserLogin)
@@ -472,6 +587,7 @@ namespace ATM.CLI
                 {
                     consoleMessages.InvalidOptionMsg();
                 }
+            EndOfProgram:;
             }
         }
     }
