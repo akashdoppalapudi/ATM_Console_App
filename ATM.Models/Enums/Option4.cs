@@ -5,6 +5,7 @@
         CreateAccount = 1,
         UpdateAccount,
         DeleteAccount,
+        RevertTransaction,
         TransactionHistory,
         ActionHistory,
         Back

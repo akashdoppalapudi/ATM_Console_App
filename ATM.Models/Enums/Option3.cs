@@ -13,6 +13,7 @@
         RemoveCurrency,
         UpdateBank,
         DeleteBank,
+        RevertTransaction,
         TransactionHistory,
         ActionHistory,
         Back
