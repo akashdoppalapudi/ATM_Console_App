@@ -161,7 +161,7 @@ namespace ATM.Services
             return newAccount.Id;
         }
 
-        public string UpdateBank(string bankId, string employeeId, Tuple<string> bankDetails)
+        public string UpdateBank(string bankId, string employeeId, Tuple<string, double, double, double, double> bankDetails)
         {
             Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
             Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
@@ -174,6 +174,10 @@ namespace ATM.Services
                 throw new BankNameAlreadyExistsException();
             }
             bank.Name = bankDetails.Item1;
+            bank.IMPS = bankDetails.Item2;
+            bank.RTGS = bankDetails.Item3;
+            bank.OIMPS = bankDetails.Item4;
+            bank.ORTGS = bankDetails.Item5;
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)4));
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
@@ -506,10 +510,10 @@ namespace ATM.Services
             }
         }
 
-        public Tuple<string> GetBankDetails(string bankId)
+        public Tuple<string, double, double, double, double> GetBankDetails(string bankId)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            return Tuple.Create(bank.Name);
+            return Tuple.Create(bank.Name, bank.IMPS, bank.RTGS, bank.OIMPS, bank.ORTGS);
         }
 
         public Tuple<string, Gender, string, EmployeeType> GetEmployeeDetails(string bankId, string employeeId)
