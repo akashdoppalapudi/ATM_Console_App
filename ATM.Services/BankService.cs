@@ -396,6 +396,7 @@ namespace ATM.Services
 
         public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, Currency currency, decimal amount)
         {
+            decimal debitAmount, serviceCharge;
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
@@ -408,10 +409,37 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
-            amount = amount * (decimal)currency.ExchangeRate;
-            account.Balance -= amount;
+            amount *= (decimal)currency.ExchangeRate;
+            if (amount > 50000)
+            {
+                if (selectedBankId == transferToBankId)
+                {
+                    serviceCharge = (decimal)bank.RTGS;
+                }
+                else
+                {
+                    serviceCharge = (decimal)bank.ORTGS;
+                }
+            }
+            else
+            {
+                if (selectedBankId == transferToBankId)
+                {
+                    serviceCharge = (decimal)bank.IMPS;
+                }
+                else
+                {
+                    serviceCharge = (decimal)bank.IMPS;
+                }
+            }
+            debitAmount = amount + amount * (decimal)0.01 * serviceCharge;
+            if (debitAmount <= 0 || debitAmount > account.Balance)
+            {
+                throw new InvalidAmountException();
+            }
+            account.Balance -= debitAmount;
             string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, debitAmount, (TransactionType)1, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
             account.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
             transferToAccount.Balance += amount;
