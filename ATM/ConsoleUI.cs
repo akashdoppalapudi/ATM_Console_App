@@ -237,9 +237,10 @@ namespace ATM.Services
             return Tuple.Create(name, gender, username, password, accountType);
         }
 
-        public Tuple<string> GetDataForBankUpdate(Tuple<string> bankDetails)
+        public Tuple<string, double, double, double, double> GetDataForBankUpdate(Tuple<string, double, double, double, double> bankDetails)
         {
             string name;
+            double imps, rtgs, oimps, ortgs;
             Console.WriteLine("____BANK UPDATE____");
             Console.Write("[" + bankDetails.Item1 + "] Enter new Bank Name (Leave it empty to not change) : ");
             string userInput = Console.ReadLine();
@@ -251,7 +252,80 @@ namespace ATM.Services
             {
                 name = userInput;
             }
-            return Tuple.Create(name);
+            Console.Write("[" + bankDetails.Item2 + "] Enter new IMPS for same bank transfer (Leave it empty to not change) : ");
+            userInput = Console.ReadLine();
+            if (String.IsNullOrEmpty(userInput))
+            {
+                imps = bankDetails.Item2;
+            }
+            else
+            {
+                try
+                {
+                    imps = Convert.ToDouble(userInput);
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Input! Keeping the previous IMPS");
+                    imps = bankDetails.Item2;
+                }
+            }
+            Console.Write("[" + bankDetails.Item3 + "] Enter new RTGS for same bank transfer (Leave it empty to not change) : ");
+            userInput = Console.ReadLine();
+            if (String.IsNullOrEmpty(userInput))
+            {
+                rtgs = bankDetails.Item3;
+            }
+            else
+            {
+                try
+                {
+                    rtgs = Convert.ToDouble(userInput);
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Input! Keeping the previous RTGS");
+                    rtgs = bankDetails.Item3;
+                }
+            }
+            Console.Write("[" + bankDetails.Item4 + "] Enter new IMPS for same other bank transfer (Leave it empty to not change) : ");
+            userInput = Console.ReadLine();
+            if (String.IsNullOrEmpty(userInput))
+            {
+                oimps = bankDetails.Item4;
+            }
+            else
+            {
+                try
+                {
+                    oimps = Convert.ToDouble(userInput);
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Input! Keeping the previous IMPS");
+                    oimps = bankDetails.Item4;
+                }
+            }
+            Console.Write("[" + bankDetails.Item5 + "] Enter new RTGS for other bank transfer (Leave it empty to not change) : ");
+            userInput = Console.ReadLine();
+            if (String.IsNullOrEmpty(userInput))
+            {
+                ortgs = bankDetails.Item5;
+            }
+            else
+            {
+                try
+                {
+                    ortgs = Convert.ToDouble(userInput);
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Input! Keeping the previous RTGS");
+                    ortgs = bankDetails.Item5;
+                }
+            }
+
+            return Tuple.Create(name, imps, rtgs, oimps, ortgs);
         }
 
         public Tuple<string, Gender, string, string, EmployeeType> GetDataForEmployeeUpdate(Tuple<string, Gender, string, EmployeeType> employeeDetails)

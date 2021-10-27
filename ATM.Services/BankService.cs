@@ -63,6 +63,10 @@ namespace ATM.Services
                 Accounts = new List<Account>(),
                 Employees = new List<Employee>(),
                 Currencies = new List<Currency>(),
+                IMPS = 5,
+                RTGS = 0,
+                OIMPS = 6,
+                ORTGS = 2,
                 IsActive = true,
                 CreatedOn = DateTime.Now,
                 UpdatedOn = DateTime.Now,
@@ -157,7 +161,7 @@ namespace ATM.Services
             return newAccount.Id;
         }
 
-        public string UpdateBank(string bankId, string employeeId, Tuple<string> bankDetails)
+        public string UpdateBank(string bankId, string employeeId, Tuple<string, double, double, double, double> bankDetails)
         {
             Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
             Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
@@ -170,6 +174,10 @@ namespace ATM.Services
                 throw new BankNameAlreadyExistsException();
             }
             bank.Name = bankDetails.Item1;
+            bank.IMPS = bankDetails.Item2;
+            bank.RTGS = bankDetails.Item3;
+            bank.OIMPS = bankDetails.Item4;
+            bank.ORTGS = bankDetails.Item5;
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)4));
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
@@ -388,6 +396,7 @@ namespace ATM.Services
 
         public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, Currency currency, decimal amount)
         {
+            decimal debitAmount, serviceCharge;
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
@@ -400,10 +409,37 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
-            amount = amount * (decimal)currency.ExchangeRate;
-            account.Balance -= amount;
+            amount *= (decimal)currency.ExchangeRate;
+            if (amount > 50000)
+            {
+                if (selectedBankId == transferToBankId)
+                {
+                    serviceCharge = (decimal)bank.RTGS;
+                }
+                else
+                {
+                    serviceCharge = (decimal)bank.ORTGS;
+                }
+            }
+            else
+            {
+                if (selectedBankId == transferToBankId)
+                {
+                    serviceCharge = (decimal)bank.IMPS;
+                }
+                else
+                {
+                    serviceCharge = (decimal)bank.IMPS;
+                }
+            }
+            debitAmount = amount + amount * (decimal)0.01 * serviceCharge;
+            if (debitAmount <= 0 || debitAmount > account.Balance)
+            {
+                throw new InvalidAmountException();
+            }
+            account.Balance -= debitAmount;
             string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, debitAmount, (TransactionType)1, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
             account.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
             transferToAccount.Balance += amount;
@@ -502,10 +538,10 @@ namespace ATM.Services
             }
         }
 
-        public Tuple<string> GetBankDetails(string bankId)
+        public Tuple<string, double, double, double, double> GetBankDetails(string bankId)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            return Tuple.Create(bank.Name);
+            return Tuple.Create(bank.Name, bank.IMPS, bank.RTGS, bank.OIMPS, bank.ORTGS);
         }
 
         public Tuple<string, Gender, string, EmployeeType> GetEmployeeDetails(string bankId, string employeeId)
