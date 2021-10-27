@@ -546,11 +546,9 @@ namespace ATM.CLI
                                 else if (option5 == Option5.Withdraw)
                                 {
                                     amount = consoleUI.GetAmount('w');
-                                    string currencyName = consoleUI.GetCurrency();
-                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
                                     try
                                     {
-                                        txnId = bankService.Withdraw(bankId, accountId, currency, amount);
+                                        txnId = bankService.Withdraw(bankId, accountId, amount);
                                         consoleMessages.WithdrawSuccess();
                                     }
                                     catch (InvalidAmountException)
@@ -562,8 +560,6 @@ namespace ATM.CLI
                                 else if (option5 == Option5.Transfer)
                                 {
                                     amount = consoleUI.GetAmount('t');
-                                    string currencyName = consoleUI.GetCurrency();
-                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
                                     string toBankId, toAccountId;
                                     string selectedToBankId = consoleUI.SelectBank(bankNames);
                                     try
@@ -587,7 +583,7 @@ namespace ATM.CLI
                                     }
                                     try
                                     {
-                                        txnId = bankService.Transfer(bankId, accountId, toBankId, toAccountId, currency, amount);
+                                        txnId = bankService.Transfer(bankId, accountId, toBankId, toAccountId, amount);
                                         consoleMessages.TransferSuccess();
                                     }
                                     catch (InvalidAmountException)

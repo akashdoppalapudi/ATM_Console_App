@@ -376,7 +376,7 @@ namespace ATM.Services
             return TXNId;
         }
 
-        public string Withdraw(string bankId, string accountId, Currency currency, decimal amount)
+        public string Withdraw(string bankId, string accountId, decimal amount)
         {
             Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
             Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
@@ -384,7 +384,6 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
-            amount = amount * (decimal)currency.ExchangeRate;
             account.Balance -= amount;
             string TXNId = idGenService.GenTransactionId(bankId, accountId);
             account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, accountId));
@@ -394,9 +393,8 @@ namespace ATM.Services
             return TXNId;
         }
 
-        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, Currency currency, decimal amount)
+        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
-            decimal debitAmount, serviceCharge;
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
@@ -409,37 +407,9 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
-            amount *= (decimal)currency.ExchangeRate;
-            if (amount > 50000)
-            {
-                if (selectedBankId == transferToBankId)
-                {
-                    serviceCharge = (decimal)bank.RTGS;
-                }
-                else
-                {
-                    serviceCharge = (decimal)bank.ORTGS;
-                }
-            }
-            else
-            {
-                if (selectedBankId == transferToBankId)
-                {
-                    serviceCharge = (decimal)bank.IMPS;
-                }
-                else
-                {
-                    serviceCharge = (decimal)bank.IMPS;
-                }
-            }
-            debitAmount = amount + amount * (decimal)0.01 * serviceCharge;
-            if (debitAmount <= 0 || debitAmount > account.Balance)
-            {
-                throw new InvalidAmountException();
-            }
-            account.Balance -= debitAmount;
+            account.Balance -= amount;
             string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, debitAmount, (TransactionType)1, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
+            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
             account.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
             transferToAccount.Balance += amount;
@@ -448,6 +418,38 @@ namespace ATM.Services
             toBank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
             return TXNId;
+        }
+
+        public string RevertTransaction(string bankId, string employeeId, string txnId)
+        {
+            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
+            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            {
+                throw new AccessDeniedException();
+            }
+            Transaction transaction = null;
+            foreach(Account account in bank.Accounts)
+            {
+                transaction = account.Transactions.FirstOrDefault(t => t.Id == txnId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
+                if (transaction != null)
+                {
+                    break;
+                }
+            }
+            if (transaction == null)
+            {
+                throw new TransactionNotFoundException();
+            }
+            decimal amount = transaction.TransactionAmount;
+            string fromAccId = transaction.FromAccountId;
+            string toAccId = transaction.ToAccountId;
+            string toBankId = transaction.ToBankId;
+            string TXNID = this.Transfer(bankId, fromAccId, toBankId, toAccId, amount);
+            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)6, fromAccId, txnId));
+            employee.UpdatedOn = DateTime.Now;
+            bank.UpdatedOn = DateTime.Now;
+            return txnId;
         }
 
         public void AddCurrency(string bankId, string currencyName, double exchangeRate)
