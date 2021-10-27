@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace ATM.Models
 {
     [Serializable]
-    public class Account: Person
+    public class Account : Person
     {
         public AccountType AccountType { get; set; }
         public decimal Balance { get; set; }

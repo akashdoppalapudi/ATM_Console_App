@@ -303,8 +303,8 @@ namespace ATM.CLI
                                     }
                                     else if (option3 == Option3.UpdateBank)
                                     {
-                                        Tuple<string> bankDetails = bankService.GetBankDetails(bankId);
-                                        Tuple<string> updateBankDetails = consoleUI.GetDataForBankUpdate(bankDetails);
+                                        Tuple<string, double, double, double, double> bankDetails = bankService.GetBankDetails(bankId);
+                                        Tuple<string, double, double, double, double> updateBankDetails = consoleUI.GetDataForBankUpdate(bankDetails);
                                         try
                                         {
                                             string updatebankId = bankService.UpdateBank(bankId, employeeId, updateBankDetails);
