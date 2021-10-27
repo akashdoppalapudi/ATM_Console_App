@@ -14,6 +14,7 @@ namespace ATM.Services
                 TransactionDate = DateTime.Now,
                 TransactionType = transactionType,
                 FromAccountId = fromAccId,
+                ToBankId = toBankId,
                 ToAccountId = toAccId,
                 TransactionNarrative = transactionNarrative,
                 TransactionAmount = amount

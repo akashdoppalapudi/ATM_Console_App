@@ -593,6 +593,15 @@ namespace ATM.Services
             return username;
         }
 
+        public string GetRevertTransactionId()
+        {
+            string txnId;
+            Console.WriteLine("\n____REVERT TRANSACTION____\n");
+            Console.Write("Enter the transaction id : ");
+            txnId = Console.ReadLine();
+            return txnId;
+        }
+
         public string GetCurrency()
         {
             Console.Write("Enter Currency Name : ");
@@ -708,7 +717,7 @@ namespace ATM.Services
         {
             Option3 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Change Currency\n9. Remove Currency\n10. Update Bank\n11. Delete Bank\n12. View Transaction History\n13. View Action History\n14. Back");
+            Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Change Currency\n9. Remove Currency\n10. Update Bank\n11. Delete Bank\n12. Revert Transaction\n13. View Transaction History\n14. View Action History\n15. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
@@ -726,7 +735,7 @@ namespace ATM.Services
         {
             Option4 operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. View Transaction History\n5. View Action History\n6. Back");
+            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. Revert Transaction\n5. View Transaction History\n6. View Action History\n6. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
