@@ -336,6 +336,24 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
+                                    else if (option3 == Option3.RevertTransaction) {
+                                        string txnId = consoleUI.GetRevertTransactionId();
+                                        try
+                                        {
+                                            txnId = bankService.RevertTransaction(bankId, employeeId, txnId);
+                                            consoleMessages.RevertTransactionSuccess();
+                                        }
+                                        catch (TransactionNotFoundException)
+                                        {
+                                            consoleMessages.TransactionNotFound();
+                                            continue;
+                                        }
+                                        catch (AccessDeniedException)
+                                        {
+                                            consoleMessages.AccessDeniedMsg();
+                                            continue;
+                                        }
+                                    }
                                     else if (option3 == Option3.TransactionHistory)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
@@ -459,6 +477,25 @@ namespace ATM.CLI
                                         {
                                             deleteAccountId = bankService.DeleteAccount(bankId, employeeId, deleteAccountId);
                                             consoleMessages.AccountDeleteSuccess();
+                                        }
+                                        catch (AccessDeniedException)
+                                        {
+                                            consoleMessages.AccessDeniedMsg();
+                                            continue;
+                                        }
+                                    }
+                                    else if (option4 == Option4.RevertTransaction)
+                                    {
+                                        string txnId = consoleUI.GetRevertTransactionId();
+                                        try
+                                        {
+                                            txnId = bankService.RevertTransaction(bankId, employeeId, txnId);
+                                            consoleMessages.RevertTransactionSuccess();
+                                        }
+                                        catch (TransactionNotFoundException)
+                                        {
+                                            consoleMessages.TransactionNotFound();
+                                            continue;
                                         }
                                         catch (AccessDeniedException)
                                         {

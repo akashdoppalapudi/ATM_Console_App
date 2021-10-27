@@ -148,5 +148,15 @@ namespace ATM.Services
         {
             Console.WriteLine("Currency with that name already exists");
         }
+
+        public void TransactionNotFound()
+        {
+            Console.WriteLine("No valid transaction found");
+        }
+
+        public void RevertTransactionSuccess()
+        {
+            Console.WriteLine("Transaction Reverted Successfully");
+        }
     }
 }

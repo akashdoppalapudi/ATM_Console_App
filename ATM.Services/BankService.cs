@@ -413,7 +413,7 @@ namespace ATM.Services
             account.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
             transferToAccount.Balance += amount;
-            transferToAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, (TransactionType)2, (TransactionNarrative)3, selectedAccountId, transferToBankId, transferToAccountId));
+            transferToAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, (TransactionType)2, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
             transferToAccount.UpdatedOn = DateTime.Now;
             toBank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
@@ -428,24 +428,23 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            Transaction transaction = null;
+            List<Transaction> transactions = new List<Transaction>();
             foreach(Account account in bank.Accounts)
             {
-                transaction = account.Transactions.FirstOrDefault(t => t.Id == txnId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
-                if (transaction != null)
-                {
-                    break;
-                }
+                List<Transaction> possibleTransactions = account.Transactions.FindAll(t => t.Id == txnId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
+                transactions.AddRange(possibleTransactions);
             }
-            if (transaction == null)
+            if (transactions.Count <= 0)
             {
                 throw new TransactionNotFoundException();
             }
+            transactions = transactions.OrderBy(t => t.TransactionDate).ToList();
+            Transaction transaction = transactions.Last();
             decimal amount = transaction.TransactionAmount;
             string fromAccId = transaction.FromAccountId;
             string toAccId = transaction.ToAccountId;
             string toBankId = transaction.ToBankId;
-            string TXNID = this.Transfer(bankId, fromAccId, toBankId, toAccId, amount);
+            string TXNID = Transfer(toBankId, toAccId, bankId, fromAccId, amount);
             employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)6, fromAccId, txnId));
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
