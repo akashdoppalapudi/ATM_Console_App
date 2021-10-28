@@ -13,35 +13,7 @@ This Solution Contains three projects
 
 ## Banks Structure
 
-```mermaid 
-classDiagram
-	Bank <|-- Account
-	Bank <|-- Employee
-	Account <|-- Person
-	Employee <|-- Person
-	Account <|-- Transaction
-	Employee <|-- Action
-	Bank : Id
-	Bank : Name
-	Bank : List<Account>
-	Bank : List<Employee>
-	Person : Id
-	Person : Name
-	Person : Gender
-	Person : Username
-	Person : Password
-	Account : Balance
-	Account : List<Transaction>
-	Employee : IsAdmin
-	Employee : List<Action>
-	Transaction : Id
-	Transaction : Date
-	Transaction : Type
-	Transaction : Amount
-	Action : Id
-	Action : Date
-	Action : Type
-```
+![ClassDiagram](/ATM-Class-Diagram.png?raw=true 'ClassDiagram')
 
 > Employees with Admin access can do more actions than normal staff.
 
