@@ -13,7 +13,7 @@ This Solution Contains three projects
 
 ## Banks Structure
 
-```mermaid
+```mermaid 
 classDiagram
 	Bank <|-- Account
 	Bank <|-- Employee
