@@ -44,7 +44,7 @@ namespace ATM.Services
             }
             Employee newEmployee = new Employee
             {
-                Id = idGenService.GenEmployeeId(employeeDetails.Item1),
+                Id = idGenService.GenId(employeeDetails.Item1),
                 Name = employeeDetails.Item1,
                 Gender = employeeDetails.Item2,
                 Username = employeeDetails.Item3,
@@ -59,7 +59,7 @@ namespace ATM.Services
             Bank newBank = new Bank
             {
                 Name = bankDetails.Item1,
-                Id = idGenService.GenBankId(bankDetails.Item1),
+                Id = idGenService.GenId(bankDetails.Item1),
                 Accounts = new List<Account>(),
                 Employees = new List<Employee>(),
                 Currencies = new List<Currency>(),
@@ -101,7 +101,7 @@ namespace ATM.Services
             }
             Employee newEmployee = new Employee
             {
-                Id = idGenService.GenEmployeeId(employeeDetails.Item1),
+                Id = idGenService.GenId(employeeDetails.Item1),
                 Name = employeeDetails.Item1,
                 Gender = employeeDetails.Item2,
                 Username = employeeDetails.Item3,
@@ -138,7 +138,7 @@ namespace ATM.Services
             }
             Account newAccount = new Account
             {
-                Id = idGenService.GenAccountId(accountDetails.Item1),
+                Id = idGenService.GenId(accountDetails.Item1),
                 Name = accountDetails.Item1,
                 Gender = accountDetails.Item2,
                 Username = accountDetails.Item3,

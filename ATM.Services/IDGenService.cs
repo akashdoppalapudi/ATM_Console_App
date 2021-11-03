@@ -4,46 +4,32 @@ namespace ATM.Services
 {
     public class IDGenService
     {
-        public string GenBankId(string bankName)
+        public string GenId(string Name)
         {
-            string bankId;
-            DateTime date = DateTime.Today;
-            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
-            bankId = bankName.Substring(0, 3).ToUpper() + dateStr;
-            return bankId;
-        }
-
-        public string GenAccountId(string accName)
-        {
-            string AccountId;
-            DateTime date = DateTime.Today;
-            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
-            AccountId = accName.Substring(0, 3).ToUpper() + dateStr;
-            return AccountId;
-        }
-
-        public string GenEmployeeId(string empName)
-        {
-            string EmployeeId = GenAccountId(empName) + 'S';
-            return EmployeeId;
+            string Id;
+            Id = Name.Substring(0, 3).ToUpper() + GetDateStr();
+            return Id;
         }
 
         public string GenTransactionId(string bankId, string accId)
         {
             string TXNId;
-            DateTime date = DateTime.Today;
-            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
-            TXNId = "TXN" + bankId + accId + dateStr;
+            TXNId = "TXN" + bankId + accId + GetDateStr();
             return TXNId;
         }
 
         public string GenEmployeeActionId(string bankId, string empId)
         {
             string ACNId;
-            DateTime date = DateTime.Today;
-            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
-            ACNId = "ACN" + bankId + empId + dateStr;
+            ACNId = "ACN" + bankId + empId + GetDateStr();
             return ACNId;
+        }
+
+        private string GetDateStr()
+        {
+            DateTime date = DateTime.Now;
+            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
+            return dateStr;
         }
     }
 }
