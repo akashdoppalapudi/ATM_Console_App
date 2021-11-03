@@ -677,92 +677,92 @@ namespace ATM.Services
             }
         }
 
-        public Option1 SelectOrCreateBank()
+        public BankCreateOrSelect SelectOrCreateBank()
         {
-            Option1 option;
+            BankCreateOrSelect option;
             Console.WriteLine("\n____OPTIONS____\n");
             Console.WriteLine("1. Create New Bank\n2. Select a Bank\n3. Exit");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
             {
-                option = (Option1)Convert.ToInt32(userInput);
+                option = (BankCreateOrSelect)Convert.ToInt32(userInput);
             }
             catch
             {
-                option = (Option1)0;
+                option = (BankCreateOrSelect)0;
             }
             return option;
         }
 
-        public Option2 UserOrStaff()
+        public StaffOrUserLogin UserOrStaff()
         {
-            Option2 option;
+            StaffOrUserLogin option;
             Console.WriteLine("\n____OPTIONS____\n");
             Console.WriteLine("1. Login as Staff\n2. Login as User\n3. Back");
             Console.Write("\nSelect an Option : ");
             string userInput = Console.ReadLine();
             try
             {
-                option = (Option2)(Convert.ToInt32(userInput));
+                option = (StaffOrUserLogin)(Convert.ToInt32(userInput));
             }
             catch
             {
-                option = (Option2)0;
+                option = (StaffOrUserLogin)0;
             }
             return option;
         }
 
-        public Option3 AdminOptions()
+        public AdminOperation AdminOptions()
         {
-            Option3 operation;
+            AdminOperation operation;
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("\n1. Create a new Employee\n2. Update an Employee\n3. Delete an Employee\n4. Create a new Account\n5. Update an Account\n6. Delete an Account\n7. Add Currency\n8. Change Currency\n9. Remove Currency\n10. Update Bank\n11. Delete Bank\n12. Revert Transaction\n13. View Transaction History\n14. View Action History\n15. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
             {
-                operation = (Option3)(Convert.ToInt32(userInput));
+                operation = (AdminOperation)(Convert.ToInt32(userInput));
             }
             catch
             {
-                operation = (Option3)0;
+                operation = (AdminOperation)0;
             }
             return operation;
         }
 
-        public Option4 StaffOptions()
+        public StaffOperation StaffOptions()
         {
-            Option4 operation;
+            StaffOperation operation;
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. Revert Transaction\n5. View Transaction History\n6. View Action History\n6. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
             {
-                operation = (Option4)(Convert.ToInt32(userInput));
+                operation = (StaffOperation)(Convert.ToInt32(userInput));
             }
             catch
             {
-                operation = (Option4)0;
+                operation = (StaffOperation)0;
             }
             return operation;
         }
 
-        public Option5 UserOptions()
+        public UserOperation UserOptions()
         {
-            Option5 operation;
+            UserOperation operation;
             Console.WriteLine("\n____OPERATIONS____\n");
             Console.WriteLine("\n1. Deposit\n2. Withdraw\n3. Transfer\n4. View Action History\n5. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
             {
-                operation = (Option5)(Convert.ToInt32(userInput));
+                operation = (UserOperation)(Convert.ToInt32(userInput));
             }
             catch
             {
-                operation = (Option5)0;
+                operation = (UserOperation)0;
             }
             return operation;
         }

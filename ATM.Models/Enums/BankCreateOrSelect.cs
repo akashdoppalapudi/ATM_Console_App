@@ -1,6 +1,6 @@
 ﻿namespace ATM.Models.Enums
 {
-    public enum Option1
+    public enum BankCreateOrSelect
     {
         CreateNewBank = 1,
         SelectBank,
