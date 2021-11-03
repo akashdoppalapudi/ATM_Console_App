@@ -22,7 +22,7 @@ namespace ATM.Services
                 }
                 catch
                 {
-                    return null;
+                    retrievedBanks = null;
                 }
                 readerFileStream.Close();
                 return retrievedBanks;

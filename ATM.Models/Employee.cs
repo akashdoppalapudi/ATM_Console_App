@@ -8,6 +8,6 @@ namespace ATM.Models
     public class Employee : Person
     {
         public EmployeeType EmployeeType { get; set; }
-        public List<EmployeeAction> EmployeeActions { get; set; }
+        public List<EmployeeAction> EmployeeActions { get; set; } = new List<EmployeeAction>();
     }
 }
