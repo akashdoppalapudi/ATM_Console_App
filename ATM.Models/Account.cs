@@ -8,7 +8,7 @@ namespace ATM.Models
     public class Account : Person
     {
         public AccountType AccountType { get; set; }
-        public decimal Balance { get; set; }
-        public List<Transaction> Transactions { get; set; }
+        public decimal Balance { get; set; } = 1500;
+        public List<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 }

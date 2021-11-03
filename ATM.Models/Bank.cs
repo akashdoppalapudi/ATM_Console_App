@@ -8,16 +8,16 @@ namespace ATM.Models
     {
         public string Name { get; set; }
         public string Id { get; set; }
-        public List<Account> Accounts { get; set; }
-        public List<Employee> Employees { get; set; }
-        public List<Currency> Currencies { get; set; }
-        public double IMPS { get; set; }
-        public double RTGS { get; set; }
-        public double OIMPS { get; set; }
-        public double ORTGS { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public DateTime UpdatedOn { get; set; }
-        public DateTime? DeletedOn { get; set; }
+        public List<Account> Accounts { get; set; } = new List<Account>();
+        public List<Employee> Employees { get; set; } = new List<Employee>();
+        public List<Currency> Currencies { get; set; } = new List<Currency>();
+        public double IMPS { get; set; } = 5;
+        public double RTGS { get; set; } = 0;
+        public double OIMPS { get; set; } = 6;
+        public double ORTGS { get; set; } = 2;
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
+        public DateTime UpdatedOn { get; set; } = DateTime.Now;
+        public DateTime? DeletedOn { get; set; } = null;
     }
 }

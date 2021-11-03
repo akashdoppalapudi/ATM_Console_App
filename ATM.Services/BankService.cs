@@ -50,27 +50,11 @@ namespace ATM.Services
                 Username = employeeDetails.Item3,
                 Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4),
                 EmployeeType = EmployeeType.Admin,
-                IsActive = true,
-                CreatedOn = DateTime.Now,
-                UpdatedOn = DateTime.Now,
-                DeletedOn = null,
-                EmployeeActions = new List<EmployeeAction>()
             };
             Bank newBank = new Bank
             {
                 Name = bankDetails.Item1,
                 Id = idGenService.GenId(bankDetails.Item1),
-                Accounts = new List<Account>(),
-                Employees = new List<Employee>(),
-                Currencies = new List<Currency>(),
-                IMPS = 5,
-                RTGS = 0,
-                OIMPS = 6,
-                ORTGS = 2,
-                IsActive = true,
-                CreatedOn = DateTime.Now,
-                UpdatedOn = DateTime.Now,
-                DeletedOn = null
             };
             newBank.Employees.Add(newEmployee);
             newBank.Currencies.Add(new Currency
@@ -79,6 +63,7 @@ namespace ATM.Services
                 ExchangeRate = 1
             });
             this.banks.Add(newBank);
+            Console.WriteLine(this.banks.ToString());
             dataHandler.WriteBankData(this.banks);
             return newBank.Id;
         }
@@ -107,11 +92,6 @@ namespace ATM.Services
                 Username = employeeDetails.Item3,
                 Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4),
                 EmployeeType = employeeDetails.Item5,
-                IsActive = true,
-                CreatedOn = DateTime.Now,
-                UpdatedOn = DateTime.Now,
-                DeletedOn = null,
-                EmployeeActions = new List<EmployeeAction>()
             };
             newEmployee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, newEmployee.Id), (EmployeeActionType)1, newEmployee.Id));
             bank.Employees.Add(newEmployee);
@@ -144,12 +124,6 @@ namespace ATM.Services
                 Username = accountDetails.Item3,
                 Password = encryptionService.ComputeSha256Hash(accountDetails.Item4),
                 AccountType = accountDetails.Item5,
-                IsActive = true,
-                CreatedOn = DateTime.Now,
-                UpdatedOn = DateTime.Now,
-                DeletedOn = null,
-                Balance = 1500,
-                Transactions = new List<Transaction>()
             };
             Transaction newTransaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id), 1500, (TransactionType)2, (TransactionNarrative)1, newAccount.Id);
             newAccount.Transactions.Add(newTransaction);
@@ -429,7 +403,7 @@ namespace ATM.Services
                 throw new AccessDeniedException();
             }
             List<Transaction> transactions = new List<Transaction>();
-            foreach(Account account in bank.Accounts)
+            foreach (Account account in bank.Accounts)
             {
                 List<Transaction> possibleTransactions = account.Transactions.FindAll(t => t.Id == txnId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
                 transactions.AddRange(possibleTransactions);
