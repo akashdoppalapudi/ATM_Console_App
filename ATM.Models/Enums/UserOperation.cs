@@ -1,6 +1,6 @@
 ﻿namespace ATM.Models.Enums
 {
-    public enum Option5
+    public enum UserOperation
     {
         Deposit = 1,
         Withdraw,

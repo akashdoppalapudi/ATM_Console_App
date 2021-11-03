@@ -18,8 +18,8 @@ namespace ATM.CLI
             while (true)
             {
                 bankService = new BankService();
-                Option1 option1 = consoleUI.SelectOrCreateBank();
-                if (option1 == Option1.CreateNewBank)
+                BankCreateOrSelect option1 = consoleUI.SelectOrCreateBank();
+                if (option1 == BankCreateOrSelect.CreateNewBank)
                 {
                     (Tuple<string> bankDetails, Tuple<string, Gender, string, string> employeeDetails) = consoleUI.GetDataForBankCreation();
                     try
@@ -42,7 +42,7 @@ namespace ATM.CLI
                         consoleMessages.BankCreationFailedMsg();
                     }
                 }
-                else if (option1 == Option1.SelectBank)
+                else if (option1 == BankCreateOrSelect.SelectBank)
                 {
 
                     Dictionary<string, string> bankNames = bankService.GetAllBankNames();
@@ -59,8 +59,8 @@ namespace ATM.CLI
                     }
                     while (true)
                     {
-                        Option2 option2 = consoleUI.UserOrStaff();
-                        if (option2 == Option2.StaffLogin)
+                        StaffOrUserLogin option2 = consoleUI.UserOrStaff();
+                        if (option2 == StaffOrUserLogin.StaffLogin)
                         {
                             string username, password, employeeId;
                             Tuple<string, EmployeeType> employee;
@@ -89,8 +89,8 @@ namespace ATM.CLI
                             {
                                 while (true)
                                 {
-                                    Option3 option3 = consoleUI.AdminOptions();
-                                    if (option3 == Option3.CreateEmployee)
+                                    AdminOperation option3 = consoleUI.AdminOptions();
+                                    if (option3 == AdminOperation.CreateEmployee)
                                     {
                                         Tuple<string, Gender, string, string, EmployeeType> employeeDetails = consoleUI.GetDataForEmployeeCreation();
                                         try
@@ -114,7 +114,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.UpdateEmployee)
+                                    else if (option3 == AdminOperation.UpdateEmployee)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string updateEmployeeId;
@@ -148,7 +148,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.DeleteEmployee)
+                                    else if (option3 == AdminOperation.DeleteEmployee)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string deleteEmployeeId;
@@ -173,7 +173,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.CreateAccount)
+                                    else if (option3 == AdminOperation.CreateAccount)
                                     {
                                         Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                                         try
@@ -197,7 +197,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.UpdateAccount)
+                                    else if (option3 == AdminOperation.UpdateAccount)
                                     {
                                         string selecteUsername = consoleUI.GetUsername();
                                         string updateAccountId;
@@ -230,7 +230,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.DeleteAccount)
+                                    else if (option3 == AdminOperation.DeleteAccount)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string deleteAccountId;
@@ -254,7 +254,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.AddCurrency)
+                                    else if (option3 == AdminOperation.AddCurrency)
                                     {
                                         string currencyName = consoleUI.GetCurrency();
                                         double exchangeRate = consoleUI.GetExchangeRate();
@@ -270,7 +270,7 @@ namespace ATM.CLI
                                         }
                                         catch (CurrencyDataInvalidException) { }
                                     }
-                                    else if (option3 == Option3.ChangeCurrency)
+                                    else if (option3 == AdminOperation.ChangeCurrency)
                                     {
                                         string currencyName = consoleUI.GetCurrency();
                                         double exchangeRate = consoleUI.GetExchangeRate();
@@ -286,7 +286,7 @@ namespace ATM.CLI
                                         }
                                         catch (CurrencyDataInvalidException) { }
                                     }
-                                    else if (option3 == Option3.RemoveCurrency)
+                                    else if (option3 == AdminOperation.RemoveCurrency)
                                     {
                                         string currencyName = consoleUI.GetCurrency();
                                         try
@@ -301,7 +301,7 @@ namespace ATM.CLI
                                         }
                                         catch (CurrencyDataInvalidException) { }
                                     }
-                                    else if (option3 == Option3.UpdateBank)
+                                    else if (option3 == AdminOperation.UpdateBank)
                                     {
                                         Tuple<string, double, double, double, double> bankDetails = bankService.GetBankDetails(bankId);
                                         Tuple<string, double, double, double, double> updateBankDetails = consoleUI.GetDataForBankUpdate(bankDetails);
@@ -322,7 +322,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.DeleteBank)
+                                    else if (option3 == AdminOperation.DeleteBank)
                                     {
                                         try
                                         {
@@ -336,7 +336,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.RevertTransaction) {
+                                    else if (option3 == AdminOperation.RevertTransaction) {
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
                                         {
@@ -354,7 +354,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option3 == Option3.TransactionHistory)
+                                    else if (option3 == AdminOperation.TransactionHistory)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string selectedAccountId;
@@ -371,7 +371,7 @@ namespace ATM.CLI
                                         decimal balance = bankService.GetBalance(bankId, selectedAccountId);
                                         consoleUI.PrintTransactions(transactions, balance);
                                     }
-                                    else if (option3 == Option3.ActionHistory)
+                                    else if (option3 == AdminOperation.ActionHistory)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string selectedEmployeeId;
@@ -388,7 +388,7 @@ namespace ATM.CLI
                                         List<EmployeeAction> actions = bankService.GetEmployeeActions(bankId, selectedEmployeeId);
                                         consoleUI.PrintEmployeeActions(actions);
                                     }
-                                    else if (option3 == Option3.Back)
+                                    else if (option3 == AdminOperation.Back)
                                     {
                                         break;
                                     }
@@ -402,8 +402,8 @@ namespace ATM.CLI
                             {
                                 while (true)
                                 {
-                                    Option4 option4 = consoleUI.StaffOptions();
-                                    if (option4 == Option4.CreateAccount)
+                                    StaffOperation option4 = consoleUI.StaffOptions();
+                                    if (option4 == StaffOperation.CreateAccount)
                                     {
                                         Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                                         try
@@ -427,7 +427,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option4 == Option4.UpdateAccount)
+                                    else if (option4 == StaffOperation.UpdateAccount)
                                     {
                                         string selecteUsername = consoleUI.GetUsername();
                                         string updateAccountId;
@@ -460,7 +460,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option4 == Option4.DeleteAccount)
+                                    else if (option4 == StaffOperation.DeleteAccount)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string deleteAccountId;
@@ -484,7 +484,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option4 == Option4.RevertTransaction)
+                                    else if (option4 == StaffOperation.RevertTransaction)
                                     {
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
@@ -503,7 +503,7 @@ namespace ATM.CLI
                                             continue;
                                         }
                                     }
-                                    else if (option4 == Option4.TransactionHistory)
+                                    else if (option4 == StaffOperation.TransactionHistory)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
                                         string selectedAccountId;
@@ -520,12 +520,12 @@ namespace ATM.CLI
                                         decimal balance = bankService.GetBalance(bankId, selectedAccountId);
                                         consoleUI.PrintTransactions(transactions, balance);
                                     }
-                                    else if (option4 == Option4.ActionHistory)
+                                    else if (option4 == StaffOperation.ActionHistory)
                                     {
                                         List<EmployeeAction> actions = bankService.GetEmployeeActions(bankId, employeeId);
                                         consoleUI.PrintEmployeeActions(actions);
                                     }
-                                    else if (option4 == Option4.Back)
+                                    else if (option4 == StaffOperation.Back)
                                     {
                                         break;
                                     }
@@ -536,7 +536,7 @@ namespace ATM.CLI
                                 }
                             }
                         }
-                        else if (option2 == Option2.UserLogin)
+                        else if (option2 == StaffOrUserLogin.UserLogin)
                         {
                             string username, password, accountId;
                             username = consoleUI.GetUsername();
@@ -561,10 +561,10 @@ namespace ATM.CLI
                             }
                             while (true)
                             {
-                                Option5 option5 = consoleUI.UserOptions();
+                                UserOperation option5 = consoleUI.UserOptions();
                                 decimal amount;
                                 string txnId;
-                                if (option5 == Option5.Deposit)
+                                if (option5 == UserOperation.Deposit)
                                 {
                                     amount = consoleUI.GetAmount('d');
                                     string currencyName = consoleUI.GetCurrency();
@@ -580,7 +580,7 @@ namespace ATM.CLI
                                         continue;
                                     }
                                 }
-                                else if (option5 == Option5.Withdraw)
+                                else if (option5 == UserOperation.Withdraw)
                                 {
                                     amount = consoleUI.GetAmount('w');
                                     try
@@ -594,7 +594,7 @@ namespace ATM.CLI
                                         continue;
                                     }
                                 }
-                                else if (option5 == Option5.Transfer)
+                                else if (option5 == UserOperation.Transfer)
                                 {
                                     amount = consoleUI.GetAmount('t');
                                     string toBankId, toAccountId;
@@ -634,13 +634,13 @@ namespace ATM.CLI
                                         continue;
                                     }
                                 }
-                                else if (option5 == Option5.TransactionHistory)
+                                else if (option5 == UserOperation.TransactionHistory)
                                 {
                                     List<Transaction> transactions = bankService.GetTransactions(bankId, accountId);
                                     decimal balance = bankService.GetBalance(bankId, accountId);
                                     consoleUI.PrintTransactions(transactions, balance);
                                 }
-                                else if (option5 == Option5.Back)
+                                else if (option5 == UserOperation.Back)
                                 {
                                     break;
                                 }
@@ -650,7 +650,7 @@ namespace ATM.CLI
                                 }
                             }
                         }
-                        else if (option2 == Option2.Back)
+                        else if (option2 == StaffOrUserLogin.Back)
                         {
                             break;
                         }
@@ -661,7 +661,7 @@ namespace ATM.CLI
                     }
 
                 }
-                else if (option1 == Option1.Exit)
+                else if (option1 == BankCreateOrSelect.Exit)
                 {
                     break;
                 }

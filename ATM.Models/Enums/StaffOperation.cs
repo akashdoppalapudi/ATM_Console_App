@@ -1,6 +1,6 @@
 ﻿namespace ATM.Models.Enums
 {
-    public enum Option4
+    public enum StaffOperation
     {
         CreateAccount = 1,
         UpdateAccount,

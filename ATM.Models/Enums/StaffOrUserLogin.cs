@@ -1,6 +1,6 @@
 ﻿namespace ATM.Models.Enums
 {
-    public enum Option2
+    public enum StaffOrUserLogin
     {
         StaffLogin = 1,
         UserLogin,
