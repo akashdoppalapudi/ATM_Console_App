@@ -340,7 +340,10 @@ namespace ATM.Services
             {
                 name = employeeDetails.Item1;
             }
-            name = selectedName;
+            else
+            {
+                name = selectedName;
+            }
 
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
@@ -391,7 +394,10 @@ namespace ATM.Services
             {
                 password = null;
             }
-            password = selectedPassword;
+            else
+            {
+                password = selectedPassword;
+            }
 
             Console.WriteLine("\n__EMPLOYEE TYPE__\n");
             i = 1;
@@ -439,7 +445,10 @@ namespace ATM.Services
             {
                 name = accountDetails.Item1;
             }
-            name = selectedName;
+            else
+            {
+                name = selectedName;
+            }
 
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
@@ -489,7 +498,10 @@ namespace ATM.Services
             {
                 password = null;
             }
-            password = selectedPassword;
+            else
+            {
+                password = selectedPassword;
+            }
 
             Console.WriteLine("\n__Account TYPE__\n");
             i = 1;
@@ -639,13 +651,6 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Exchange Rate");
                 return 0;
             }
-        }
-
-        public string GetTransferToUsername()
-        {
-            Console.Write("\nEnter Reciever's Username : ");
-            string username = Console.ReadLine();
-            return username;
         }
 
         public string GetPasswordFromUser()
