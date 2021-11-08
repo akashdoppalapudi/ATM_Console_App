@@ -1,5 +1,6 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,24 +9,39 @@ namespace ATM.Services
 {
     public class ConsoleUI
     {
-        ConsoleMessages consoleMessages = new ConsoleMessages();
+        private ConsoleMessages consoleMessages;
+        private BankService bankService;
+        private EmployeeService employeeService;
+        private AccountService accountService;
+        public ConsoleUI()
+        {
+            consoleMessages = new ConsoleMessages();
+            bankService = new BankService();
+            employeeService = new EmployeeService();
+            accountService = new AccountService();
+        }
 
-        public (Tuple<string>, Tuple<string, Gender, string, string>) GetDataForBankCreation()
+        public (Bank, Employee) GetDataForBankCreation()
         {
             string name;
             Console.WriteLine("\n____BANK CREATION____\n");
             Console.Write("Enter Bank Name : ");
             name = Console.ReadLine();
-            Tuple<string> bankDetails = Tuple.Create(name);
+            if (name.Length < 3)
+            {
+                Console.WriteLine("Invalid Name");
+                throw new BankCreationFailedException();
+            }
+            Bank bank = bankService.CreateBank(name);
             string empName, username, password;
             Gender gender;
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
-                return (null, null);
+                throw new AccountCreationFailedException();
             }
             empName = selectedName;
             Console.WriteLine("\n__GENDER__\n");
@@ -43,19 +59,19 @@ namespace ATM.Services
                 if ((int)gender <= 0 || (int)gender >= i)
                 {
                     Console.WriteLine("Invalid Gender");
-                    return (null, null);
+                    throw new AccountCreationFailedException();
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Gender");
-                return (null, null);
+                throw new AccountCreationFailedException();
             }
             Console.Write("\nPlease set a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                return (null, null);
+                throw new AccountCreationFailedException();
             }
             username = selectedUsername;
             Console.Write("Please set a Password : ");
@@ -63,14 +79,14 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 Console.WriteLine("Invalid Password");
-                return (null, null);
+                throw new AccountCreationFailedException();
             }
             password = selectedPassword;
-            Tuple<string, Gender, string, string> employeeDetails = Tuple.Create(empName, gender, username, password);
-            return (bankDetails, employeeDetails);
+            Employee employee = employeeService.CreateEmployee(empName, gender, username, password, EmployeeType.Admin);
+            return (bank, employee);
         }
 
-        public Tuple<string, Gender, string, string, EmployeeType> GetDataForEmployeeCreation()
+        public Employee GetDataForEmployeeCreation()
         {
             string name, username, password;
             Gender gender;
@@ -78,10 +94,10 @@ namespace ATM.Services
             Console.WriteLine("\n____EMPLOYEE CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
-                return null;
+                throw new AccountCreationFailedException();
             }
             name = selectedName;
 
@@ -100,20 +116,20 @@ namespace ATM.Services
                 if ((int)gender <= 0 || (int)gender >= i)
                 {
                     Console.WriteLine("Invalid Gender");
-                    return null;
+                    throw new AccountCreationFailedException();
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Gender");
-                return null;
+                throw new AccountCreationFailedException();
             }
 
             Console.Write("\nPlease set a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                return null;
+                throw new AccountCreationFailedException();
             }
             username = selectedUsername;
 
@@ -122,7 +138,7 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 Console.WriteLine("Invalid Password");
-                return null;
+                throw new AccountCreationFailedException();
             }
             password = selectedPassword;
 
@@ -142,18 +158,18 @@ namespace ATM.Services
                 if ((int)employeeType <= 0 || (int)employeeType >= i)
                 {
                     Console.WriteLine("Invalid Employee Type");
-                    return null;
+                    throw new AccountCreationFailedException();
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Employee Type");
-                return null;
+                throw new AccountCreationFailedException();
             }
 
-            return Tuple.Create(name, gender, username, password, employeeType);
+            return employeeService.CreateEmployee(name, gender, username, password, employeeType);
         }
-        public Tuple<string, Gender, string, string, AccountType> GetDataForAccountCreation()
+        public Account GetDataForAccountCreation()
         {
             string name, username, password;
             Gender gender;
@@ -161,10 +177,10 @@ namespace ATM.Services
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
-                return null;
+                throw new AccountCreationFailedException();
             }
             name = selectedName;
 
@@ -183,20 +199,20 @@ namespace ATM.Services
                 if ((int)gender <= 0 || (int)gender >= i)
                 {
                     Console.WriteLine("Invalid Gender");
-                    return null;
+                    throw new AccountCreationFailedException();
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Gender");
-                return null;
+                throw new AccountCreationFailedException();
             }
 
             Console.Write("\nPlease set a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                return null;
+                throw new AccountCreationFailedException();
             }
             username = selectedUsername;
 
@@ -205,7 +221,7 @@ namespace ATM.Services
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 Console.WriteLine("Invalid Password");
-                return null;
+                throw new AccountCreationFailedException();
             }
             password = selectedPassword;
 
@@ -225,120 +241,140 @@ namespace ATM.Services
                 if ((int)accountType <= 0 || (int)accountType >= i)
                 {
                     Console.WriteLine("Invalid Account Type");
-                    return null;
+                    throw new AccountCreationFailedException();
                 }
             }
             catch
             {
                 Console.WriteLine("Invalid Account Type");
-                return null;
+                throw new AccountCreationFailedException();
             }
 
-            return Tuple.Create(name, gender, username, password, accountType);
+            return accountService.CreateAccount(name, gender, username, password, accountType);
         }
 
-        public Tuple<string, double, double, double, double> GetDataForBankUpdate(Tuple<string, double, double, double, double> bankDetails)
+        public Bank GetDataForBankUpdate(Bank currentBank)
         {
             string name;
             double imps, rtgs, oimps, ortgs;
             Console.WriteLine("____BANK UPDATE____");
-            Console.Write("[" + bankDetails.Item1 + "] Enter new Bank Name (Leave it empty to not change) : ");
+            Console.Write("[" + currentBank.Name + "] Enter new Bank Name (Leave it empty to not change) : ");
             string userInput = Console.ReadLine();
-            if (String.IsNullOrEmpty(userInput))
+            if (userInput.Length < 3)
             {
-                name = bankDetails.Item1;
+                name = currentBank.Name;
             }
             else
             {
                 name = userInput;
             }
-            Console.Write("[" + bankDetails.Item2 + "] Enter new IMPS for same bank transfer (Leave it empty to not change) : ");
+            Console.Write("[" + currentBank.IMPS + "] Enter new IMPS for same bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
             if (String.IsNullOrEmpty(userInput))
             {
-                imps = bankDetails.Item2;
+                imps = currentBank.IMPS;
             }
             else
             {
                 try
                 {
                     imps = Convert.ToDouble(userInput);
+                    if (imps < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous IMPS");
+                        imps = currentBank.IMPS;
+                    }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Input! Keeping the previous IMPS");
-                    imps = bankDetails.Item2;
+                    imps = currentBank.IMPS;
                 }
             }
-            Console.Write("[" + bankDetails.Item3 + "] Enter new RTGS for same bank transfer (Leave it empty to not change) : ");
+            Console.Write("[" + currentBank.RTGS + "] Enter new RTGS for same bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
             if (String.IsNullOrEmpty(userInput))
             {
-                rtgs = bankDetails.Item3;
+                rtgs = currentBank.RTGS;
             }
             else
             {
                 try
                 {
                     rtgs = Convert.ToDouble(userInput);
+                    if (rtgs < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous RTGS");
+                        imps = currentBank.RTGS;
+                    }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Input! Keeping the previous RTGS");
-                    rtgs = bankDetails.Item3;
+                    rtgs = currentBank.RTGS;
                 }
             }
-            Console.Write("[" + bankDetails.Item4 + "] Enter new IMPS for same other bank transfer (Leave it empty to not change) : ");
+            Console.Write("[" + currentBank.OIMPS + "] Enter new IMPS for same other bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
             if (String.IsNullOrEmpty(userInput))
             {
-                oimps = bankDetails.Item4;
+                oimps = currentBank.OIMPS;
             }
             else
             {
                 try
                 {
                     oimps = Convert.ToDouble(userInput);
+                    if (oimps < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous OIMPS");
+                        imps = currentBank.IMPS;
+                    }
                 }
                 catch
                 {
-                    Console.WriteLine("Invalid Input! Keeping the previous IMPS");
-                    oimps = bankDetails.Item4;
+                    Console.WriteLine("Invalid Input! Keeping the previous OIMPS");
+                    oimps = currentBank.OIMPS;
                 }
             }
-            Console.Write("[" + bankDetails.Item5 + "] Enter new RTGS for other bank transfer (Leave it empty to not change) : ");
+            Console.Write("[" + currentBank.ORTGS + "] Enter new RTGS for other bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
             if (String.IsNullOrEmpty(userInput))
             {
-                ortgs = bankDetails.Item5;
+                ortgs = currentBank.ORTGS;
             }
             else
             {
                 try
                 {
                     ortgs = Convert.ToDouble(userInput);
+                    if (ortgs < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous ORTGS");
+                        imps = currentBank.ORTGS;
+                    }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Input! Keeping the previous RTGS");
-                    ortgs = bankDetails.Item5;
+                    ortgs = currentBank.ORTGS;
                 }
             }
 
-            return Tuple.Create(name, imps, rtgs, oimps, ortgs);
+            return new Bank { Name = name, IMPS = imps, RTGS = rtgs, OIMPS = oimps, ORTGS = ortgs };
         }
 
-        public Tuple<string, Gender, string, string, EmployeeType> GetDataForEmployeeUpdate(Tuple<string, Gender, string, EmployeeType> employeeDetails)
+        public Employee GetDataForEmployeeUpdate(Employee CurrentEmployee)
         {
             string name, username, password;
             Gender gender;
             EmployeeType employeeType;
             Console.WriteLine("\n____EMPLOYEE UPDATE____\n");
-            Console.Write("[" + employeeDetails.Item1 + "] Please Enter a new Name (Leave it empty to not change) : ");
+            Console.Write("[" + CurrentEmployee.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
-                name = employeeDetails.Item1;
+                name = CurrentEmployee.Name;
             }
             else
             {
@@ -352,11 +388,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + g);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(Gender), employeeDetails.Item2) + "] Select a Gender (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(Gender), CurrentEmployee.Gender) + "] Select a Gender (Leave it empty to not change) : ");
             string selectedGender = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedGender))
             {
-                gender = employeeDetails.Item2;
+                gender = CurrentEmployee.Gender;
             }
             else
             {
@@ -366,21 +402,21 @@ namespace ATM.Services
                     if ((int)gender <= 0 || (int)gender >= i)
                     {
                         Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                        gender = employeeDetails.Item2;
+                        gender = CurrentEmployee.Gender;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                    gender = employeeDetails.Item2;
+                    gender = CurrentEmployee.Gender;
                 }
             }
 
-            Console.Write("\n[" + employeeDetails.Item3 + "] Please set a new Username (Leave it empty to not change) : ");
+            Console.Write("\n[" + CurrentEmployee.Username + "] Please set a new Username (Leave it empty to not change) : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                username = employeeDetails.Item3;
+                username = CurrentEmployee.Username;
             }
             else
             {
@@ -388,16 +424,7 @@ namespace ATM.Services
             }
 
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
-            string selectedPassword = Console.ReadLine();
-
-            if (String.IsNullOrEmpty(selectedPassword))
-            {
-                password = null;
-            }
-            else
-            {
-                password = selectedPassword;
-            }
+            password = Console.ReadLine();
 
             Console.WriteLine("\n__EMPLOYEE TYPE__\n");
             i = 1;
@@ -406,11 +433,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + type);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(EmployeeType), employeeDetails.Item4) + "]Select an Employee type (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(EmployeeType), CurrentEmployee.EmployeeType) + "]Select an Employee type (Leave it empty to not change) : ");
             string selectedType = Console.ReadLine();
             if (selectedType == null)
             {
-                employeeType = employeeDetails.Item4;
+                employeeType = CurrentEmployee.EmployeeType;
             }
             else
             {
@@ -420,30 +447,30 @@ namespace ATM.Services
                     if ((int)employeeType <= 0 || (int)employeeType >= i)
                     {
                         Console.WriteLine("Invalid Employee Type. Keeping previous Employee Type");
-                        employeeType = employeeDetails.Item4;
+                        employeeType = CurrentEmployee.EmployeeType;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Employee Type. Keeping Previous EmployeeType");
-                    employeeType = employeeDetails.Item4;
+                    employeeType = CurrentEmployee.EmployeeType;
                 }
             }
 
-            return Tuple.Create(name, gender, username, password, employeeType);
+            return employeeService.CreateEmployee(name, gender, username, password, employeeType);
         }
 
-        public Tuple<string, Gender, string, string, AccountType> GetDataForAccountUpdate(Tuple<string, Gender, string, AccountType> accountDetails)
+        public Account GetDataForAccountUpdate(Account currentAccount)
         {
             string name, username, password;
             Gender gender;
             AccountType accountType;
             Console.WriteLine("\n____ACCOUNT UPDATE____\n");
-            Console.Write("[" + accountDetails.Item1 + "] Please Enter a new Name (Leave it empty to not change) : ");
+            Console.Write("[" + currentAccount.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
-                name = accountDetails.Item1;
+                name = currentAccount.Name;
             }
             else
             {
@@ -457,11 +484,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + g);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(Gender), accountDetails.Item2) + "] Select a Gender (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(Gender), currentAccount.Gender) + "] Select a Gender (Leave it empty to not change) : ");
             string selectedGender = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedGender))
             {
-                gender = accountDetails.Item2;
+                gender = currentAccount.Gender;
             }
             else
             {
@@ -471,21 +498,21 @@ namespace ATM.Services
                     if ((int)gender <= 0 || (int)gender >= i)
                     {
                         Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                        gender = accountDetails.Item2;
+                        gender = currentAccount.Gender;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                    gender = accountDetails.Item2;
+                    gender = currentAccount.Gender;
                 }
             }
 
-            Console.Write("\n[" + accountDetails.Item3 + "] Please set a new Username (Leave it empty to not change) : ");
+            Console.Write("\n[" + currentAccount.Username + "] Please set a new Username (Leave it empty to not change) : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                username = accountDetails.Item3;
+                username = currentAccount.Username;
             }
             else
             {
@@ -493,15 +520,7 @@ namespace ATM.Services
             }
 
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
-            string selectedPassword = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedPassword))
-            {
-                password = null;
-            }
-            else
-            {
-                password = selectedPassword;
-            }
+            password = Console.ReadLine();
 
             Console.WriteLine("\n__Account TYPE__\n");
             i = 1;
@@ -510,11 +529,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + type);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(AccountType), accountDetails.Item4) + "]Select an Employee type (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(AccountType), currentAccount.AccountType) + "]Select an Employee type (Leave it empty to not change) : ");
             string selectedType = Console.ReadLine();
             if (selectedType == null)
             {
-                accountType = accountDetails.Item4;
+                accountType = currentAccount.AccountType;
             }
             else
             {
@@ -524,17 +543,17 @@ namespace ATM.Services
                     if ((int)accountType <= 0 || (int)accountType >= i)
                     {
                         Console.WriteLine("Invalid Employee Type. Keeping previous Employee Type");
-                        accountType = accountDetails.Item4;
+                        accountType = currentAccount.AccountType;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Employee Type. Keeping Previous EmployeeType");
-                    accountType = accountDetails.Item4;
+                    accountType = currentAccount.AccountType;
                 }
             }
 
-            return Tuple.Create(name, gender, username, password, accountType);
+            return accountService.CreateAccount(name, gender, username, password, accountType);
         }
 
         public string SelectBank(Dictionary<string, string> bankNames)
