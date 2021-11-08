@@ -43,6 +43,10 @@ namespace ATM.Services
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
+            if (this.banks.Exists(b => b.Name == bank.Name))
+            {
+                throw new BankNameAlreadyExistsException();
+            }
             bank.Employees.Add(adminEmployee);
             bank.Currencies.Add(new Currency { Name = "INR", ExchangeRate = 1 });
             bank.UpdatedOn = DateTime.Now;
@@ -106,7 +110,7 @@ namespace ATM.Services
         {
             Bank bank = GetBankById(bankId);
             Employee employee = GetEmployeeById(bank, employeeId);
-            if (employeeService.IsEmployeeAdmin(employee))
+            if (!employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
@@ -130,7 +134,7 @@ namespace ATM.Services
             Bank bank = GetBankById(bankId);
             Employee employee = GetEmployeeById(bank, employeeId);
             Employee currentEmployee = GetEmployeeById(bank, currentEmployeeId);
-            if (employeeService.IsEmployeeAdmin(employee))
+            if (!employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
@@ -164,7 +168,7 @@ namespace ATM.Services
         {
             Bank bank = GetBankById(bankId);
             Employee employee = GetEmployeeById(bank, employeeId);
-            if (employeeService.IsEmployeeAdmin(employee))
+            if (!employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
@@ -180,7 +184,7 @@ namespace ATM.Services
         {
             Bank bank = GetBankById(bankId);
             Employee employee = GetEmployeeById(bank, employeeId);
-            if (employeeService.IsEmployeeAdmin(employee))
+            if (!employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
@@ -417,7 +421,7 @@ namespace ATM.Services
         {
             Bank bank = GetBankById(bankId);
             Account account = GetAccountById(bank, accountId);
-            if (accountService.Authenticate(account, userInput))
+            if (!accountService.Authenticate(account, userInput))
             {
                 throw new AuthenticationFailedException();
             }
@@ -427,7 +431,7 @@ namespace ATM.Services
         {
             Bank bank = GetBankById(bankId);
             Employee employee = GetEmployeeById(bank, employeeId);
-            if (employeeService.Authenticate(employee, userInput))
+            if (!employeeService.Authenticate(employee, userInput))
             {
                 throw new AuthenticationFailedException();
             }
