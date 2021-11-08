@@ -353,7 +353,7 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Bank bank = GetBankById(bankId);
             if (bank.Currencies.Exists(c => c.Name == currencyName))
             {
                 throw new CurrencyAlreadyExistsException();
@@ -374,8 +374,8 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            Bank bank = GetBankById(bankId);
+            Currency currency = GetCurrencyByName(bankId, currencyName);
             if (currency == null)
             {
                 throw new CurrencyDoesNotExistException();
@@ -391,8 +391,8 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            Bank bank = GetBankById(bankId);
+            Currency currency = GetCurrencyByName(bankId, currencyName);
             if (currency == null)
             {
                 throw new CurrencyDoesNotExistException();
@@ -404,7 +404,7 @@ namespace ATM.Services
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Bank bank = banks.Find(b => b.Id == bankId && b.IsActive);
             Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
             if (currency == null)
             {
