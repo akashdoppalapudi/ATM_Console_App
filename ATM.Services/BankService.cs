@@ -404,7 +404,7 @@ namespace ATM.Services
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
         {
-            Bank bank = banks.Find(b => b.Id == bankId && b.IsActive);
+            Bank bank = GetBankById(bankId);
             Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
             if (currency == null)
             {
