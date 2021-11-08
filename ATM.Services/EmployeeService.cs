@@ -6,8 +6,8 @@ namespace ATM.Services
 {
     public class EmployeeService
     {
-        IDGenService idGenService;
-        EncryptionService encryptionService;
+        private IDGenService idGenService;
+        private EncryptionService encryptionService;
         public EmployeeService()
         {
             idGenService = new IDGenService();
@@ -30,6 +30,7 @@ namespace ATM.Services
         public void AddAction(Employee employee, EmployeeAction action)
         {
             employee.EmployeeActions.Add(action);
+            employee.UpdatedOn = DateTime.Now;
         }
 
         public void UpdateEmployee(Employee employee, Employee UpdateEmployee)
@@ -50,6 +51,11 @@ namespace ATM.Services
             employee.IsActive = false;
             employee.UpdatedOn = DateTime.Now;
             employee.DeletedOn = DateTime.Now;
+        }
+
+        public bool IsEmployeeAdmin(Employee employee)
+        {
+            return employee.EmployeeType == EmployeeType.Admin;
         }
 
         public bool Authenticate(Employee employee, string password)

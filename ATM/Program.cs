@@ -24,7 +24,7 @@ namespace ATM.CLI
                     (Tuple<string> bankDetails, Tuple<string, Gender, string, string> employeeDetails) = consoleUI.GetDataForBankCreation();
                     try
                     {
-                        string bankId = bankService.CreateNewBank(bankDetails, employeeDetails);
+                        string bankId = bankService.AddBank(bankDetails, employeeDetails);
                         consoleMessages.BankCreationSuccess();
                     }
                     catch (BankCreationFailedException)
@@ -67,7 +67,7 @@ namespace ATM.CLI
                             username = consoleUI.GetUsername();
                             try
                             {
-                                employee = bankService.CheckEmployeeExistance(bankId, username);
+                                employee = bankService.GetEmployeeIdByUsername(bankId, username);
                                 employeeId = employee.Item1;
                             }
                             catch (EmployeeDoesNotExistException)
@@ -95,7 +95,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, EmployeeType> employeeDetails = consoleUI.GetDataForEmployeeCreation();
                                         try
                                         {
-                                            Tuple<string, EmployeeType> newEmployee = bankService.CreateNewEmployee(bankId, employeeId, employeeDetails);
+                                            Tuple<string, EmployeeType> newEmployee = bankService.AddEmployee(bankId, employeeId, employeeDetails);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccessDeniedException)
@@ -122,7 +122,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, EmployeeType> updatedEmployeeDetails;
                                         try
                                         {
-                                            Tuple<string, EmployeeType> updateEmployee = bankService.CheckEmployeeExistance(bankId, selectedUsername);
+                                            Tuple<string, EmployeeType> updateEmployee = bankService.GetEmployeeIdByUsername(bankId, selectedUsername);
                                             updateEmployeeId = updateEmployee.Item1;
                                         }
                                         catch (EmployeeDoesNotExistException)
@@ -154,7 +154,7 @@ namespace ATM.CLI
                                         string deleteEmployeeId;
                                         try
                                         {
-                                            Tuple<string, EmployeeType> deleteEmployee = bankService.CheckEmployeeExistance(bankId, selectedUsername);
+                                            Tuple<string, EmployeeType> deleteEmployee = bankService.GetEmployeeIdByUsername(bankId, selectedUsername);
                                             deleteEmployeeId = deleteEmployee.Item1;
                                         }
                                         catch (EmployeeDoesNotExistException)
@@ -178,7 +178,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                                         try
                                         {
-                                            string newAccountId = bankService.CreateNewAccount(bankId, employeeId, accountDetails);
+                                            string newAccountId = bankService.AddAccount(bankId, employeeId, accountDetails);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccessDeniedException)
@@ -205,7 +205,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, AccountType> updatedAccountDetails;
                                         try
                                         {
-                                            updateAccountId = bankService.CheckAccountExistance(bankId, selecteUsername);
+                                            updateAccountId = bankService.GetAccountIdByUsername(bankId, selecteUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -236,7 +236,7 @@ namespace ATM.CLI
                                         string deleteAccountId;
                                         try
                                         {
-                                            deleteAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                            deleteAccountId = bankService.GetAccountIdByUsername(bankId, selectedUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -360,7 +360,7 @@ namespace ATM.CLI
                                         string selectedAccountId;
                                         try
                                         {
-                                            selectedAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                            selectedAccountId = bankService.GetAccountIdByUsername(bankId, selectedUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -377,7 +377,7 @@ namespace ATM.CLI
                                         string selectedEmployeeId;
                                         try
                                         {
-                                            Tuple<string, EmployeeType> selectedEmployee = bankService.CheckEmployeeExistance(bankId, selectedUsername);
+                                            Tuple<string, EmployeeType> selectedEmployee = bankService.GetEmployeeIdByUsername(bankId, selectedUsername);
                                             selectedEmployeeId = selectedEmployee.Item1;
                                         }
                                         catch (AccountDoesNotExistException)
@@ -408,7 +408,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, AccountType> accountDetails = consoleUI.GetDataForAccountCreation();
                                         try
                                         {
-                                            string newAccountId = bankService.CreateNewAccount(bankId, employeeId, accountDetails);
+                                            string newAccountId = bankService.AddAccount(bankId, employeeId, accountDetails);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccessDeniedException)
@@ -435,7 +435,7 @@ namespace ATM.CLI
                                         Tuple<string, Gender, string, string, AccountType> updatedAccountDetails;
                                         try
                                         {
-                                            updateAccountId = bankService.CheckAccountExistance(bankId, selecteUsername);
+                                            updateAccountId = bankService.GetAccountIdByUsername(bankId, selecteUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -466,7 +466,7 @@ namespace ATM.CLI
                                         string deleteAccountId;
                                         try
                                         {
-                                            deleteAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                            deleteAccountId = bankService.GetAccountIdByUsername(bankId, selectedUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -509,7 +509,7 @@ namespace ATM.CLI
                                         string selectedAccountId;
                                         try
                                         {
-                                            selectedAccountId = bankService.CheckAccountExistance(bankId, selectedUsername);
+                                            selectedAccountId = bankService.GetAccountIdByUsername(bankId, selectedUsername);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
@@ -542,7 +542,7 @@ namespace ATM.CLI
                             username = consoleUI.GetUsername();
                             try
                             {
-                                accountId = bankService.CheckAccountExistance(bankId, username);
+                                accountId = bankService.GetAccountIdByUsername(bankId, username);
                             }
                             catch (AccountDoesNotExistException)
                             {
@@ -568,7 +568,7 @@ namespace ATM.CLI
                                 {
                                     amount = consoleUI.GetAmount('d');
                                     string currencyName = consoleUI.GetCurrency();
-                                    Currency currency = bankService.CheckCurrencyExistance(bankId, currencyName);
+                                    Currency currency = bankService.GetCurrencyByName(bankId, currencyName);
                                     try
                                     {
                                         txnId = bankService.Deposit(bankId, accountId, currency, amount);
@@ -611,7 +611,7 @@ namespace ATM.CLI
                                     string selectedToUsername = consoleUI.GetUsername();
                                     try
                                     {
-                                        toAccountId = bankService.CheckAccountExistance(toBankId, selectedToUsername);
+                                        toAccountId = bankService.GetAccountIdByUsername(toBankId, selectedToUsername);
                                     }
                                     catch (AccountDoesNotExistException)
                                     {
