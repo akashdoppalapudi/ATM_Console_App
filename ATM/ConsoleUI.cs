@@ -27,13 +27,18 @@ namespace ATM.Services
             Console.WriteLine("\n____BANK CREATION____\n");
             Console.Write("Enter Bank Name : ");
             name = Console.ReadLine();
+            if (name.Length < 3)
+            {
+                Console.WriteLine("Invalid Name");
+                throw new BankCreationFailedException();
+            }
             Bank bank = bankService.CreateBank(name);
             string empName, username, password;
             Gender gender;
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
                 throw new AccountCreationFailedException();
@@ -89,7 +94,7 @@ namespace ATM.Services
             Console.WriteLine("\n____EMPLOYEE CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
                 throw new AccountCreationFailedException();
@@ -172,7 +177,7 @@ namespace ATM.Services
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter Name : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
                 throw new AccountCreationFailedException();
@@ -255,7 +260,7 @@ namespace ATM.Services
             Console.WriteLine("____BANK UPDATE____");
             Console.Write("[" + currentBank.Name + "] Enter new Bank Name (Leave it empty to not change) : ");
             string userInput = Console.ReadLine();
-            if (String.IsNullOrEmpty(userInput))
+            if (userInput.Length < 3)
             {
                 name = currentBank.Name;
             }
@@ -274,6 +279,11 @@ namespace ATM.Services
                 try
                 {
                     imps = Convert.ToDouble(userInput);
+                    if (imps < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous IMPS");
+                        imps = currentBank.IMPS;
+                    }
                 }
                 catch
                 {
@@ -292,6 +302,11 @@ namespace ATM.Services
                 try
                 {
                     rtgs = Convert.ToDouble(userInput);
+                    if (rtgs < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous RTGS");
+                        imps = currentBank.RTGS;
+                    }
                 }
                 catch
                 {
@@ -310,10 +325,15 @@ namespace ATM.Services
                 try
                 {
                     oimps = Convert.ToDouble(userInput);
+                    if (oimps < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous OIMPS");
+                        imps = currentBank.IMPS;
+                    }
                 }
                 catch
                 {
-                    Console.WriteLine("Invalid Input! Keeping the previous IMPS");
+                    Console.WriteLine("Invalid Input! Keeping the previous OIMPS");
                     oimps = currentBank.OIMPS;
                 }
             }
@@ -328,6 +348,11 @@ namespace ATM.Services
                 try
                 {
                     ortgs = Convert.ToDouble(userInput);
+                    if (ortgs < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous ORTGS");
+                        imps = currentBank.ORTGS;
+                    }
                 }
                 catch
                 {
@@ -347,7 +372,7 @@ namespace ATM.Services
             Console.WriteLine("\n____EMPLOYEE UPDATE____\n");
             Console.Write("[" + CurrentEmployee.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 name = CurrentEmployee.Name;
             }
@@ -443,7 +468,7 @@ namespace ATM.Services
             Console.WriteLine("\n____ACCOUNT UPDATE____\n");
             Console.Write("[" + currentAccount.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
             string selectedName = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedName))
+            if (selectedName.Length < 3)
             {
                 name = currentAccount.Name;
             }
