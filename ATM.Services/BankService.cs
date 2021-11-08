@@ -14,6 +14,8 @@ namespace ATM.Services
         private EncryptionService encryptionService;
         private IDGenService idGenService;
         private TransactionHandler transactionHandler;
+        private EmployeeService employeeService;
+        private AccountService accountService;
 
         public BankService()
         {
@@ -21,6 +23,8 @@ namespace ATM.Services
             encryptionService = new EncryptionService();
             dataHandler = new DataHandler();
             idGenService = new IDGenService();
+            employeeService = new EmployeeService();
+            accountService = new AccountService();
             this.banks = dataHandler.ReadBankData();
             if (this.banks == null)
             {
@@ -28,248 +32,176 @@ namespace ATM.Services
             }
         }
 
-        public string CreateNewBank(Tuple<string> bankDetails, Tuple<string, Gender, string, string> employeeDetails)
+        public Bank CreateBank(string name)
         {
-            if (bankDetails == null)
+            return new Bank
             {
-                throw new BankCreationFailedException();
-            }
-            if (employeeDetails == null)
-            {
-                throw new AccountCreationFailedException();
-            }
-            if (this.banks.FindAll(b => b.IsActive).Exists(b => b.Name == bankDetails.Item1))
-            {
-                throw new BankNameAlreadyExistsException();
-            }
-            Employee newEmployee = new Employee
-            {
-                Id = idGenService.GenId(employeeDetails.Item1),
-                Name = employeeDetails.Item1,
-                Gender = employeeDetails.Item2,
-                Username = employeeDetails.Item3,
-                Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4),
-                EmployeeType = EmployeeType.Admin,
+                Name = name,
+                Id = idGenService.GenId(name)
             };
-            Bank newBank = new Bank
-            {
-                Name = bankDetails.Item1,
-                Id = idGenService.GenId(bankDetails.Item1),
-            };
-            newBank.Employees.Add(newEmployee);
-            newBank.Currencies.Add(new Currency
-            {
-                Name = "INR",
-                ExchangeRate = 1
-            });
-            this.banks.Add(newBank);
-            Console.WriteLine(this.banks.ToString());
-            dataHandler.WriteBankData(this.banks);
-            return newBank.Id;
         }
 
-        public Tuple<string, EmployeeType> CreateNewEmployee(string bankId, string employeeId, Tuple<string, Gender, string, string, EmployeeType> employeeDetails)
+        public void AddBank(Bank bank, Employee adminEmployee)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            bank.Employees.Add(adminEmployee);
+            bank.Currencies.Add(new Currency { Name = "INR", ExchangeRate = 1 });
+            bank.UpdatedOn = DateTime.Now;
+            this.banks.Add(bank);
+            dataHandler.WriteBankData(this.banks);
+        }
+
+        private Bank GetBankById(string bankId)
+        {
+            return this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+        }
+
+        private Employee GetEmployeeById(Bank bank, string employeeId)
+        {
+            return bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
+        }
+
+        private Account GetAccountById(Bank bank, string accountId)
+        {
+            return bank.Accounts.FirstOrDefault(a => a.Id == accountId && a.IsActive);
+        }
+
+        public void AddEmployee(string bankId, string employeeId, Employee newEmployee)
+        {
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (!employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
-            if (employeeDetails == null)
-            {
-                throw new AccountCreationFailedException();
-            }
-            if (bank.Employees.FindAll(e => e.IsActive).Exists(e => e.Username == employeeDetails.Item3))
+            if (bank.Employees.FindAll(e => e.IsActive).Exists(e => e.Username == newEmployee.Username))
             {
                 throw new UsernameAlreadyExistsException();
             }
-            Employee newEmployee = new Employee
-            {
-                Id = idGenService.GenId(employeeDetails.Item1),
-                Name = employeeDetails.Item1,
-                Gender = employeeDetails.Item2,
-                Username = employeeDetails.Item3,
-                Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4),
-                EmployeeType = employeeDetails.Item5,
-            };
-            newEmployee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, newEmployee.Id), (EmployeeActionType)1, newEmployee.Id));
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employee.Id), EmployeeActionType.NewAccount, newEmployee.Id);
+            employeeService.AddAction(employee, action);
             bank.Employees.Add(newEmployee);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return Tuple.Create(newEmployee.Id, newEmployee.EmployeeType);
         }
 
-        public string CreateNewAccount(string bankId, string employeeId, Tuple<string, Gender, string, string, AccountType> accountDetails)
+        public void AddAccount(string bankId, string employeeId, Account newAccount)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null)
-            {
-                throw new AccessDeniedException();
-            }
-            if (bank.Accounts.FindAll(a => a.IsActive).Exists(a => a.Username == accountDetails.Item3))
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (bank.Accounts.FindAll(a => a.IsActive).Exists(a => a.Username == newAccount.Username))
             {
                 throw new UsernameAlreadyExistsException();
             }
-            if (accountDetails == null)
-            {
-                throw new AccountCreationFailedException();
-            }
-            Account newAccount = new Account
-            {
-                Id = idGenService.GenId(accountDetails.Item1),
-                Name = accountDetails.Item1,
-                Gender = accountDetails.Item2,
-                Username = accountDetails.Item3,
-                Password = encryptionService.ComputeSha256Hash(accountDetails.Item4),
-                AccountType = accountDetails.Item5,
-            };
-            Transaction newTransaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id), 1500, (TransactionType)2, (TransactionNarrative)1, newAccount.Id);
-            newAccount.Transactions.Add(newTransaction);
+            Transaction transaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, newAccount.Id), 1500, TransactionType.Credit, TransactionNarrative.AccountCreation, newAccount.Id);
+            accountService.AddTransaction(newAccount, transaction);
             bank.Accounts.Add(newAccount);
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)1, newAccount.Id, newTransaction.Id));
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.NewAccount, newAccount.Id, transaction.Id);
+            employeeService.AddAction(employee, action);
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return newAccount.Id;
         }
 
-        public string UpdateBank(string bankId, string employeeId, Tuple<string, double, double, double, double> bankDetails)
+        public void UpdateBank(string bankId, string employeeId, Bank updateBank)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
-            if (this.banks.FindAll(b => b.IsActive && b.Id != bankId).Exists(b => b.Name == bankDetails.Item1))
+            if (this.banks.FindAll(b => b.IsActive && b.Id != bankId).Exists(b => b.Name == updateBank.Name))
             {
                 throw new BankNameAlreadyExistsException();
             }
-            bank.Name = bankDetails.Item1;
-            bank.IMPS = bankDetails.Item2;
-            bank.RTGS = bankDetails.Item3;
-            bank.OIMPS = bankDetails.Item4;
-            bank.ORTGS = bankDetails.Item5;
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)4));
-            employee.UpdatedOn = DateTime.Now;
+            bank.Name = updateBank.Name;
+            bank.IMPS = updateBank.IMPS;
+            bank.RTGS = updateBank.RTGS;
+            bank.OIMPS = updateBank.OIMPS;
+            bank.ORTGS = updateBank.ORTGS;
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateBank);
+            employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return bankId;
         }
 
-        public string UpdateEmployee(string bankId, string employeeId, string updateEmployeeId, Tuple<string, Gender, string, string, EmployeeType> employeeDetails)
+        public void UpdateEmployee(string bankId, string employeeId, string currentEmployeeId, Employee updateEmployee)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            Employee currentEmployee = GetEmployeeById(bank, currentEmployeeId);
+            if (employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
-            if (bank.Employees.FindAll(e => e.IsActive && e.Id != updateEmployeeId).Exists(e => e.Username == employeeDetails.Item3))
+            if (bank.Employees.FindAll(e => e.IsActive && e.Id != currentEmployeeId).Exists(e => e.Username == updateEmployee.Username))
             {
                 throw new UsernameAlreadyExistsException();
             }
-            Employee updateEmployee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            updateEmployee.Name = employeeDetails.Item1;
-            updateEmployee.Gender = employeeDetails.Item2;
-            updateEmployee.Username = employeeDetails.Item3;
-            if (!String.IsNullOrEmpty(employeeDetails.Item4))
-            {
-                updateEmployee.Password = encryptionService.ComputeSha256Hash(employeeDetails.Item4);
-            }
-            updateEmployee.EmployeeType = employeeDetails.Item5;
-            updateEmployee.UpdatedOn = DateTime.Now;
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)2, updateEmployee.Id));
-            employee.UpdatedOn = DateTime.Now;
+            employeeService.UpdateEmployee(currentEmployee, updateEmployee);
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateAccount, currentEmployee.Id);
+            employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return updateEmployeeId;
         }
 
-        public string UpdateAccount(string bankId, string employeeId, string accountId, Tuple<string, Gender, string, string, AccountType> accountDetails)
+        public void UpdateAccount(string bankId, string employeeId, string currentAccountId, Account updateAccount)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            if (bank.Accounts.FindAll(a => a.IsActive && a.Id != accountId).Exists(a => a.Username == accountDetails.Item3))
+            Bank bank = GetBankById(bankId);
+            if (bank.Accounts.FindAll(a => a.IsActive && a.Id != currentAccountId).Exists(a => a.Username == updateAccount.Username))
             {
                 throw new UsernameAlreadyExistsException();
             }
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null)
-            {
-                throw new AccessDeniedException();
-            }
-            Account account = bank.Accounts.FirstOrDefault(a => a.Id == accountId && a.IsActive);
-            account.Name = accountDetails.Item1;
-            account.Gender = accountDetails.Item2;
-            account.Username = accountDetails.Item3;
-            if (!String.IsNullOrEmpty(accountDetails.Item4))
-            {
-                account.Password = accountDetails.Item4;
-            }
-            account.AccountType = accountDetails.Item5;
-            account.UpdatedOn = DateTime.Now;
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)2, account.Id));
-            employee.UpdatedOn = DateTime.Now;
+            Employee employee = GetEmployeeById(bank, employeeId);
+            Account currentAccount = GetAccountById(bank, currentAccountId);
+            accountService.UpdateAccount(currentAccount, updateAccount);
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateAccount, currentAccount.Id);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return accountId;
         }
 
-        public string DeleteBank(string bankId, string employeeId)
+        public void DeleteBank(string bankId, string employeeId)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)5));
-            employee.UpdatedOn = DateTime.Now;
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.DeleteBank);
+            employeeService.AddAction(employee, action);
             bank.IsActive = false;
             bank.UpdatedOn = DateTime.Now;
             bank.DeletedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return bankId;
         }
 
-        public string DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
+        public void DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (employeeService.IsEmployeeAdmin(employee))
             {
                 throw new AccessDeniedException();
             }
-            Employee deleteEmployee = bank.Employees.FirstOrDefault(e => e.Id == deleteEmployeeId && e.IsActive);
-            deleteEmployee.IsActive = false;
-            deleteEmployee.UpdatedOn = DateTime.Now;
-            deleteEmployee.DeletedOn = DateTime.Now;
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)3, deleteEmployeeId));
-            employee.UpdatedOn = DateTime.Now;
+            Employee deleteEmployee = GetEmployeeById(bank, deleteEmployeeId);
+            employeeService.DeleteEmployee(deleteEmployee);
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.DeleteAccount, deleteEmployeeId);
+            employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return deleteEmployeeId;
         }
 
-        public string DeleteAccount(string bankId, string employeeId, string accountId)
+        public void DeleteAccount(string bankId, string employeeId, string accountId)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null)
-            {
-                throw new AccessDeniedException();
-            }
-            Account account = bank.Accounts.FirstOrDefault(a => a.Id == accountId && a.IsActive);
-            account.IsActive = false;
-            account.UpdatedOn = DateTime.Now;
-            account.DeletedOn = DateTime.Now;
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)3, accountId));
-            employee.UpdatedOn = DateTime.Now;
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            Account account = GetAccountById(bank, accountId);
+            accountService.DeleteAccount(account);
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)3, accountId);
+            employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return accountId;
         }
 
         public Dictionary<string, string> GetAllBankNames()
@@ -282,28 +214,28 @@ namespace ATM.Services
             return bankNames;
         }
 
-        public string CheckBankExistance(string bankId)
+        public void CheckBankExistance(string bankId)
         {
             if (this.banks.Exists(b => b.Id == bankId && b.IsActive))
             {
-                return bankId;
+                return;
             }
             throw new BankDoesnotExistException();
         }
 
-        public Tuple<string, EmployeeType> CheckEmployeeExistance(string bankId, string username)
+        public string GetEmployeeIdByUsername(string bankId, string username)
         {
-            Employee employee = this.banks.Find(b => b.Id == bankId && b.IsActive).Employees.FirstOrDefault(e => e.Username == username && e.IsActive);
+            Employee employee = GetBankById(bankId).Employees.FirstOrDefault(e => e.Username == username && e.IsActive);
             if (employee == null)
             {
                 throw new EmployeeDoesNotExistException();
             }
-            return Tuple.Create(employee.Id, employee.EmployeeType);
+            return employee.Id;
         }
 
-        public string CheckAccountExistance(string bankId, string username)
+        public string GetAccountIdByUsername(string bankId, string username)
         {
-            Account account = this.banks.Find(b => b.Id == bankId && b.IsActive).Accounts.FirstOrDefault(a => a.Username == username && a.IsActive);
+            Account account = GetBankById(bankId).Accounts.FirstOrDefault(a => a.Username == username && a.IsActive);
             if (account == null)
             {
                 throw new AccountDoesNotExistException();
@@ -313,95 +245,85 @@ namespace ATM.Services
 
         public decimal GetBalance(string bankId, string accountId)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
             return account.Balance;
         }
 
         public List<Transaction> GetTransactions(string bankId, string accountId)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
             return account.Transactions;
         }
 
         public List<EmployeeAction> GetEmployeeActions(string bankId, string employeeId)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.Find(e => e.Id == employeeId && e.IsActive);
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
             return employee.EmployeeActions;
         }
 
-        public string Deposit(string bankId, string accountId, Currency currency, decimal amount)
+        public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
             if (amount <= 0)
             {
                 throw new InvalidAmountException();
             }
-            amount = amount * (decimal)currency.ExchangeRate;
-            account.Balance += amount;
-            string TXNId = idGenService.GenTransactionId(bankId, accountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)2, (TransactionNarrative)2, accountId));
-            account.UpdatedOn = DateTime.Now;
+            amount *= (decimal)currency.ExchangeRate;
+            accountService.Deposit(account, amount);
+            Transaction transaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, TransactionType.Credit, TransactionNarrative.Deposit, accountId);
+            accountService.AddTransaction(account, transaction);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return TXNId;
         }
 
-        public string Withdraw(string bankId, string accountId, decimal amount)
+        public void Withdraw(string bankId, string accountId, decimal amount)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
             }
-            account.Balance -= amount;
-            string TXNId = idGenService.GenTransactionId(bankId, accountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)3, accountId));
-            account.UpdatedOn = DateTime.Now;
+            accountService.Withdraw(account, amount);
+            Transaction transaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, TransactionType.Debit, TransactionNarrative.Withdraw, accountId);
+            accountService.AddTransaction(account, transaction);
             bank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return TXNId;
         }
 
-        public string Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
+        public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
             }
-            Bank bank = this.banks.Find(b => b.Id == selectedBankId && b.IsActive);
-            Bank toBank = this.banks.Find(b => b.Id == transferToBankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == selectedAccountId && a.IsActive);
-            Account transferToAccount = toBank.Accounts.Find(a => a.Id == transferToAccountId && a.IsActive);
+            Bank bank = GetBankById(selectedBankId);
+            Bank toBank = GetBankById(transferToBankId);
+            Account account = GetAccountById(bank, selectedAccountId);
+            Account transferToAccount = GetAccountById(toBank, transferToAccountId);
             if (amount <= 0 || amount > account.Balance)
             {
                 throw new InvalidAmountException();
             }
-            account.Balance -= amount;
+            accountService.Transfer(account, transferToAccount, amount);
             string TXNId = idGenService.GenTransactionId(selectedBankId, selectedAccountId);
-            account.Transactions.Add(transactionHandler.NewTransaction(TXNId, amount, (TransactionType)1, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
-            account.UpdatedOn = DateTime.Now;
+            Transaction fromTransaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(selectedBankId, selectedAccountId), amount, TransactionType.Debit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
+            accountService.AddTransaction(account, fromTransaction);
             bank.UpdatedOn = DateTime.Now;
-            transferToAccount.Balance += amount;
-            transferToAccount.Transactions.Add(transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, (TransactionType)2, (TransactionNarrative)4, selectedAccountId, transferToBankId, transferToAccountId));
-            transferToAccount.UpdatedOn = DateTime.Now;
+            Transaction toTransaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, TransactionType.Credit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
+            accountService.AddTransaction(transferToAccount, toTransaction);
             toBank.UpdatedOn = DateTime.Now;
             dataHandler.WriteBankData(this.banks);
-            return TXNId;
         }
 
-        public string RevertTransaction(string bankId, string employeeId, string txnId)
+        public void RevertTransaction(string bankId, string employeeId, string txnId)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            if (employee == null || employee.EmployeeType != EmployeeType.Admin)
-            {
-                throw new AccessDeniedException();
-            }
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
             List<Transaction> transactions = new List<Transaction>();
             foreach (Account account in bank.Accounts)
             {
@@ -418,11 +340,11 @@ namespace ATM.Services
             string fromAccId = transaction.FromAccountId;
             string toAccId = transaction.ToAccountId;
             string toBankId = transaction.ToBankId;
-            string TXNID = Transfer(toBankId, toAccId, bankId, fromAccId, amount);
-            employee.EmployeeActions.Add(transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)6, fromAccId, txnId));
-            employee.UpdatedOn = DateTime.Now;
+            Transfer(toBankId, toAccId, bankId, fromAccId, amount);
+            EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.RevertTransaction, fromAccId, txnId);
+            employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            return txnId;
+            dataHandler.WriteBankData(this.banks);
         }
 
         public void AddCurrency(string bankId, string currencyName, double exchangeRate)
@@ -431,7 +353,7 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Bank bank = GetBankById(bankId);
             if (bank.Currencies.Exists(c => c.Name == currencyName))
             {
                 throw new CurrencyAlreadyExistsException();
@@ -452,8 +374,8 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            Bank bank = GetBankById(bankId);
+            Currency currency = GetCurrencyByName(bankId, currencyName);
             if (currency == null)
             {
                 throw new CurrencyDoesNotExistException();
@@ -469,8 +391,8 @@ namespace ATM.Services
             {
                 throw new CurrencyDataInvalidException();
             }
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
+            Bank bank = GetBankById(bankId);
+            Currency currency = GetCurrencyByName(bankId, currencyName);
             if (currency == null)
             {
                 throw new CurrencyDoesNotExistException();
@@ -480,9 +402,9 @@ namespace ATM.Services
             dataHandler.WriteBankData(this.banks);
         }
 
-        public Currency CheckCurrencyExistance(string bankId, string currencyName)
+        public Currency GetCurrencyByName(string bankId, string currencyName)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
+            Bank bank = banks.Find(b => b.Id == bankId && b.IsActive);
             Currency currency = bank.Currencies.FirstOrDefault(c => c.Name == currencyName);
             if (currency == null)
             {
@@ -493,10 +415,9 @@ namespace ATM.Services
 
         public void AuthenticateUser(string bankId, string accountId, string userInput)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.Find(a => a.Id == accountId && a.IsActive);
-            string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
-            if (hashedUserInput != account.Password)
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
+            if (accountService.Authenticate(account, userInput))
             {
                 throw new AuthenticationFailedException();
             }
@@ -504,33 +425,51 @@ namespace ATM.Services
 
         public void AuthenticateEmployee(string bankId, string employeeId, string userInput)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.Find(e => e.Id == employeeId && e.IsActive);
-            string hashedUserInput = encryptionService.ComputeSha256Hash(userInput);
-            if (hashedUserInput != employee.Password)
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            if (employeeService.Authenticate(employee, userInput))
             {
                 throw new AuthenticationFailedException();
             }
         }
 
-        public Tuple<string, double, double, double, double> GetBankDetails(string bankId)
+        public Bank GetBankDetails(string bankId)
         {
-            Bank bank = this.banks.Find(b => b.Id == bankId && b.IsActive);
-            return Tuple.Create(bank.Name, bank.IMPS, bank.RTGS, bank.OIMPS, bank.ORTGS);
+            Bank bank = GetBankById(bankId);
+            return new Bank
+            {
+                Name = bank.Name,
+                IMPS = bank.IMPS,
+                RTGS = bank.RTGS,
+                OIMPS = bank.OIMPS,
+                ORTGS = bank.ORTGS
+            };
         }
 
-        public Tuple<string, Gender, string, EmployeeType> GetEmployeeDetails(string bankId, string employeeId)
+        public Employee GetEmployeeDetails(string bankId, string employeeId)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Employee employee = bank.Employees.FirstOrDefault(e => e.Id == employeeId && e.IsActive);
-            return Tuple.Create(employee.Name, employee.Gender, employee.Username, employee.EmployeeType);
+            Bank bank = GetBankById(bankId);
+            Employee employee = GetEmployeeById(bank, employeeId);
+            return new Employee
+            {
+                Name = employee.Name,
+                Gender = employee.Gender,
+                Username = employee.Username,
+                EmployeeType = employee.EmployeeType
+            };
         }
 
-        public Tuple<string, Gender, string, AccountType> GetAccountDetails(string bankId, string accountId)
+        public Account GetAccountDetails(string bankId, string accountId)
         {
-            Bank bank = this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            Account account = bank.Accounts.FirstOrDefault(a => a.Id == accountId && a.IsActive);
-            return Tuple.Create(account.Name, account.Gender, account.Username, account.AccountType);
+            Bank bank = GetBankById(bankId);
+            Account account = GetAccountById(bank, accountId);
+            return new Account
+            {
+                Name = account.Name,
+                Gender = account.Gender,
+                Username = account.Username,
+                AccountType = account.AccountType
+            };
         }
     }
 }

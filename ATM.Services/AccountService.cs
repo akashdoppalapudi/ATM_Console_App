@@ -6,8 +6,8 @@ namespace ATM.Services
 {
     public class AccountService
     {
-        IDGenService idGenService;
-        EncryptionService encryptionService;
+        private IDGenService idGenService;
+        private EncryptionService encryptionService;
         public AccountService()
         {
             idGenService = new IDGenService();
@@ -29,6 +29,7 @@ namespace ATM.Services
         public void AddTransaction(Account account, Transaction transaction)
         {
             account.Transactions.Add(transaction);
+            account.UpdatedOn = DateTime.Now;
         }
 
         public void UpdateAccount(Account account, Account updateAccount)
@@ -51,9 +52,9 @@ namespace ATM.Services
             account.DeletedOn = DateTime.Now;
         }
 
-        public void Deposit(Account account, decimal amount, Currency currency)
+        public void Deposit(Account account, decimal amount)
         {
-            account.Balance += amount * (decimal)currency.ExchangeRate;
+            account.Balance += amount;
         }
 
         public void Withdraw(Account account, decimal amount)
