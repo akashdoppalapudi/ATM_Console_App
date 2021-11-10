@@ -10,7 +10,7 @@ namespace ATM.Services
     public class BankService
     {
         private List<Bank> banks;
-        private DataHandler dataHandler;
+        private DataService dataHandler;
         private EncryptionService encryptionService;
         private IDGenService idGenService;
         private TransactionHandler transactionHandler;
@@ -21,7 +21,7 @@ namespace ATM.Services
         {
             transactionHandler = new TransactionHandler();
             encryptionService = new EncryptionService();
-            dataHandler = new DataHandler();
+            dataHandler = new DataService();
             idGenService = new IDGenService();
             employeeService = new EmployeeService();
             accountService = new AccountService();
