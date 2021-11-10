@@ -4,10 +4,9 @@ using System.Collections.Generic;
 
 namespace ATM.Models
 {
-    [Serializable]
     public class Employee : Person
     {
+        public string BankId { get; set; }
         public EmployeeType EmployeeType { get; set; }
-        public List<EmployeeAction> EmployeeActions { get; set; } = new List<EmployeeAction>();
     }
 }
