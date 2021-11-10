@@ -152,5 +152,35 @@ namespace ATM.Services
             string jsonString = JsonSerializer.Serialize<IList<Bank>>(updatedBanks, indentOption);
             File.WriteAllText(bankDataFile, jsonString);
         }
+
+        public void WriteAccountData(IList<Account> updatedAccounts)
+        {
+            string jsonString = JsonSerializer.Serialize<IList<Account>>(updatedAccounts, indentOption);
+            File.WriteAllText(accountDataFile, jsonString);
+        }
+
+        public void WriteEmployeeData(IList<Employee> updatedEmployees)
+        {
+            string jsonString = JsonSerializer.Serialize<IList<Employee>>(updatedEmployees, indentOption);
+            File.WriteAllText(employeeDataFile, jsonString);
+        }
+
+        public void WriteCurrencyData(IList<Currency> updatedCurrencies)
+        {
+            string jsonString = JsonSerializer.Serialize<IList<Currency>>(updatedCurrencies, indentOption);
+            File.WriteAllText(currencyDataFile, jsonString);
+        }
+
+        public void WriteTransactionData(IList<Transaction> updatedTransactions)
+        {
+            string jsonString = JsonSerializer.Serialize<IList<Transaction>>(updatedTransactions, indentOption);
+            File.WriteAllText(transactionDataFile, jsonString);
+        }
+
+        public void WriteEmployeeActionData(IList<EmployeeAction> updatedEmployeeActions)
+        {
+            string jsonString = JsonSerializer.Serialize<IList<EmployeeAction>>(updatedEmployeeActions, indentOption);
+            File.WriteAllText(employeeActionDataFile, jsonString);
+        }
     }
 }
