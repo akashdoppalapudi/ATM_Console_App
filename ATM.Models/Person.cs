@@ -3,7 +3,6 @@ using System;
 
 namespace ATM.Models
 {
-    [Serializable]
     public class Person
     {
         public string Id { get; set; }
