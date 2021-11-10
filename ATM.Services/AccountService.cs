@@ -1,18 +1,34 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace ATM.Services
 {
     public class AccountService
     {
-        private IDGenService idGenService;
-        private EncryptionService encryptionService;
+        private IList<Account> accounts;
+        private readonly IDGenService idGenService;
+        private readonly EncryptionService encryptionService;
+        private readonly DataService dataService;
+
         public AccountService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
+            dataService = new DataService();
+            PopulateEmployeeData();
         }
+
+        private void PopulateEmployeeData()
+        {
+            this.accounts = dataService.ReadAccountData();
+            if (accounts == null)
+            {
+                this.accounts = new List<Account>();
+            }
+        }
+
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
         {
             return new Account

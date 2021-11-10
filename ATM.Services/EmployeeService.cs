@@ -1,17 +1,31 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace ATM.Services
 {
     public class EmployeeService
     {
-        private IDGenService idGenService;
-        private EncryptionService encryptionService;
+        private IList<Employee> employees;
+        private readonly IDGenService idGenService;
+        private readonly EncryptionService encryptionService;
+        private readonly DataService dataService;
         public EmployeeService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
+            dataService = new DataService();
+            PopulateEmployeeData();
+        }
+
+        private void PopulateEmployeeData()
+        {
+            this.employees = dataService.ReadEmployeeData();
+            if (this.employees == null)
+            {
+                this.employees = new List<Employee>();
+            }
         }
 
         public Employee CreateEmployee(string name, Gender gender, string username, string password, EmployeeType employeeType)

@@ -9,23 +9,28 @@ namespace ATM.Services
 {
     public class BankService
     {
-        private List<Bank> banks;
-        private DataService dataHandler;
-        private EncryptionService encryptionService;
-        private IDGenService idGenService;
-        private TransactionHandler transactionHandler;
-        private EmployeeService employeeService;
-        private AccountService accountService;
+        private IList<Bank> banks;
+        private readonly DataService dataService;
+        private readonly EncryptionService encryptionService;
+        private readonly IDGenService idGenService;
+        private readonly TransactionService transactionHandler;
+        private readonly EmployeeService employeeService;
+        private readonly AccountService accountService;
 
         public BankService()
         {
-            transactionHandler = new TransactionHandler();
+            transactionHandler = new TransactionService();
             encryptionService = new EncryptionService();
-            dataHandler = new DataService();
+            dataService = new DataService();
             idGenService = new IDGenService();
             employeeService = new EmployeeService();
             accountService = new AccountService();
-            this.banks = dataHandler.ReadBankData();
+            PopulateBankData();
+        }
+
+        private void PopulateBankData()
+        {
+            this.banks = dataService.ReadBankData();
             if (this.banks == null)
             {
                 this.banks = new List<Bank>();
@@ -43,7 +48,7 @@ namespace ATM.Services
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
-            if (this.banks.Exists(b => b.Name == bank.Name))
+            if (this.banks.FirstOrDefault(b => b.Name == bank.Name) != null)
             {
                 throw new BankNameAlreadyExistsException();
             }
@@ -51,7 +56,7 @@ namespace ATM.Services
             bank.Currencies.Add(new Currency { Name = "INR", ExchangeRate = 1 });
             bank.UpdatedOn = DateTime.Now;
             this.banks.Add(bank);
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         private Bank GetBankById(string bankId)
@@ -85,7 +90,7 @@ namespace ATM.Services
             employeeService.AddAction(employee, action);
             bank.Employees.Add(newEmployee);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void AddAccount(string bankId, string employeeId, Account newAccount)
@@ -103,7 +108,7 @@ namespace ATM.Services
             employeeService.AddAction(employee, action);
             employee.UpdatedOn = DateTime.Now;
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void UpdateBank(string bankId, string employeeId, Bank updateBank)
@@ -126,7 +131,7 @@ namespace ATM.Services
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateBank);
             employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void UpdateEmployee(string bankId, string employeeId, string currentEmployeeId, Employee updateEmployee)
@@ -146,7 +151,7 @@ namespace ATM.Services
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateAccount, currentEmployee.Id);
             employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void UpdateAccount(string bankId, string employeeId, string currentAccountId, Account updateAccount)
@@ -161,7 +166,7 @@ namespace ATM.Services
             accountService.UpdateAccount(currentAccount, updateAccount);
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.UpdateAccount, currentAccount.Id);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void DeleteBank(string bankId, string employeeId)
@@ -177,7 +182,7 @@ namespace ATM.Services
             bank.IsActive = false;
             bank.UpdatedOn = DateTime.Now;
             bank.DeletedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
@@ -193,7 +198,7 @@ namespace ATM.Services
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.DeleteAccount, deleteEmployeeId);
             employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void DeleteAccount(string bankId, string employeeId, string accountId)
@@ -205,7 +210,7 @@ namespace ATM.Services
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), (EmployeeActionType)3, accountId);
             employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public Dictionary<string, string> GetAllBankNames()
@@ -281,7 +286,7 @@ namespace ATM.Services
             Transaction transaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, TransactionType.Credit, TransactionNarrative.Deposit, accountId);
             accountService.AddTransaction(account, transaction);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void Withdraw(string bankId, string accountId, decimal amount)
@@ -296,7 +301,7 @@ namespace ATM.Services
             Transaction transaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(bankId, accountId), amount, TransactionType.Debit, TransactionNarrative.Withdraw, accountId);
             accountService.AddTransaction(account, transaction);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
@@ -321,7 +326,7 @@ namespace ATM.Services
             Transaction toTransaction = transactionHandler.NewTransaction(idGenService.GenTransactionId(transferToBankId, transferToAccountId), amount, TransactionType.Credit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
             accountService.AddTransaction(transferToAccount, toTransaction);
             toBank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void RevertTransaction(string bankId, string employeeId, string txnId)
@@ -348,7 +353,7 @@ namespace ATM.Services
             EmployeeAction action = transactionHandler.NewEmployeeAction(idGenService.GenEmployeeActionId(bankId, employeeId), EmployeeActionType.RevertTransaction, fromAccId, txnId);
             employeeService.AddAction(employee, action);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void AddCurrency(string bankId, string currencyName, double exchangeRate)
@@ -369,7 +374,7 @@ namespace ATM.Services
             };
             bank.Currencies.Add(newCurrency);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void UpdateCurrency(string bankId, string currencyName, double exchangeRate)
@@ -386,7 +391,7 @@ namespace ATM.Services
             }
             currency.ExchangeRate = exchangeRate;
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public void DeleteCurrency(string bankId, string currencyName)
@@ -403,7 +408,7 @@ namespace ATM.Services
             }
             bank.Currencies.Remove(currency);
             bank.UpdatedOn = DateTime.Now;
-            dataHandler.WriteBankData(this.banks);
+            dataService.WriteBankData(this.banks);
         }
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
