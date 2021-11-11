@@ -1,7 +1,9 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Services.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ATM.Services
 {
@@ -9,10 +11,12 @@ namespace ATM.Services
     {
         private IList<Transaction> transactions;
         private readonly DataService dataService;
+        private readonly IDGenService idGenService;
 
         public TransactionService()
         {
             dataService = new DataService();
+            idGenService = new IDGenService();
             PopulateTransactionData();
         }
 
@@ -24,11 +28,12 @@ namespace ATM.Services
                 this.transactions = new List<Transaction>();
             }
         }
-        public Transaction NewTransaction(string TXNID, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
+
+        public Transaction CreateTransaction(string bankId, string accountId, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
         {
             Transaction newTransaction = new Transaction
             {
-                Id = TXNID,
+                Id = idGenService.GenTransactionId(bankId, accountId),
                 TransactionDate = DateTime.Now,
                 TransactionType = transactionType,
                 FromAccountId = fromAccId,
@@ -37,22 +42,33 @@ namespace ATM.Services
                 TransactionNarrative = transactionNarrative,
                 TransactionAmount = amount
             };
-
             return newTransaction;
         }
 
-        public EmployeeAction NewEmployeeAction(string ACNID, EmployeeActionType actionType, string accId = null, string TXNID = null)
+        public void AddTransaction(string bankId, string accountId, Transaction transaction)
         {
-            EmployeeAction newEmployeeAction = new EmployeeAction
-            {
-                Id = ACNID,
-                TXNId = TXNID,
-                AccountId = accId,
-                ActionDate = DateTime.Now,
-                ActionType = actionType
-            };
+            PopulateTransactionData();
+            transaction.AccountId = accountId;
+            transaction.BankId = bankId;
+            this.transactions.Add(transaction);
+            dataService.WriteTransactionData(this.transactions);
+        }
 
-            return newEmployeeAction;
+        public Transaction GetTransactionById(string bankId, string txnId)
+        {
+            PopulateTransactionData();
+            IList<Transaction> possibleTransactions = (IList<Transaction>)this.transactions.Where(t => t.Id == txnId && t.BankId == bankId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
+            if (possibleTransactions.Count <= 0)
+            {
+                throw new TransactionNotFoundException();
+            }
+            return possibleTransactions.OrderBy(t => t.TransactionDate).Last();
+        }
+
+        public IList<Transaction> GetTransactions(string bankId, string accountId)
+        {
+            PopulateTransactionData();
+            return (IList<Transaction>)this.transactions.Where(t => t.AccountId == accountId && t.BankId == bankId);
         }
     }
 }
