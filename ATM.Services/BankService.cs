@@ -233,7 +233,7 @@ namespace ATM.Services
         public void ValidateBankName(string bankName)
         {
             PopulateBankData();
-            if (this.banks.Any(b => b.Name==bankName && b.IsActive))
+            if (this.banks.Any(b => b.Name == bankName && b.IsActive))
             {
                 throw new BankNameAlreadyExistsException();
             }

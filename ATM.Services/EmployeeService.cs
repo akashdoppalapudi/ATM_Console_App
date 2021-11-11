@@ -1,9 +1,9 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ATM.Services.Exceptions;
 
 namespace ATM.Services
 {
@@ -58,7 +58,7 @@ namespace ATM.Services
             {
                 bankService.CheckBankExistance(bankId);
                 PopulateEmployeeData();
-                if(this.employees.Any(e => e.Id==employeeId && e.BankId==bankId && e.IsActive))
+                if (this.employees.Any(e => e.Id == employeeId && e.BankId == bankId && e.IsActive))
                 {
                     return;
                 }
@@ -73,7 +73,7 @@ namespace ATM.Services
         public string GetEmployeeIdByUsername(string bankId, string username)
         {
             PopulateEmployeeData();
-            Employee employee = this.employees.FirstOrDefault(e => e.IsActive && e.BankId==bankId && e.Username == username);
+            Employee employee = this.employees.FirstOrDefault(e => e.IsActive && e.BankId == bankId && e.Username == username);
             if (employee == null)
             {
                 throw new EmployeeDoesNotExistException();
@@ -135,7 +135,7 @@ namespace ATM.Services
         public void ValidateUsername(string bankId, string username)
         {
             PopulateEmployeeData();
-            if (this.employees.Any(e => e.BankId==bankId && e.Username == username && e.IsActive))
+            if (this.employees.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
             {
                 throw new UsernameAlreadyExistsException();
             }

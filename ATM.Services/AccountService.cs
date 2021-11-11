@@ -1,8 +1,8 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Services.Exceptions;
 using System;
 using System.Collections.Generic;
-using ATM.Services.Exceptions;
 using System.Linq;
 
 namespace ATM.Services
@@ -66,7 +66,8 @@ namespace ATM.Services
             {
                 bankService.CheckBankExistance(bankId);
                 PopulateAccountData();
-                if(this.accounts.Any(a => a.Id==accountId && a.BankId==bankId && a.IsActive)){
+                if (this.accounts.Any(a => a.Id == accountId && a.BankId == bankId && a.IsActive))
+                {
                     return;
                 }
                 throw new AccountDoesNotExistException();
@@ -79,7 +80,7 @@ namespace ATM.Services
 
         public string GetAccountIdByUsername(string bankId, string username)
         {
-            Account account = this.accounts.FirstOrDefault(a => a.Username == username && a.BankId==bankId && a.IsActive);
+            Account account = this.accounts.FirstOrDefault(a => a.Username == username && a.BankId == bankId && a.IsActive);
             if (account == null)
             {
                 throw new AccountDoesNotExistException();

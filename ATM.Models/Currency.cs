@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ATM.Models
+﻿namespace ATM.Models
 {
     public class Currency
     {
