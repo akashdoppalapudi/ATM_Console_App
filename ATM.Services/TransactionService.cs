@@ -57,7 +57,7 @@ namespace ATM.Services
         public Transaction GetTransactionById(string bankId, string txnId)
         {
             PopulateTransactionData();
-            IList<Transaction> possibleTransactions = (IList<Transaction>)this.transactions.Where(t => t.Id == txnId && t.BankId == bankId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer);
+            IList<Transaction> possibleTransactions = this.transactions.Where(t => t.Id == txnId && t.BankId == bankId && t.TransactionType == TransactionType.Debit && t.TransactionNarrative == TransactionNarrative.Transfer).ToList();
             if (possibleTransactions.Count <= 0)
             {
                 throw new TransactionNotFoundException();
@@ -68,7 +68,7 @@ namespace ATM.Services
         public IList<Transaction> GetTransactions(string bankId, string accountId)
         {
             PopulateTransactionData();
-            return (IList<Transaction>)this.transactions.Where(t => t.AccountId == accountId && t.BankId == bankId);
+            return this.transactions.Where(t => t.AccountId == accountId && t.BankId == bankId).ToList();
         }
     }
 }

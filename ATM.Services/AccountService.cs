@@ -13,14 +13,12 @@ namespace ATM.Services
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;
         private readonly DataService dataService;
-        private readonly BankService bankService;
 
         public AccountService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
             dataService = new DataService();
-            bankService = new BankService();
             PopulateAccountData();
         }
 
@@ -64,7 +62,7 @@ namespace ATM.Services
         {
             try
             {
-                bankService.CheckBankExistance(bankId);
+                BankService.CheckBankExistance(bankId);
                 PopulateAccountData();
                 if (this.accounts.Any(a => a.Id == accountId && a.BankId == bankId && a.IsActive))
                 {
@@ -80,6 +78,7 @@ namespace ATM.Services
 
         public string GetAccountIdByUsername(string bankId, string username)
         {
+            PopulateAccountData();
             Account account = this.accounts.FirstOrDefault(a => a.Username == username && a.BankId == bankId && a.IsActive);
             if (account == null)
             {
@@ -141,7 +140,6 @@ namespace ATM.Services
         {
             PopulateAccountData();
             Account selectedAccount = GetAccountById(selectedBankId, selectedAccountId);
-            Account transferToAccount = GetAccountById(transferToBankId, transferToAccountId);
             if (selectedAccountId == transferToAccountId && selectedBankId == transferToBankId)
             {
                 throw new AccessDeniedException();
@@ -150,7 +148,10 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
+            selectedAccount = GetAccountById(selectedBankId, selectedAccountId);
             selectedAccount.Balance -= amount;
+            dataService.WriteAccountData(this.accounts);
+            Account transferToAccount = GetAccountById(transferToBankId, transferToAccountId);
             transferToAccount.Balance += amount;
             dataService.WriteAccountData(this.accounts);
         }
@@ -160,6 +161,7 @@ namespace ATM.Services
             Account account = GetAccountById(bankId, accountId);
             return new Account
             {
+                BankId = account.BankId,
                 Name = account.Name,
                 Gender = account.Gender,
                 Username = account.Username,

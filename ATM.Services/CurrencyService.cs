@@ -9,12 +9,10 @@ namespace ATM.Services
     {
         private IList<Currency> currencies;
         private readonly DataService dataService;
-        private readonly BankService bankService;
 
         public CurrencyService()
         {
             dataService = new DataService();
-            bankService = new BankService();
             PopulateCurrencyData();
         }
 
@@ -31,7 +29,7 @@ namespace ATM.Services
         {
             try
             {
-                bankService.CheckBankExistance(bankId);
+                BankService.CheckBankExistance(bankId);
                 PopulateCurrencyData();
                 if (this.currencies.Any(c => c.BankId == bankId && c.Name == currencyName))
                 {
@@ -43,6 +41,16 @@ namespace ATM.Services
             {
                 throw new CurrencyDoesNotExistException();
             }
+        }
+
+        public void ValidateCurrencyName(string bankId, string currencyName)
+        {
+            try
+            {
+                CheckCurrencyExistance(bankId, currencyName);
+                throw new CurrencyAlreadyExistsException();
+            }
+            catch (CurrencyDoesNotExistException) { }
         }
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
@@ -82,7 +90,8 @@ namespace ATM.Services
         public void DeleteCurrency(string bankId, string currencyName)
         {
             PopulateCurrencyData();
-            this.currencies.Remove(GetCurrencyByName(bankId, currencyName));
+            Currency currency = GetCurrencyByName(bankId, currencyName);
+            this.currencies = this.currencies.Where(c => c != currency).ToList();
             dataService.WriteCurrencyData(this.currencies);
         }
     }

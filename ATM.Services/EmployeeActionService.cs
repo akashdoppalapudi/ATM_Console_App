@@ -53,7 +53,7 @@ namespace ATM.Services
         public IList<EmployeeAction> GetEmployeeActions(string bankId, string employeeId)
         {
             PopulateEmployeeActionData();
-            return (IList<EmployeeAction>)this.employeeActions.Where(a => a.BankId == bankId && a.EmployeeId == employeeId);
+            return this.employeeActions.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList();
         }
     }
 }

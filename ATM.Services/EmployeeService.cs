@@ -13,14 +13,12 @@ namespace ATM.Services
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;
         private readonly DataService dataService;
-        private readonly BankService bankService;
 
         public EmployeeService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
             dataService = new DataService();
-            bankService = new BankService();
             PopulateEmployeeData();
         }
 
@@ -56,7 +54,7 @@ namespace ATM.Services
         {
             try
             {
-                bankService.CheckBankExistance(bankId);
+                BankService.CheckBankExistance(bankId);
                 PopulateEmployeeData();
                 if (this.employees.Any(e => e.Id == employeeId && e.BankId == bankId && e.IsActive))
                 {
@@ -119,6 +117,7 @@ namespace ATM.Services
             Employee employee = GetEmployeeById(bankId, employeeId);
             return new Employee
             {
+                BankId = employee.BankId,
                 Name = employee.Name,
                 Gender = employee.Gender,
                 Username = employee.Username,

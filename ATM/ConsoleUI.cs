@@ -13,12 +13,14 @@ namespace ATM.Services
         private BankService bankService;
         private EmployeeService employeeService;
         private AccountService accountService;
+        private CurrencyService currencyService;
         public ConsoleUI()
         {
             consoleMessages = new ConsoleMessages();
             bankService = new BankService();
             employeeService = new EmployeeService();
             accountService = new AccountService();
+            currencyService = new CurrencyService();
         }
 
         public (Bank, Employee) GetDataForBankCreation()
@@ -32,6 +34,7 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Name");
                 throw new BankCreationFailedException();
             }
+            bankService.ValidateBankName(name);
             Bank bank = bankService.CreateBank(name);
             string empName, username, password;
             Gender gender;
@@ -71,6 +74,7 @@ namespace ATM.Services
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
+                Console.WriteLine("Invalid Username");
                 throw new AccountCreationFailedException();
             }
             username = selectedUsername;
@@ -86,7 +90,7 @@ namespace ATM.Services
             return (bank, employee);
         }
 
-        public Employee GetDataForEmployeeCreation()
+        public Employee GetDataForEmployeeCreation(string bankId)
         {
             string name, username, password;
             Gender gender;
@@ -100,7 +104,6 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             name = selectedName;
-
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
             foreach (string g in Enum.GetNames(typeof(Gender)))
@@ -124,7 +127,6 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Gender");
                 throw new AccountCreationFailedException();
             }
-
             Console.Write("\nPlease set a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
@@ -132,7 +134,7 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             username = selectedUsername;
-
+            employeeService.ValidateUsername(bankId, username);
             Console.Write("Please set a Password : ");
             string selectedPassword = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedPassword))
@@ -141,7 +143,6 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             password = selectedPassword;
-
             Console.WriteLine("\n__EMPLOYEE TYPE__\n");
             i = 1;
             foreach (string type in Enum.GetNames(typeof(EmployeeType)))
@@ -151,7 +152,6 @@ namespace ATM.Services
             }
             Console.Write("\nSelect an Employee type : ");
             string selectedType = Console.ReadLine();
-
             try
             {
                 employeeType = (EmployeeType)Convert.ToInt32(selectedType);
@@ -166,10 +166,9 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Employee Type");
                 throw new AccountCreationFailedException();
             }
-
             return employeeService.CreateEmployee(name, gender, username, password, employeeType);
         }
-        public Account GetDataForAccountCreation()
+        public Account GetDataForAccountCreation(string bankId)
         {
             string name, username, password;
             Gender gender;
@@ -207,7 +206,6 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Gender");
                 throw new AccountCreationFailedException();
             }
-
             Console.Write("\nPlease set a Username : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
@@ -215,7 +213,7 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             username = selectedUsername;
-
+            accountService.ValidateUsername(bankId, username);
             Console.Write("Please set a Password : ");
             string selectedPassword = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedPassword))
@@ -224,7 +222,6 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             password = selectedPassword;
-
             Console.WriteLine("\n__ACCOUNT TYPE__\n");
             i = 1;
             foreach (string type in Enum.GetNames(typeof(AccountType)))
@@ -234,7 +231,6 @@ namespace ATM.Services
             }
             Console.Write("\nSelect an Account type : ");
             string selectedType = Console.ReadLine();
-
             try
             {
                 accountType = (AccountType)Convert.ToInt32(selectedType);
@@ -249,7 +245,6 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Account Type");
                 throw new AccountCreationFailedException();
             }
-
             return accountService.CreateAccount(name, gender, username, password, accountType);
         }
 
@@ -267,6 +262,7 @@ namespace ATM.Services
             else
             {
                 name = userInput;
+                bankService.ValidateBankName(name);
             }
             Console.Write("[" + currentBank.IMPS + "] Enter new IMPS for same bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
@@ -364,23 +360,22 @@ namespace ATM.Services
             return new Bank { Name = name, IMPS = imps, RTGS = rtgs, OIMPS = oimps, ORTGS = ortgs };
         }
 
-        public Employee GetDataForEmployeeUpdate(Employee CurrentEmployee)
+        public Employee GetDataForEmployeeUpdate(Employee currentEmployee)
         {
             string name, username, password;
             Gender gender;
             EmployeeType employeeType;
             Console.WriteLine("\n____EMPLOYEE UPDATE____\n");
-            Console.Write("[" + CurrentEmployee.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
+            Console.Write("[" + currentEmployee.Name + "] Please Enter a new Name (Leave it empty to not change) : ");
             string selectedName = Console.ReadLine();
             if (selectedName.Length < 3)
             {
-                name = CurrentEmployee.Name;
+                name = currentEmployee.Name;
             }
             else
             {
                 name = selectedName;
             }
-
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
             foreach (string g in Enum.GetNames(typeof(Gender)))
@@ -388,11 +383,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + g);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(Gender), CurrentEmployee.Gender) + "] Select a Gender (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(Gender), currentEmployee.Gender) + "] Select a Gender (Leave it empty to not change) : ");
             string selectedGender = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedGender))
             {
-                gender = CurrentEmployee.Gender;
+                gender = currentEmployee.Gender;
             }
             else
             {
@@ -402,27 +397,26 @@ namespace ATM.Services
                     if ((int)gender <= 0 || (int)gender >= i)
                     {
                         Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                        gender = CurrentEmployee.Gender;
+                        gender = currentEmployee.Gender;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Gender. Keeping the previous gender");
-                    gender = CurrentEmployee.Gender;
+                    gender = currentEmployee.Gender;
                 }
             }
-
-            Console.Write("\n[" + CurrentEmployee.Username + "] Please set a new Username (Leave it empty to not change) : ");
+            Console.Write("\n[" + currentEmployee.Username + "] Please set a new Username (Leave it empty to not change) : ");
             string selectedUsername = Console.ReadLine();
             if (String.IsNullOrEmpty(selectedUsername))
             {
-                username = CurrentEmployee.Username;
+                username = currentEmployee.Username;
             }
             else
             {
                 username = selectedUsername;
+                employeeService.ValidateUsername(currentEmployee.BankId, username);
             }
-
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
             password = Console.ReadLine();
 
@@ -433,11 +427,11 @@ namespace ATM.Services
                 Console.WriteLine(i + ". " + type);
                 i++;
             }
-            Console.Write("\n[" + Enum.GetName(typeof(EmployeeType), CurrentEmployee.EmployeeType) + "]Select an Employee type (Leave it empty to not change) : ");
+            Console.Write("\n[" + Enum.GetName(typeof(EmployeeType), currentEmployee.EmployeeType) + "]Select an Employee type (Leave it empty to not change) : ");
             string selectedType = Console.ReadLine();
             if (selectedType == null)
             {
-                employeeType = CurrentEmployee.EmployeeType;
+                employeeType = currentEmployee.EmployeeType;
             }
             else
             {
@@ -447,13 +441,13 @@ namespace ATM.Services
                     if ((int)employeeType <= 0 || (int)employeeType >= i)
                     {
                         Console.WriteLine("Invalid Employee Type. Keeping previous Employee Type");
-                        employeeType = CurrentEmployee.EmployeeType;
+                        employeeType = currentEmployee.EmployeeType;
                     }
                 }
                 catch
                 {
                     Console.WriteLine("Invalid Employee Type. Keeping Previous EmployeeType");
-                    employeeType = CurrentEmployee.EmployeeType;
+                    employeeType = currentEmployee.EmployeeType;
                 }
             }
 
@@ -517,6 +511,7 @@ namespace ATM.Services
             else
             {
                 username = selectedUsername;
+                accountService.ValidateUsername(currentAccount.BankId, username);
             }
 
             Console.Write("Please set a new Password (Leave it empty to not change) : ");
@@ -624,6 +619,13 @@ namespace ATM.Services
             return username;
         }
 
+        public string GetCurrencyName()
+        {
+            Console.Write("\nEnter Currency Name : ");
+            string currencyName = Console.ReadLine();
+            return currencyName;
+        }
+
         public string GetRevertTransactionId()
         {
             string txnId;
@@ -633,27 +635,25 @@ namespace ATM.Services
             return txnId;
         }
 
-        public string GetCurrency()
+        public Currency GetDataForCurrencyCreation(string bankId)
         {
+            string currencyName;
+            double exchangeRate;
             Console.Write("Enter Currency Name : ");
             string userInput = Console.ReadLine();
             if (userInput == null || userInput.Length != 3)
             {
                 Console.WriteLine("Invalid Name");
-                return null;
+                throw new CurrencyDataInvalidException();
             }
-            return userInput;
-        }
-
-        public double GetExchangeRate()
-        {
+            currencyService.ValidateCurrencyName(bankId, userInput);
+            currencyName = userInput;
             Console.Write("Enter Exchange Rate : ");
-            string userInput = Console.ReadLine();
-            double exchangeRate;
+            userInput = Console.ReadLine();
             if (String.IsNullOrEmpty(userInput))
             {
                 Console.WriteLine("Invalid Exchange Rate");
-                return 0;
+                throw new CurrencyDataInvalidException();
             }
             try
             {
@@ -661,15 +661,44 @@ namespace ATM.Services
                 if (exchangeRate <= 0)
                 {
                     Console.WriteLine("Invalid Exchange Rate");
-                    return 0;
+                    throw new CurrencyDataInvalidException();
                 }
-                return exchangeRate;
             }
             catch
             {
                 Console.WriteLine("Invalid Exchange Rate");
-                return 0;
+                throw new CurrencyDataInvalidException();
             }
+            return currencyService.CreateCurrency(currencyName, exchangeRate);
+        }
+
+        public Currency GetDataForCurrencyUpdate(Currency currentCurrency)
+        {
+            Console.Write("[" + currentCurrency.ExchangeRate + "] Enter new Exchange rate for '" + currentCurrency.Name + "' (Leave it Empty to not change) : ");
+            string userInput = Console.ReadLine();
+            double exchangeRate;
+            if (String.IsNullOrEmpty(userInput))
+            {
+                exchangeRate = currentCurrency.ExchangeRate;
+            }
+            else
+            {
+                try
+                {
+                    exchangeRate = Convert.ToDouble(userInput);
+                    if (exchangeRate < 0)
+                    {
+                        Console.WriteLine("Invalid Input! Keeping the previous Exchange Rate");
+                        exchangeRate = currentCurrency.ExchangeRate;
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Input! Keeping the previous Exchange Rate");
+                    exchangeRate = currentCurrency.ExchangeRate;
+                }
+            }
+            return currencyService.CreateCurrency(currentCurrency.Name, exchangeRate);
         }
 
         public string GetPasswordFromUser()
@@ -680,7 +709,7 @@ namespace ATM.Services
             return userInput;
         }
 
-        public void PrintTransactions(List<Transaction> transactions, decimal availBal)
+        public void PrintTransactions(IList<Transaction> transactions, decimal availBal)
         {
             Console.WriteLine("\n____TRANSACTION HISTORY____\n");
             Console.WriteLine("Date\tTXN ID\tDebit/Credit\tFrom\tTo\tNarrative\tAmount\n");
@@ -691,7 +720,7 @@ namespace ATM.Services
             Console.WriteLine("\t\t\t\tAvailable Balance : " + availBal);
         }
 
-        public void PrintEmployeeActions(List<EmployeeAction> employeeActions)
+        public void PrintEmployeeActions(IList<EmployeeAction> employeeActions)
         {
             Console.WriteLine("\n____ACTION HISTORY____\n");
             Console.WriteLine("Date\tACN ID\tAction Type\tAccount ID\tTXN ID\n");
@@ -759,7 +788,7 @@ namespace ATM.Services
         {
             StaffOperation operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. Revert Transaction\n5. View Transaction History\n6. View Action History\n6. Back");
+            Console.WriteLine("\n1. Create a new Account\n2. Update an Account\n3. Delete an Account\n4. Revert Transaction\n5. View Transaction History\n6. View Action History\n7. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try
@@ -777,7 +806,7 @@ namespace ATM.Services
         {
             UserOperation operation;
             Console.WriteLine("\n____OPERATIONS____\n");
-            Console.WriteLine("\n1. Deposit\n2. Withdraw\n3. Transfer\n4. View Action History\n5. Back");
+            Console.WriteLine("\n1. Deposit\n2. Withdraw\n3. Transfer\n4. View Transaction History\n5. Back");
             Console.Write("\nSelect an operation : ");
             string userInput = Console.ReadLine();
             try

@@ -9,9 +9,8 @@ namespace ATM.Services
 {
     public class BankService
     {
-        private IList<Bank> banks;
+        public static IList<Bank> banks;
         private readonly DataService dataService;
-        private readonly EncryptionService encryptionService;
         private readonly IDGenService idGenService;
         private readonly TransactionService transactionService;
         private readonly EmployeeActionService employeeActionService;
@@ -23,7 +22,6 @@ namespace ATM.Services
         {
             transactionService = new TransactionService();
             employeeActionService = new EmployeeActionService();
-            encryptionService = new EncryptionService();
             dataService = new DataService();
             idGenService = new IDGenService();
             employeeService = new EmployeeService();
@@ -34,10 +32,10 @@ namespace ATM.Services
 
         private void PopulateBankData()
         {
-            this.banks = dataService.ReadBankData();
-            if (this.banks == null)
+            banks = dataService.ReadBankData();
+            if (banks == null)
             {
-                this.banks = new List<Bank>();
+                banks = new List<Bank>();
             }
         }
 
@@ -54,15 +52,17 @@ namespace ATM.Services
         {
             PopulateBankData();
             employeeService.AddEmployee(bank.Id, adminEmployee);
-            this.banks.Add(bank);
-            dataService.WriteBankData(this.banks);
+            Currency defaultCurrency = currencyService.CreateCurrency("INR", 1);
+            currencyService.AddCurrency(bank.Id, defaultCurrency);
+            banks.Add(bank);
+            dataService.WriteBankData(banks);
         }
 
         private Bank GetBankById(string bankId)
         {
             PopulateBankData();
             CheckBankExistance(bankId);
-            return this.banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+            return banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
         }
 
         public void AddEmployee(string bankId, string employeeId, Employee newEmployee)
@@ -99,7 +99,7 @@ namespace ATM.Services
             bank.ORTGS = updateBank.ORTGS;
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            dataService.WriteBankData(this.banks);
+            dataService.WriteBankData(banks);
         }
 
         public void UpdateEmployee(string bankId, string employeeId, string currentEmployeeId, Employee updateEmployee)
@@ -118,7 +118,7 @@ namespace ATM.Services
             accountService.UpdateAccount(bankId, currentAccountId, updateAccount);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentAccountId);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            dataService.WriteBankData(this.banks);
+            dataService.WriteBankData(banks);
         }
 
         public void DeleteBank(string bankId, string employeeId)
@@ -133,7 +133,7 @@ namespace ATM.Services
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
             bank.IsActive = false;
             bank.DeletedOn = DateTime.Now;
-            dataService.WriteBankData(this.banks);
+            dataService.WriteBankData(banks);
         }
 
         public void DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
@@ -142,7 +142,7 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            employeeService.DeleteEmployee(bankId, employeeId);
+            employeeService.DeleteEmployee(bankId, deleteEmployeeId);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteAccount, deleteEmployeeId);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -158,16 +158,16 @@ namespace ATM.Services
         {
             PopulateBankData();
             Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            foreach (Bank bank in this.banks.Where(b => b.IsActive))
+            foreach (Bank bank in banks.Where(b => b.IsActive))
             {
                 bankNames.Add(bank.Id, bank.Name);
             }
             return bankNames;
         }
 
-        public void CheckBankExistance(string bankId)
+        public static void CheckBankExistance(string bankId)
         {
-            if (this.banks.Any(b => b.Id == bankId && b.IsActive))
+            if (banks.Any(b => b.Id == bankId && b.IsActive))
             {
                 return;
             }
@@ -233,7 +233,7 @@ namespace ATM.Services
         public void ValidateBankName(string bankName)
         {
             PopulateBankData();
-            if (this.banks.Any(b => b.Name == bankName && b.IsActive))
+            if (banks.Any(b => b.Name == bankName && b.IsActive))
             {
                 throw new BankNameAlreadyExistsException();
             }
@@ -245,6 +245,7 @@ namespace ATM.Services
             Bank bank = GetBankById(bankId);
             return new Bank
             {
+                Id = bank.Id,
                 Name = bank.Name,
                 IMPS = bank.IMPS,
                 RTGS = bank.RTGS,
