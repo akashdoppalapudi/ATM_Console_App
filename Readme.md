@@ -19,9 +19,9 @@ This Solution Contains three projects
 
 ## Data Storage
 
-Data is stored in a local `bankdata.dat` file which is a binary file to store data.
-Data fetching and data writing happens inside `DataHandler.cs` in `ATM.Services`.
-Serializable C# objects are stored inside `bankdata.dat` using file stream and also can be deserialized when the data needs to be read.
+Data is stored in local `json` files.
+Data fetching and data writing happens inside `DataService.cs` in `ATM.Services`.
+C# objects are stored inside `json` files `JsonSerializer` and also can be deserialized when the data needs to be read.
 
 ## Flowchart
 

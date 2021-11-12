@@ -1,10 +1,9 @@
-﻿using System;
-
-namespace ATM.Models
+﻿namespace ATM.Models
 {
-    [Serializable]
     public class Currency
     {
+        public int Id { get; set; }
+        public string BankId { get; set; }
         public string Name { get; set; }
         public double ExchangeRate { get; set; }
     }
