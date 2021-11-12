@@ -13,7 +13,7 @@ namespace ATM.Services
         private readonly string currencyDataFile = "currencydata.json";
         private readonly string transactionDataFile = "transactiondata.json";
         private readonly string employeeActionDataFile = "employeeactiondata.json";
-        private JsonSerializerOptions indentOption = new JsonSerializerOptions() { WriteIndented = true };
+        private readonly JsonSerializerOptions indentOption = new JsonSerializerOptions() { WriteIndented = true };
 
         public IList<Bank> ReadBankData()
         {
@@ -125,7 +125,7 @@ namespace ATM.Services
             }
         }
 
-        public IList<EmployeeAction> ReadEmployeeActions()
+        public IList<EmployeeAction> ReadEmployeeActionData()
         {
             if (File.Exists(employeeActionDataFile))
             {

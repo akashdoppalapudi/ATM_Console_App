@@ -1,6 +1,4 @@
 ﻿using ATM.Models.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace ATM.Models
 {
