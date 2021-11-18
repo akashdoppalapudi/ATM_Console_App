@@ -28,7 +28,7 @@ namespace ATM.Services
         private string GetDateStr()
         {
             DateTime date = DateTime.Now;
-            string dateStr = date.ToString().Substring(0, 10).Replace("-", string.Empty);
+            string dateStr = date.ToString().Replace("-", string.Empty).Replace(" ", string.Empty).Replace(":", string.Empty);
             return dateStr;
         }
     }

@@ -56,7 +56,7 @@ namespace ATM.CLI
                     string bankId = consoleUI.SelectBank(bankNames);
                     try
                     {
-                        BankService.CheckBankExistance(bankId);
+                        bankService.CheckBankExistance(bankId);
                     }
                     catch (BankDoesnotExistException)
                     {
@@ -553,7 +553,7 @@ namespace ATM.CLI
                                     string selectedToBankId = consoleUI.SelectBank(bankNames);
                                     try
                                     {
-                                        BankService.CheckBankExistance(selectedToBankId);
+                                        bankService.CheckBankExistance(selectedToBankId);
                                         toBankId = selectedToBankId;
                                         string selectedToUsername = consoleUI.GetUsername();
                                         toAccountId = accountService.GetAccountIdByUsername(toBankId, selectedToUsername);
@@ -583,6 +583,7 @@ namespace ATM.CLI
                                 }
                                 else if (option5 == UserOperation.TransactionHistory)
                                 {
+                                    accountService.CheckAccountExistance(bankId, accountId);
                                     IList<Transaction> transactions = transactionService.GetTransactions(bankId, accountId);
                                     decimal balance = accountService.GetBalance(bankId, accountId);
                                     consoleUI.PrintTransactions(transactions, balance);
