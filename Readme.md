@@ -11,17 +11,20 @@ This Solution Contains three projects
 - ATM.Models
 - ATM.Services _`Depends on ATM.Models`_
 
-## Banks Structure
-
-![ClassDiagram](/ATM-Class-Diagram.png?raw=true 'ClassDiagram')
-
-> Employees with Admin access can do more actions than normal staff.
-
 ## Data Storage
 
-Data is stored in local `json` files.
-Data fetching and data writing happens inside `DataService.cs` in `ATM.Services`.
-C# objects are stored inside `json` files `JsonSerializer` and also can be deserialized when the data needs to be read.
+Data is stored in an **MYSQL Database** data is added, modified and retrieved using MySqlClient which is a `Nuget package`.
+
+The Database Schema is given in `schema.sql`.
+
+The schema is available at [`https://drawsql.app/akash/diagrams/banking-application`](https://drawsql.app/akash/diagrams/banking-application)
+
+The database can be created using the following command
+
+```PowerShell
+> mysql -u root -p "name of the database" < "path to the schema sql"
+```
+
 
 ## Flowchart
 
