@@ -1,42 +1,34 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ATM.Services
 {
     public class BankService
     {
-        public static IList<Bank> banks;
-        private readonly DataService dataService;
         private readonly IDGenService idGenService;
         private readonly TransactionService transactionService;
         private readonly EmployeeActionService employeeActionService;
         private readonly EmployeeService employeeService;
         private readonly AccountService accountService;
         private readonly CurrencyService currencyService;
+        private readonly DBService dbService;
 
         public BankService()
         {
             transactionService = new TransactionService();
             employeeActionService = new EmployeeActionService();
-            dataService = new DataService();
             idGenService = new IDGenService();
             employeeService = new EmployeeService();
             accountService = new AccountService();
             currencyService = new CurrencyService();
-            PopulateBankData();
+            dbService = new DBService();
         }
 
-        private void PopulateBankData()
+        public void CheckBankExistance(string bankId)
         {
-            banks = dataService.ReadBankData();
-            if (banks == null)
-            {
-                banks = new List<Bank>();
-            }
+            dbService.CheckBankExistance(bankId);
         }
 
         public Bank CreateBank(string name)
@@ -50,19 +42,10 @@ namespace ATM.Services
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
-            PopulateBankData();
+            dbService.AddBank(bank);
             employeeService.AddEmployee(bank.Id, adminEmployee);
             Currency defaultCurrency = currencyService.CreateCurrency("INR", 1);
             currencyService.AddCurrency(bank.Id, defaultCurrency);
-            banks.Add(bank);
-            dataService.WriteBankData(banks);
-        }
-
-        private Bank GetBankById(string bankId)
-        {
-            PopulateBankData();
-            CheckBankExistance(bankId);
-            return banks.FirstOrDefault(b => b.Id == bankId && b.IsActive);
         }
 
         public void AddEmployee(string bankId, string employeeId, Employee newEmployee)
@@ -71,23 +54,23 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
+            employeeService.AddEmployee(bankId, newEmployee);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newEmployee.Id);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            employeeService.AddEmployee(bankId, newEmployee);
         }
 
         public void AddAccount(string bankId, string employeeId, Account newAccount)
         {
             Transaction transaction = transactionService.CreateTransaction(bankId, newAccount.Id, 1500, TransactionType.Credit, TransactionNarrative.AccountCreation, newAccount.Id);
-            transactionService.AddTransaction(bankId, newAccount.Id, transaction);
             accountService.AddAccount(bankId, newAccount);
+            transactionService.AddTransaction(bankId, newAccount.Id, transaction);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newAccount.Id, transaction.Id);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void UpdateBank(string bankId, string employeeId, Bank updateBank)
         {
-            Bank bank = GetBankById(bankId);
+            Bank bank = dbService.GetBankById(bankId);
             if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
@@ -97,9 +80,9 @@ namespace ATM.Services
             bank.RTGS = updateBank.RTGS;
             bank.OIMPS = updateBank.OIMPS;
             bank.ORTGS = updateBank.ORTGS;
+            dbService.UpdateBank(bank);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            dataService.WriteBankData(banks);
         }
 
         public void UpdateEmployee(string bankId, string employeeId, string currentEmployeeId, Employee updateEmployee)
@@ -108,7 +91,7 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            employeeService.UpdateEmployee(bankId, employeeId, updateEmployee);
+            employeeService.UpdateEmployee(bankId, currentEmployeeId, updateEmployee);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentEmployeeId);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -118,22 +101,17 @@ namespace ATM.Services
             accountService.UpdateAccount(bankId, currentAccountId, updateAccount);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentAccountId);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            dataService.WriteBankData(banks);
         }
 
         public void DeleteBank(string bankId, string employeeId)
         {
-            PopulateBankData();
-            Bank bank = GetBankById(bankId);
             if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
+            dbService.DeleteBank(bankId);
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteBank);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
-            bank.IsActive = false;
-            bank.DeletedOn = DateTime.Now;
-            dataService.WriteBankData(banks);
         }
 
         public void DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
@@ -156,22 +134,7 @@ namespace ATM.Services
 
         public Dictionary<string, string> GetAllBankNames()
         {
-            PopulateBankData();
-            Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            foreach (Bank bank in banks.Where(b => b.IsActive))
-            {
-                bankNames.Add(bank.Id, bank.Name);
-            }
-            return bankNames;
-        }
-
-        public static void CheckBankExistance(string bankId)
-        {
-            if (banks.Any(b => b.Id == bankId && b.IsActive))
-            {
-                return;
-            }
-            throw new BankDoesnotExistException();
+            return dbService.GetAllBankNames();
         }
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
@@ -201,7 +164,7 @@ namespace ATM.Services
         {
             Transaction transaction = transactionService.GetTransactionById(bankId, txnId);
             decimal amount = transaction.TransactionAmount;
-            string fromAccId = transaction.FromAccountId;
+            string fromAccId = transaction.AccountId;
             string toAccId = transaction.ToAccountId;
             string toBankId = transaction.ToBankId;
             Transfer(toBankId, toAccId, bankId, fromAccId, amount);
@@ -232,26 +195,13 @@ namespace ATM.Services
 
         public void ValidateBankName(string bankName)
         {
-            PopulateBankData();
-            if (banks.Any(b => b.Name == bankName && b.IsActive))
-            {
-                throw new BankNameAlreadyExistsException();
-            }
+            dbService.ValidateBankName(bankName);
         }
 
         public Bank GetBankDetails(string bankId)
         {
-            PopulateBankData();
-            Bank bank = GetBankById(bankId);
-            return new Bank
-            {
-                Id = bank.Id,
-                Name = bank.Name,
-                IMPS = bank.IMPS,
-                RTGS = bank.RTGS,
-                OIMPS = bank.OIMPS,
-                ORTGS = bank.ORTGS
-            };
+            Bank bank = dbService.GetBankById(bankId);
+            return bank;
         }
     }
 }
