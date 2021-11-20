@@ -158,5 +158,15 @@ namespace ATM.Services
         {
             Console.WriteLine("Transaction Reverted Successfully");
         }
+
+        public void NoTransactions()
+        {
+            Console.WriteLine("There are no Transactions in this account");
+        }
+
+        public void NoEmployeeActions()
+        {
+            Console.WriteLine("There are no actions for this employee");
+        }
     }
 }

@@ -380,6 +380,12 @@ namespace ATM.Services
         {
             IList<Transaction> transactions = new List<Transaction>();
             conn.Open();
+            cmd.CommandText = $"SELECT COUNT(*) FROM transactions WHERE bank_id='{bankId}' AND account_id='{accountId}';";
+            if (Convert.ToInt32(cmd.ExecuteScalar()) <= 0)
+            {
+                conn.Close();
+                throw new NoTransactionsException();
+            }
             cmd.CommandText = $"SELECT * FROM transactions WHERE bank_id='{bankId}' AND account_id='{accountId}';";
             using MySqlDataReader rdr = cmd.ExecuteReader();
             while (rdr.Read())
@@ -406,6 +412,12 @@ namespace ATM.Services
         {
             IList<EmployeeAction> actions = new List<EmployeeAction>();
             conn.Open();
+            cmd.CommandText = $"SELECT COUNT(*) FROM actions WHERE bank_id='{bankId}' AND employee_id='{employeeId}';";
+            if (Convert.ToInt32(cmd.ExecuteScalar()) <= 0)
+            {
+                conn.Close();
+                throw new NoEmployeeActionsException();
+            }
             cmd.CommandText = $"SELECT * FROM actions WHERE bank_id='{bankId}' AND employee_id='{employeeId}';";
             using MySqlDataReader rdr = cmd.ExecuteReader();
             while (rdr.Read())

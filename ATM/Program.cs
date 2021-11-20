@@ -339,15 +339,20 @@ namespace ATM.CLI
                                         try
                                         {
                                             selectedAccountId = accountService.GetAccountIdByUsername(bankId, selectedUsername);
+                                            IList<Transaction> transactions = transactionService.GetTransactions(bankId, selectedAccountId);
+                                            decimal balance = accountService.GetBalance(bankId, selectedAccountId);
+                                            consoleUI.PrintTransactions(transactions, balance);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        IList<Transaction> transactions = transactionService.GetTransactions(bankId, selectedAccountId);
-                                        decimal balance = accountService.GetBalance(bankId, selectedAccountId);
-                                        consoleUI.PrintTransactions(transactions, balance);
+                                        catch (NoTransactionsException)
+                                        {
+                                            consoleMessages.NoTransactions();
+                                        }
+                                        
                                     }
                                     else if (option3 == AdminOperation.ActionHistory)
                                     {
@@ -356,14 +361,19 @@ namespace ATM.CLI
                                         try
                                         {
                                             selectedEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
+                                            IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(bankId, selectedEmployeeId);
+                                            consoleUI.PrintEmployeeActions(actions);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(bankId, selectedEmployeeId);
-                                        consoleUI.PrintEmployeeActions(actions);
+                                        catch (NoEmployeeActionsException)
+                                        {
+                                            consoleMessages.NoEmployeeActions();
+                                            continue;
+                                        }
                                     }
                                     else if (option3 == AdminOperation.Back)
                                     {
