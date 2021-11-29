@@ -1,6 +1,7 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
+using System;
 
 namespace ATM.Services
 {
@@ -143,7 +144,7 @@ namespace ATM.Services
         public void Authenticate(string bankId, string accountId, string password)
         {
             Account account = GetAccountById(bankId, accountId);
-            if (account.Password != encryptionService.ComputeHash(password, account.Salt))
+            if (Convert.ToBase64String(account.Password) != Convert.ToBase64String(encryptionService.ComputeHash(password, account.Salt)))
             {
                 throw new AuthenticationFailedException();
             }

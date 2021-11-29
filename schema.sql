@@ -120,7 +120,7 @@ CREATE TABLE `currencies` (
   PRIMARY KEY (`id`),
   KEY `bank_id` (`bank_id`),
   CONSTRAINT `currencies_ibfk_1` FOREIGN KEY (`bank_id`) REFERENCES `banks` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,10 +171,11 @@ CREATE TABLE `persons` (
   `name` varchar(30) NOT NULL,
   `gender` int NOT NULL,
   `username` varchar(30) NOT NULL,
-  `password` varchar(64) NOT NULL,
   `is_active` tinyint(1) NOT NULL,
   `created_on` datetime NOT NULL,
   `deleted_on` datetime DEFAULT NULL,
+  `salt` varbinary(24) NOT NULL,
+  `password` varbinary(64) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -231,4 +232,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-11-18 20:01:01
+-- Dump completed on 2021-11-29 13:07:11
