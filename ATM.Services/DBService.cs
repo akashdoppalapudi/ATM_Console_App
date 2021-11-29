@@ -34,7 +34,9 @@ namespace ATM.Services
         public void AddEmployee(Employee employee)
         {
             conn.Open();
-            cmd.CommandText = $"INSERT INTO persons(id,name,gender,username,password,is_active,created_on) VALUES ('{employee.Id}','{employee.Name}',{(int)employee.Gender},'{employee.Username}','{employee.Password}',{employee.IsActive},'{employee.CreatedOn.ToString(dateTimeFormat)}');";
+            cmd.CommandText = $"INSERT INTO persons(id,name,gender,username,is_active,created_on,salt,password) VALUES ('{employee.Id}','{employee.Name}',{(int)employee.Gender},'{employee.Username}',{employee.IsActive},'{employee.CreatedOn.ToString(dateTimeFormat)}',?salt,?password);";
+            cmd.Parameters.Add(new MySqlParameter("salt", employee.Salt));
+            cmd.Parameters.Add(new MySqlParameter("password", employee.Password));
             cmd.ExecuteNonQuery();
             cmd.CommandText = $"INSERT INTO employees(id,bank_id,type) VALUES ('{employee.Id}','{employee.BankId}',{(int)employee.EmployeeType});";
             cmd.ExecuteNonQuery();
@@ -52,7 +54,9 @@ namespace ATM.Services
         public void AddAccount(Account account)
         {
             conn.Open();
-            cmd.CommandText = $"INSERT INTO persons(id,name,gender,username,password,is_active,created_on) VALUES ('{account.Id}','{account.Name}',{(int)account.Gender},'{account.Username}','{account.Password}',{account.IsActive},'{account.CreatedOn.ToString(dateTimeFormat)}');";
+            cmd.CommandText = $"INSERT INTO persons(id,name,gender,username,is_active,created_on,salt,password) VALUES ('{account.Id}','{account.Name}',{(int)account.Gender},'{account.Username}',{account.IsActive},'{account.CreatedOn.ToString(dateTimeFormat)}',?salt,?password);";
+            cmd.Parameters.Add(new MySqlParameter("salt", account.Salt));
+            cmd.Parameters.Add(new MySqlParameter("password", account.Password));
             cmd.ExecuteNonQuery();
             cmd.CommandText = $"INSERT INTO accounts(id,bank_id,type,balance) VALUES ('{account.Id}','{account.BankId}',{(int)account.AccountType},{account.Balance});";
             cmd.ExecuteNonQuery();
@@ -294,7 +298,8 @@ namespace ATM.Services
                     Name = rdr.GetString(4),
                     Gender = (Gender)rdr.GetInt32(5),
                     Username = rdr.GetString(6),
-                    Password = rdr.GetString(7)
+                    Salt = (byte[])rdr.GetValue(10),
+                    Password = (byte[])rdr.GetValue(11)
                 };
                 conn.Close();
                 return employee;
@@ -320,7 +325,8 @@ namespace ATM.Services
                     Name = rdr.GetString(5),
                     Gender = (Gender)rdr.GetInt32(6),
                     Username = rdr.GetString(7),
-                    Password = rdr.GetString(8)
+                    Salt = (byte[])rdr.GetValue(11),
+                    Password = (byte[])rdr.GetValue(12)
                 };
                 conn.Close();
                 return account;
@@ -449,7 +455,9 @@ namespace ATM.Services
         public void UpdateEmployee(Employee employee)
         {
             conn.Open();
-            cmd.CommandText = $"UPDATE employees INNER JOIN persons ON employees.id=persons.id SET employees.type={(int)employee.EmployeeType},persons.name='{employee.Name}',persons.gender={(int)employee.Gender},persons.username='{employee.Username}',persons.password='{employee.Password}' WHERE employees.id='{employee.Id}' AND employees.bank_id='{employee.BankId}' AND persons.is_active=TRUE;";
+            cmd.CommandText = $"UPDATE employees INNER JOIN persons ON employees.id=persons.id SET employees.type={(int)employee.EmployeeType},persons.name='{employee.Name}',persons.gender={(int)employee.Gender},persons.username='{employee.Username}',persons.password=?passwordBytes,persons.salt=?saltBytes WHERE employees.id='{employee.Id}' AND employees.bank_id='{employee.BankId}' AND persons.is_active=TRUE;";
+            cmd.Parameters.Add(new MySqlParameter("passwordBytes", employee.Password));
+            cmd.Parameters.Add(new MySqlParameter("saltBytes", employee.Salt));
             cmd.ExecuteNonQuery();
             conn.Close();
         }
@@ -457,7 +465,9 @@ namespace ATM.Services
         public void UpdateAccount(Account account)
         {
             conn.Open();
-            cmd.CommandText = $"UPDATE accounts INNER JOIN persons ON accounts.id=persons.id SET accounts.type={(int)account.AccountType},accounts.balance={account.Balance},persons.name='{account.Name}',persons.gender={(int)account.Gender},persons.username='{account.Username}',persons.password='{account.Password}' WHERE accounts.id='{account.Id}' AND accounts.bank_id='{account.BankId}' AND persons.is_active=TRUE;";
+            cmd.CommandText = $"UPDATE accounts INNER JOIN persons ON accounts.id=persons.id SET accounts.type={(int)account.AccountType},accounts.balance={account.Balance},persons.name='{account.Name}',persons.gender={(int)account.Gender},persons.username='{account.Username}',persons.password=?passwordBytes,persons.salt=?saltBytes WHERE accounts.id='{account.Id}' AND accounts.bank_id='{account.BankId}' AND persons.is_active=TRUE;";
+            cmd.Parameters.Add(new MySqlParameter("passwordBytes", account.Password));
+            cmd.Parameters.Add(new MySqlParameter("saltBytes", account.Salt));
             cmd.ExecuteNonQuery();
             conn.Close();
         }

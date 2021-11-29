@@ -1,6 +1,7 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
+using System;
 
 namespace ATM.Services
 {
@@ -29,13 +30,15 @@ namespace ATM.Services
 
         public Employee CreateEmployee(string name, Gender gender, string username, string password, EmployeeType employeeType)
         {
+            (byte[] passwordBytes, byte[] saltBytes) = encryptionService.ComputeHash(password);
             return new Employee
             {
                 Id = idGenService.GenId(name),
                 Name = name,
                 Gender = gender,
                 Username = username,
-                Password = encryptionService.ComputeSha256Hash(password),
+                Password = passwordBytes,
+                Salt = saltBytes,
                 EmployeeType = employeeType
             };
         }
@@ -58,9 +61,10 @@ namespace ATM.Services
             employee.Name = UpdateEmployee.Name;
             employee.Gender = UpdateEmployee.Gender;
             employee.Username = UpdateEmployee.Username;
-            if (UpdateEmployee.Password != encryptionService.ComputeSha256Hash(""))
+            if (UpdateEmployee.Password != encryptionService.ComputeHash("", UpdateEmployee.Salt))
             {
                 employee.Password = UpdateEmployee.Password;
+                employee.Salt = UpdateEmployee.Salt;
             }
             employee.EmployeeType = UpdateEmployee.EmployeeType;
             dbService.UpdateEmployee(employee);
@@ -99,7 +103,7 @@ namespace ATM.Services
         public void Authenticate(string bankId, string employeeId, string password)
         {
             Employee employee = GetEmployeeById(bankId, employeeId);
-            if (employee.Password != encryptionService.ComputeSha256Hash(password))
+            if (Convert.ToBase64String(employee.Password) != Convert.ToBase64String(encryptionService.ComputeHash(password, employee.Salt)))
             {
                 throw new AuthenticationFailedException();
             }
