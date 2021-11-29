@@ -29,13 +29,15 @@ namespace ATM.Services
 
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
         {
+            (byte[] passwordBytes, byte[] saltBytes) = encryptionService.ComputeHash(password);
             return new Account
             {
                 Id = idGenService.GenId(name),
                 Name = name,
                 Gender = gender,
                 Username = username,
-                Password = encryptionService.ComputeSha256Hash(password),
+                Password = passwordBytes,
+                Salt = saltBytes,
                 AccountType = accountType
             };
         }
@@ -57,9 +59,10 @@ namespace ATM.Services
             account.Name = updateAccount.Name;
             account.Gender = updateAccount.Gender;
             account.Username = updateAccount.Username;
-            if (updateAccount.Password != encryptionService.ComputeSha256Hash(""))
+            if (updateAccount.Password != encryptionService.ComputeHash("", updateAccount.Salt))
             {
                 account.Password = updateAccount.Password;
+                account.Salt = updateAccount.Salt;
             }
             account.AccountType = updateAccount.AccountType;
             dbService.UpdateAccount(account);
@@ -140,7 +143,7 @@ namespace ATM.Services
         public void Authenticate(string bankId, string accountId, string password)
         {
             Account account = GetAccountById(bankId, accountId);
-            if (account.Password != encryptionService.ComputeSha256Hash(password))
+            if (account.Password != encryptionService.ComputeHash(password, account.Salt))
             {
                 throw new AuthenticationFailedException();
             }
