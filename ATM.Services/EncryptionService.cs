@@ -1,22 +1,28 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
 
 namespace ATM.Services
 {
     public class EncryptionService
     {
-        public string ComputeSha256Hash(string rawData)
+        public const int SALT_SIZE = 24;
+        public const int HASH_SIZE = 64;
+        public const int ITERATIONS = 10000;
+
+        public byte[] ComputeHash(string rawData, byte[] salt)
         {
-            using SHA256 sha256Hash = SHA256.Create();
-            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawData));
+            Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(rawData, salt, ITERATIONS);
+            byte[] hash = pbkdf2.GetBytes(HASH_SIZE);
+            return hash;
+        }
 
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                builder.Append(bytes[i].ToString("x2"));
-            }
-
-            return builder.ToString();
+        public (byte[], byte[]) ComputeHash(string rawData)
+        {
+            RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
+            byte[] salt = new byte[SALT_SIZE];
+            provider.GetBytes(salt);
+            Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(rawData, salt, ITERATIONS);
+            byte[] hash = pbkdf2.GetBytes(HASH_SIZE);
+            return (hash, salt);
         }
     }
 }
