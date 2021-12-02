@@ -1,7 +1,7 @@
 # Banking Application
 
 This is a C# Console App made to do tasks of a bank like Deposit, Withdraw and transfer funds.
-This is built on **.NET** framework of version `.NET.5.0`
+This is built on **.NET** framework of version `.NET.6.0`
 
 ## Structure
 
@@ -11,19 +11,15 @@ This Solution Contains three projects
 - ATM.Models
 - ATM.Services _`Depends on ATM.Models`_
 
+## Dependencies
+
+>MySql.EntityFrameWorkCore
+
 ## Data Storage
 
-Data is stored in an **MYSQL Database** data is added, modified and retrieved using MySqlClient which is a `Nuget package`.
+Data is stored in an **MYSQL Database** data is added, modified and retrieved using `MySql.EntityFrameWorkCore` which is a `Nuget package`.
 
-The Database Schema is given in `schema.sql`.
-
-The schema is available at [`https://drawsql.app/akash/diagrams/banking-application`](https://drawsql.app/akash/diagrams/banking-application)
-
-The database can be created using the following command
-
-```PowerShell
-> mysql -u root -p "name of the database" < "path to the schema sql"
-```
+**Code First** approach is used to create the database in MySql Server.
 
 
 ## Flowchart
