@@ -72,7 +72,7 @@ namespace ATM.Services
         public void DeleteAccount(string bankId, string accountId)
         {
             CheckAccountExistance(bankId, accountId);
-            dbService.DeletePerson(accountId);
+            dbService.DeleteAccount(bankId, accountId);
         }
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)

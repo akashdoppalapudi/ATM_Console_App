@@ -23,6 +23,7 @@ namespace ATM.Services
                 Id = idGenService.GenTransactionId(bankId, accountId),
                 TransactionDate = DateTime.Now,
                 TransactionType = transactionType,
+                BankId = bankId,
                 AccountId = fromAccId,
                 ToBankId = toBankId,
                 ToAccountId = toAccId,

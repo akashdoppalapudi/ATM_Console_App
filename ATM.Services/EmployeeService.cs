@@ -73,7 +73,7 @@ namespace ATM.Services
         public void DeleteEmployee(string bankId, string employeeId)
         {
             CheckEmployeeExistance(bankId, employeeId);
-            dbService.DeletePerson(employeeId);
+            dbService.DeleteEmployee(bankId, employeeId);
         }
 
         public Employee GetEmployeeDetails(string bankId, string employeeId)
