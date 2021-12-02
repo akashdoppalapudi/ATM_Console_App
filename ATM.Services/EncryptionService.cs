@@ -17,9 +17,9 @@ namespace ATM.Services
 
         public (byte[], byte[]) ComputeHash(string rawData)
         {
-            RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
+            RandomNumberGenerator rng = RandomNumberGenerator.Create();
             byte[] salt = new byte[SALT_SIZE];
-            provider.GetBytes(salt);
+            rng.GetBytes(salt);
             Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(rawData, salt, ITERATIONS);
             byte[] hash = pbkdf2.GetBytes(HASH_SIZE);
             return (hash, salt);
