@@ -14,6 +14,8 @@ namespace ATM.Services
                 bankContext.Database.EnsureCreated();
             }
         }
+
+
         public void AddBank(Bank bank)
         {
             using (BankContext bankContext = new BankContext())
