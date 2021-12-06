@@ -13,7 +13,9 @@ namespace ATM.Services
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;
         private readonly MapperConfiguration employeeDBConfig;
+        private readonly MapperConfiguration dbEmployeeConfig;
         private readonly Mapper employeeDBMapper;
+        private readonly Mapper dbEmployeeMapper;
 
         public EmployeeService()
         {
@@ -21,6 +23,8 @@ namespace ATM.Services
             encryptionService = new EncryptionService();
             employeeDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Employee, EmployeeDBModel>());
             employeeDBMapper = new Mapper(employeeDBConfig);
+            dbEmployeeConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeDBModel, Employee>());
+            dbEmployeeMapper = new Mapper(dbEmployeeConfig);
         }
 
         private Employee GetEmployeeById(string bankId, string employeeId)
@@ -28,7 +32,8 @@ namespace ATM.Services
             CheckEmployeeExistance(bankId, employeeId);
             using (BankContext bankContext = new BankContext())
             {
-                return employeeDBMapper.Map<Employee>(bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.Id == employeeId && e.IsActive));
+                EmployeeDBModel employeeRecord = bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.Id == employeeId && e.IsActive);
+                return dbEmployeeMapper.Map<Employee>(employeeRecord);
             }
         }
 
@@ -100,7 +105,12 @@ namespace ATM.Services
             using (BankContext bankContext = new BankContext())
             {
                 EmployeeDBModel currentEmployeeRecord = bankContext.Employee.First(e => e.BankId == employee.BankId && e.Id == employee.Id && e.IsActive);
-                currentEmployeeRecord = employeeDBMapper.Map<EmployeeDBModel>(employee);
+                currentEmployeeRecord.Name = employee.Name;
+                currentEmployeeRecord.Gender = employee.Gender;
+                currentEmployeeRecord.Username = employee.Username;
+                currentEmployeeRecord.Password = employee.Password;
+                currentEmployeeRecord.Salt = employee.Salt;
+                currentEmployeeRecord.EmployeeType = employee.EmployeeType;
                 bankContext.SaveChanges();
             }
         }
@@ -112,6 +122,7 @@ namespace ATM.Services
             {
                 EmployeeDBModel employeeRecord = bankContext.Employee.First(e => e.Id == employeeId && e.BankId == bankId && e.IsActive);
                 employeeRecord.IsActive = false;
+                employeeRecord.DeletedOn = DateTime.Now;
                 bankContext.SaveChanges();
             }
         }

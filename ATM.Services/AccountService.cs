@@ -14,6 +14,8 @@ namespace ATM.Services
         private readonly EncryptionService encryptionService;
         private readonly MapperConfiguration accountDBConfig;
         private readonly Mapper accountDBMapper;
+        private readonly MapperConfiguration dbAccountConfig;
+        private readonly Mapper dbAccountMapper;
 
         public AccountService()
         {
@@ -21,6 +23,8 @@ namespace ATM.Services
             encryptionService = new EncryptionService();
             accountDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Account, AccountDBModel>());
             accountDBMapper = new Mapper(accountDBConfig);
+            dbAccountConfig = new MapperConfiguration(cfg => cfg.CreateMap<AccountDBModel, Account>());
+            dbAccountMapper = new Mapper(dbAccountConfig);
         }
 
         public void CheckAccountExistance(string bankId, string accountId)
@@ -39,7 +43,7 @@ namespace ATM.Services
             CheckAccountExistance(bankId, accountId);
             using (BankContext bankContext = new BankContext())
             {
-                return accountDBMapper.Map<Account>(bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
+                return dbAccountMapper.Map<Account>(bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
             }
         }
 
@@ -100,7 +104,13 @@ namespace ATM.Services
             using (BankContext bankContext = new BankContext())
             {
                 AccountDBModel currentAccountRecord = bankContext.Account.First(a => a.BankId == account.BankId && a.Id == account.Id && a.IsActive);
-                currentAccountRecord = accountDBMapper.Map<AccountDBModel>(account);
+                currentAccountRecord.Name = account.Name;
+                currentAccountRecord.Gender = account.Gender;
+                currentAccountRecord.Username = account.Username;
+                currentAccountRecord.Password = account.Password;
+                currentAccountRecord.Salt = account.Salt;
+                currentAccountRecord.AccountType = account.AccountType;
+                currentAccountRecord.Balance = account.Balance;
                 bankContext.SaveChanges();
             }
         }
@@ -112,6 +122,7 @@ namespace ATM.Services
             {
                 AccountDBModel accountRecord = bankContext.Account.First(a => a.Id == accountId && a.BankId == bankId && a.IsActive);
                 accountRecord.IsActive = false;
+                accountRecord.DeletedOn = DateTime.Now;
                 bankContext.SaveChanges();
             }
         }

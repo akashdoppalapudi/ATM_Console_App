@@ -14,12 +14,16 @@ namespace ATM.Services
         private readonly IDGenService idGenService;
         private readonly MapperConfiguration transactionDBConfig;
         private readonly Mapper transactionDBMapper;
+        private readonly MapperConfiguration dbTransactionConfig;
+        private readonly Mapper dbTransactionMapper;
 
         public TransactionService()
         {
             idGenService = new IDGenService();
             transactionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, TransactionDBModel>());
             transactionDBMapper = new Mapper(transactionDBConfig);
+            dbTransactionConfig = new MapperConfiguration(cfg => cfg.CreateMap<TransactionDBModel, Transaction>());
+            dbTransactionMapper = new Mapper(dbTransactionConfig);
         }
 
         public Transaction CreateTransaction(string bankId, string accountId, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
@@ -60,7 +64,7 @@ namespace ATM.Services
                 {
                     throw new TransactionNotFoundException();
                 }
-                return transactionDBMapper.Map<Transaction>(transactionRecord);
+                return dbTransactionMapper.Map<Transaction>(transactionRecord);
             }
         }
 
@@ -69,7 +73,7 @@ namespace ATM.Services
             IList<Transaction> transactions;
             using (BankContext bankContext = new BankContext())
             {
-                transactions = transactionDBMapper.Map<Transaction[]>(bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList());
+                transactions = dbTransactionMapper.Map<Transaction[]>(bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList());
             }
             if (transactions.Count == 0 || transactions == null)
             {

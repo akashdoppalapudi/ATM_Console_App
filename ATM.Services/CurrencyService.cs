@@ -10,11 +10,15 @@ namespace ATM.Services
     {
         private readonly MapperConfiguration currencyDBConfig;
         private readonly Mapper currencyDBMapper;
+        private readonly MapperConfiguration dbCurrencyConfig;
+        private readonly Mapper dbCurrencyMapper;
 
         public CurrencyService()
         {
             currencyDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Currency, CurrencyDBModel>());
             currencyDBMapper = new Mapper(currencyDBConfig);
+            dbCurrencyConfig = new MapperConfiguration(cfg => cfg.CreateMap<CurrencyDBModel, Currency>());
+            dbCurrencyMapper = new Mapper(dbCurrencyConfig);
         }
 
         public void CheckCurrencyExistance(string bankId, string currencyName)
@@ -45,7 +49,7 @@ namespace ATM.Services
             using (BankContext bankContext = new BankContext())
             {
                 CurrencyDBModel currencyRecord = bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
-                return currencyDBMapper.Map<Currency>(currencyRecord);
+                return dbCurrencyMapper.Map<Currency>(currencyRecord);
             }
         }
 

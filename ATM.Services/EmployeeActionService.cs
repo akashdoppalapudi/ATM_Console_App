@@ -14,12 +14,16 @@ namespace ATM.Services
         private readonly IDGenService idGenService;
         private readonly MapperConfiguration employeeActionDBConfig;
         private readonly Mapper employeeActionDBMapper;
+        private readonly MapperConfiguration dbEmployeeActionConfig;
+        private readonly Mapper dbEmployeeActionMapper;
 
         public EmployeeActionService()
         {
             idGenService = new IDGenService();
             employeeActionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeAction, EmployeeActionDBModel>());
             employeeActionDBMapper = new Mapper(employeeActionDBConfig);
+            dbEmployeeActionConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeActionDBModel, EmployeeAction>());
+            dbEmployeeActionMapper = new Mapper(dbEmployeeActionConfig);
         }
 
         public EmployeeAction CreateEmployeeAction(string bankId, string employeeId, EmployeeActionType actionType, string accId = null, string TXNID = null)
@@ -52,7 +56,7 @@ namespace ATM.Services
             IList<EmployeeAction> actions;
             using (BankContext bankContext = new BankContext())
             {
-                actions = employeeActionDBMapper.Map<EmployeeAction[]>(bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList());
+                actions = dbEmployeeActionMapper.Map<EmployeeAction[]>(bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList());
             }
             if (actions.Count == 0 || actions == null)
             {
