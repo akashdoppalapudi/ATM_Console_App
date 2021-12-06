@@ -1,7 +1,10 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
+using AutoMapper;
+using ATM.Services.DBModels;
 using System;
+using System.Linq;
 
 namespace ATM.Services
 {
@@ -9,23 +12,35 @@ namespace ATM.Services
     {
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;
-        private readonly DBService dbService;
+        private readonly MapperConfiguration employeeDBConfig;
+        private readonly Mapper employeeDBMapper;
 
         public EmployeeService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
-            dbService = new DBService();
+            employeeDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Employee, EmployeeDBModel>());
+            employeeDBMapper = new Mapper(employeeDBConfig);
         }
 
         private Employee GetEmployeeById(string bankId, string employeeId)
         {
-            return dbService.GetEmployeeById(bankId, employeeId);
+            CheckEmployeeExistance(bankId, employeeId);
+            using (BankContext bankContext = new BankContext())
+            {
+                return employeeDBMapper.Map<Employee>(bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.Id == employeeId && e.IsActive));
+            }
         }
 
         public void CheckEmployeeExistance(string bankId, string employeeId)
         {
-            dbService.CheckEmployeeExistance(bankId, employeeId);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (!bankContext.Employee.Any(e => e.BankId == bankId && e.Id == employeeId && e.IsActive))
+                {
+                    throw new EmployeeDoesNotExistException();
+                }
+            }
         }
 
         public Employee CreateEmployee(string name, Gender gender, string username, string password, EmployeeType employeeType)
@@ -45,13 +60,28 @@ namespace ATM.Services
 
         public string GetEmployeeIdByUsername(string bankId, string username)
         {
-            return dbService.GetEmployeeIdByUsername(bankId, username);
+            string id;
+            using (BankContext bankContext = new BankContext())
+            {
+                EmployeeDBModel employeeRecord = bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.IsActive && e.Username == username);
+                if (employeeRecord == null)
+                {
+                    throw new EmployeeDoesNotExistException();
+                }
+                id = employeeRecord.Id;
+            }
+            return id;
         }
 
         public void AddEmployee(string bankId, Employee employee)
         {
             employee.BankId = bankId;
-            dbService.AddEmployee(employee);
+            EmployeeDBModel employeeRecord = employeeDBMapper.Map<EmployeeDBModel>(employee);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Employee.Add(employeeRecord);
+                bankContext.SaveChanges();
+            }
 
         }
 
@@ -67,13 +97,23 @@ namespace ATM.Services
                 employee.Salt = UpdateEmployee.Salt;
             }
             employee.EmployeeType = UpdateEmployee.EmployeeType;
-            dbService.UpdateEmployee(employee);
+            using (BankContext bankContext = new BankContext())
+            {
+                EmployeeDBModel currentEmployeeRecord = bankContext.Employee.First(e => e.BankId == employee.BankId && e.Id == employee.Id && e.IsActive);
+                currentEmployeeRecord = employeeDBMapper.Map<EmployeeDBModel>(employee);
+                bankContext.SaveChanges();
+            }
         }
 
         public void DeleteEmployee(string bankId, string employeeId)
         {
             CheckEmployeeExistance(bankId, employeeId);
-            dbService.DeleteEmployee(bankId, employeeId);
+            using (BankContext bankContext = new BankContext())
+            {
+                EmployeeDBModel employeeRecord = bankContext.Employee.First(e => e.Id == employeeId && e.BankId == bankId && e.IsActive);
+                employeeRecord.IsActive = false;
+                bankContext.SaveChanges();
+            }
         }
 
         public Employee GetEmployeeDetails(string bankId, string employeeId)
@@ -97,7 +137,13 @@ namespace ATM.Services
 
         public void ValidateUsername(string bankId, string username)
         {
-            dbService.ValidateEmployeeUsername(bankId, username);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
+                {
+                    throw new UsernameAlreadyExistsException();
+                }
+            }
         }
 
         public void Authenticate(string bankId, string employeeId, string password)
