@@ -13,13 +13,28 @@ This Solution Contains three projects
 
 ## Dependencies
 
->MySql.EntityFrameWorkCore
+>Microsoft.EntityFrameworkCore.SqlServer
+
+>Microsoft.EntityFrameworkCore.Tools
+
+>Microsoft.EntityFrameworkCore.Design
+
+>AutoMapper
 
 ## Data Storage
 
-Data is stored in an **MYSQL Database** data is added, modified and retrieved using `MySql.EntityFrameWorkCore` which is a `Nuget package`.
+Data is stored in an **Microsoft SQL Server** data is added, modified and retrieved using `Microsoft.EntityFrameWorkCore.SqlServer` which is a `Nuget package`.
 
-**Code First** approach is used to create the database in MySql Server.
+Changes to the DB Model are updated through migration using...
+
+```PowerShell
+add-migration <migration-name>
+```
+```PowerShell
+update-database <target-migration>
+```
+
+**Code First** approach is used to create the database in Microsoft SQL Server.
 
 
 ## Flowchart
