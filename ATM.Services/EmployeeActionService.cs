@@ -6,10 +6,11 @@ using ATM.Services.Exceptions;
 using System.Collections.Generic;
 using AutoMapper;
 using System.Linq;
+using ATM.Services.IServices;
 
 namespace ATM.Services
 {
-    public class EmployeeActionService
+    public class EmployeeActionService : IEmployeeActionService
     {
         private readonly IDGenService idGenService;
         private readonly MapperConfiguration employeeActionDBConfig;

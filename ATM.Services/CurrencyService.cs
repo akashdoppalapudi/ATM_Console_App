@@ -3,10 +3,11 @@ using AutoMapper;
 using ATM.Services.DBModels;
 using System.Linq;
 using ATM.Services.Exceptions;
+using ATM.Services.IServices;
 
 namespace ATM.Services
 {
-    public class CurrencyService
+    public class CurrencyService : ICurrencyService
     {
         private readonly MapperConfiguration currencyDBConfig;
         private readonly Mapper currencyDBMapper;

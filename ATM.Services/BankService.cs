@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using AutoMapper;
+using ATM.Services.IServices;
 
 namespace ATM.Services
 {
-    public class BankService
+    public class BankService : IBankService
     {
         private readonly IDGenService idGenService;
         private readonly TransactionService transactionService;
@@ -40,7 +41,7 @@ namespace ATM.Services
         {
             using (BankContext bankContext = new BankContext())
             {
-                if (!bankContext.Bank.Any(b => b.Id==bankId && b.IsActive))
+                if (!bankContext.Bank.Any(b => b.Id == bankId && b.IsActive))
                 {
                     throw new BankDoesnotExistException();
                 }

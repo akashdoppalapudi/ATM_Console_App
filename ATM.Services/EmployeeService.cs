@@ -5,10 +5,11 @@ using AutoMapper;
 using ATM.Services.DBModels;
 using System;
 using System.Linq;
+using ATM.Services.IServices;
 
 namespace ATM.Services
 {
-    public class EmployeeService
+    public class EmployeeService : IEmployeeService
     {
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;

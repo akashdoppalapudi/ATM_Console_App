@@ -6,10 +6,11 @@ using ATM.Services.Exceptions;
 using ATM.Services.DBModels;
 using System.Collections.Generic;
 using System.Linq;
+using ATM.Services.IServices;
 
 namespace ATM.Services
 {
-    public class TransactionService
+    public class TransactionService : ITransactionService
     {
         private readonly IDGenService idGenService;
         private readonly MapperConfiguration transactionDBConfig;
