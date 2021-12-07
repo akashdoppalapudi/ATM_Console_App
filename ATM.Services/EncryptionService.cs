@@ -1,8 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using ATM.Services.IServices;
+using System.Security.Cryptography;
 
 namespace ATM.Services
 {
-    public class EncryptionService
+    public class EncryptionService : IEncryptionService
     {
         public const int SALT_SIZE = 24;
         public const int HASH_SIZE = 64;
