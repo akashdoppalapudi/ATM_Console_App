@@ -1,7 +1,11 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+using AutoMapper;
 
 namespace ATM.Services
 {
@@ -13,7 +17,10 @@ namespace ATM.Services
         private readonly EmployeeService employeeService;
         private readonly AccountService accountService;
         private readonly CurrencyService currencyService;
-        private readonly DBService dbService;
+        private readonly MapperConfiguration bankDBConfig;
+        private readonly Mapper bankDBMapper;
+        private readonly MapperConfiguration dbBankConfig;
+        private readonly Mapper dbBankMapper;
 
         public BankService()
         {
@@ -23,12 +30,31 @@ namespace ATM.Services
             employeeService = new EmployeeService();
             accountService = new AccountService();
             currencyService = new CurrencyService();
-            dbService = new DBService();
+            bankDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Bank, BankDBModel>());
+            bankDBMapper = new Mapper(bankDBConfig);
+            dbBankConfig = new MapperConfiguration(cfg => cfg.CreateMap<BankDBModel, Bank>());
+            dbBankMapper = new Mapper(dbBankConfig);
         }
 
         public void CheckBankExistance(string bankId)
         {
-            dbService.CheckBankExistance(bankId);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (!bankContext.Bank.Any(b => b.Id==bankId && b.IsActive))
+                {
+                    throw new BankDoesnotExistException();
+                }
+            }
+        }
+
+        public Bank GetBankById(string bankId)
+        {
+            CheckBankExistance(bankId);
+            using (BankContext bankContext = new BankContext())
+            {
+                BankDBModel bankRecord = bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+                return dbBankMapper.Map<Bank>(bankRecord);
+            }
         }
 
         public Bank CreateBank(string name)
@@ -42,7 +68,12 @@ namespace ATM.Services
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
-            dbService.AddBank(bank);
+            BankDBModel bankRecord = bankDBMapper.Map<BankDBModel>(bank);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Bank.Add(bankRecord);
+                bankContext.SaveChanges();
+            }
             employeeService.AddEmployee(bank.Id, adminEmployee);
             Currency defaultCurrency = currencyService.CreateCurrency("INR", 1);
             currencyService.AddCurrency(bank.Id, defaultCurrency);
@@ -70,17 +101,20 @@ namespace ATM.Services
 
         public void UpdateBank(string bankId, string employeeId, Bank updateBank)
         {
-            Bank bank = dbService.GetBankById(bankId);
             if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
-            bank.Name = updateBank.Name;
-            bank.IMPS = updateBank.IMPS;
-            bank.RTGS = updateBank.RTGS;
-            bank.OIMPS = updateBank.OIMPS;
-            bank.ORTGS = updateBank.ORTGS;
-            dbService.UpdateBank(bank);
+            using (BankContext bankContext = new BankContext())
+            {
+                BankDBModel currentBankRecord = bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
+                currentBankRecord.Name = updateBank.Name;
+                currentBankRecord.IMPS = updateBank.IMPS;
+                currentBankRecord.RTGS = updateBank.RTGS;
+                currentBankRecord.OIMPS = updateBank.OIMPS;
+                currentBankRecord.ORTGS = updateBank.ORTGS;
+                bankContext.SaveChanges();
+            }
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -109,7 +143,18 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            dbService.DeleteBank(bankId);
+            using (BankContext bankContext = new BankContext())
+            {
+                BankDBModel bankRecord = bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
+                bankRecord.IsActive = false;
+                bankRecord.DeletedOn = DateTime.Now;
+                var employeeRecords = bankContext.Employee.Where(e => e.BankId == bankId && e.IsActive).ToList();
+                employeeRecords.ForEach(e => e.IsActive = false);
+                var accountRecords = bankContext.Account.Where(a => a.BankId == bankId && a.IsActive).ToList();
+                accountRecords.ForEach(a => a.IsActive = false);
+                bankContext.Currency.RemoveRange(bankContext.Currency.Where(c => c.BankId == bankId));
+                bankContext.SaveChanges();
+            }
             EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteBank);
             employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -134,7 +179,16 @@ namespace ATM.Services
 
         public Dictionary<string, string> GetAllBankNames()
         {
-            return dbService.GetAllBankNames();
+            Dictionary<string, string> bankNames = new Dictionary<string, string>();
+            using (BankContext bankContext = new BankContext())
+            {
+                var bankRecords = bankContext.Bank.Where(b => b.IsActive).Select(b => new { b.Id, b.Name });
+                foreach (var bankRecord in bankRecords)
+                {
+                    bankNames.Add(bankRecord.Id, bankRecord.Name);
+                }
+            }
+            return bankNames;
         }
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
@@ -195,13 +249,23 @@ namespace ATM.Services
 
         public void ValidateBankName(string bankName)
         {
-            dbService.ValidateBankName(bankName);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (bankContext.Bank.Any(b => b.Name == bankName && b.IsActive))
+                {
+                    throw new BankNameAlreadyExistsException();
+                }
+            }
         }
 
         public Bank GetBankDetails(string bankId)
         {
-            Bank bank = dbService.GetBankById(bankId);
-            return bank;
+            CheckBankExistance(bankId);
+            using (BankContext bankContext = new BankContext())
+            {
+                BankDBModel bankRecord = bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+                return dbBankMapper.Map<Bank>(bankRecord);
+            }
         }
     }
 }
