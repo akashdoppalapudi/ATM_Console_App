@@ -1,7 +1,10 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
+using AutoMapper;
+using ATM.Services.DBModels;
 using System;
+using System.Linq;
 
 namespace ATM.Services
 {
@@ -9,23 +12,39 @@ namespace ATM.Services
     {
         private readonly IDGenService idGenService;
         private readonly EncryptionService encryptionService;
-        private readonly DBService dbService;
+        private readonly MapperConfiguration accountDBConfig;
+        private readonly Mapper accountDBMapper;
+        private readonly MapperConfiguration dbAccountConfig;
+        private readonly Mapper dbAccountMapper;
 
         public AccountService()
         {
             idGenService = new IDGenService();
             encryptionService = new EncryptionService();
-            dbService = new DBService();
+            accountDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Account, AccountDBModel>());
+            accountDBMapper = new Mapper(accountDBConfig);
+            dbAccountConfig = new MapperConfiguration(cfg => cfg.CreateMap<AccountDBModel, Account>());
+            dbAccountMapper = new Mapper(dbAccountConfig);
         }
 
         public void CheckAccountExistance(string bankId, string accountId)
         {
-            dbService.CheckAccountExistance(bankId, accountId);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (!bankContext.Account.Any(a => a.BankId == bankId && a.Id == accountId && a.IsActive))
+                {
+                    throw new AccountDoesNotExistException();
+                }
+            }
         }
 
         private Account GetAccountById(string bankId, string accountId)
         {
-            return dbService.GetAccountById(bankId, accountId);
+            CheckAccountExistance(bankId, accountId);
+            using (BankContext bankContext = new BankContext())
+            {
+                return dbAccountMapper.Map<Account>(bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
+            }
         }
 
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
@@ -46,12 +65,27 @@ namespace ATM.Services
         public void AddAccount(string bankId, Account account)
         {
             account.BankId = bankId;
-            dbService.AddAccount(account);
+            AccountDBModel accountRecord = accountDBMapper.Map<AccountDBModel>(account);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Account.Add(accountRecord);
+                bankContext.SaveChanges();
+            }
         }
 
         public string GetAccountIdByUsername(string bankId, string username)
         {
-            return dbService.GetAccountIdByUsername(bankId, username);
+            string id;
+            using (BankContext bankContext = new BankContext())
+            {
+                AccountDBModel accountRecord = bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.IsActive && a.Username == username);
+                if (accountRecord == null)
+                {
+                    throw new AccountDoesNotExistException();
+                }
+                id = accountRecord.Id;
+            }
+            return id;
         }
 
         public void UpdateAccount(string bankId, string accountId, Account updateAccount)
@@ -66,13 +100,31 @@ namespace ATM.Services
                 account.Salt = updateAccount.Salt;
             }
             account.AccountType = updateAccount.AccountType;
-            dbService.UpdateAccount(account);
+            account.Balance = updateAccount.Balance;
+            using (BankContext bankContext = new BankContext())
+            {
+                AccountDBModel currentAccountRecord = bankContext.Account.First(a => a.BankId == account.BankId && a.Id == account.Id && a.IsActive);
+                currentAccountRecord.Name = account.Name;
+                currentAccountRecord.Gender = account.Gender;
+                currentAccountRecord.Username = account.Username;
+                currentAccountRecord.Password = account.Password;
+                currentAccountRecord.Salt = account.Salt;
+                currentAccountRecord.AccountType = account.AccountType;
+                currentAccountRecord.Balance = account.Balance;
+                bankContext.SaveChanges();
+            }
         }
 
         public void DeleteAccount(string bankId, string accountId)
         {
             CheckAccountExistance(bankId, accountId);
-            dbService.DeleteAccount(bankId, accountId);
+            using (BankContext bankContext = new BankContext())
+            {
+                AccountDBModel accountRecord = bankContext.Account.First(a => a.Id == accountId && a.BankId == bankId && a.IsActive);
+                accountRecord.IsActive = false;
+                accountRecord.DeletedOn = DateTime.Now;
+                bankContext.SaveChanges();
+            }
         }
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
@@ -84,7 +136,7 @@ namespace ATM.Services
             }
             amount *= (decimal)currency.ExchangeRate;
             account.Balance += amount;
-            dbService.UpdateAccount(account);
+            UpdateAccount(bankId, accountId, account);
         }
 
         public void Withdraw(string bankId, string accountId, decimal amount)
@@ -95,7 +147,7 @@ namespace ATM.Services
                 throw new InvalidAmountException();
             }
             account.Balance -= amount;
-            dbService.UpdateAccount(account);
+            UpdateAccount(bankId, accountId, account);
         }
 
         public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
@@ -111,10 +163,10 @@ namespace ATM.Services
             }
             selectedAccount = GetAccountById(selectedBankId, selectedAccountId);
             selectedAccount.Balance -= amount;
-            dbService.UpdateAccount(selectedAccount);
+            UpdateAccount(selectedBankId, selectedAccountId, selectedAccount);
             Account transferToAccount = GetAccountById(transferToBankId, transferToAccountId);
             transferToAccount.Balance += amount;
-            dbService.UpdateAccount(transferToAccount);
+            UpdateAccount(transferToBankId, transferToAccountId, transferToAccount);
         }
 
         public Account GetAccountDetails(string bankId, string accountId)
@@ -138,7 +190,13 @@ namespace ATM.Services
 
         public void ValidateUsername(string bankId, string username)
         {
-            dbService.ValidateAccountUsername(bankId, username);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
+                {
+                    throw new UsernameAlreadyExistsException();
+                }
+            }
         }
 
         public void Authenticate(string bankId, string accountId, string password)

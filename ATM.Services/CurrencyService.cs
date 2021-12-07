@@ -1,29 +1,56 @@
 ﻿using ATM.Models;
+using AutoMapper;
+using ATM.Services.DBModels;
+using System.Linq;
+using ATM.Services.Exceptions;
 
 namespace ATM.Services
 {
     public class CurrencyService
     {
-        private readonly DBService dbService;
+        private readonly MapperConfiguration currencyDBConfig;
+        private readonly Mapper currencyDBMapper;
+        private readonly MapperConfiguration dbCurrencyConfig;
+        private readonly Mapper dbCurrencyMapper;
 
         public CurrencyService()
         {
-            dbService = new DBService();
+            currencyDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Currency, CurrencyDBModel>());
+            currencyDBMapper = new Mapper(currencyDBConfig);
+            dbCurrencyConfig = new MapperConfiguration(cfg => cfg.CreateMap<CurrencyDBModel, Currency>());
+            dbCurrencyMapper = new Mapper(dbCurrencyConfig);
         }
 
         public void CheckCurrencyExistance(string bankId, string currencyName)
         {
-            dbService.CheckCurrencyExistance(bankId, currencyName);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (!bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName))
+                {
+                    throw new CurrencyDoesNotExistException();
+                }
+            }
         }
 
         public void ValidateCurrencyName(string bankId, string currencyName)
         {
-            dbService.ValidateCurrencyName(bankId, currencyName);
+            using (BankContext bankContext = new BankContext())
+            {
+                if (bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName))
+                {
+                    throw new CurrencyAlreadyExistsException();
+                }
+            }
         }
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
         {
-            return dbService.GetCurrencyByName(bankId, currencyName);
+            CheckCurrencyExistance(bankId, currencyName);
+            using (BankContext bankContext = new BankContext())
+            {
+                CurrencyDBModel currencyRecord = bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
+                return dbCurrencyMapper.Map<Currency>(currencyRecord);
+            }
         }
 
         public Currency CreateCurrency(string currencyName, double exchangeRate)
@@ -39,20 +66,32 @@ namespace ATM.Services
         public void AddCurrency(string bankId, Currency currency)
         {
             currency.BankId = bankId;
-            dbService.AddCurrency(currency);
+            CurrencyDBModel currencyRecord = currencyDBMapper.Map<CurrencyDBModel>(currency);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Currency.Add(currencyRecord);
+                bankContext.SaveChanges();
+            }
         }
 
         public void UpdateCurrency(string bankId, string currencyName, Currency updateCurrency)
         {
-            Currency currency = GetCurrencyByName(bankId, currencyName);
-            currency.ExchangeRate = updateCurrency.ExchangeRate;
-            dbService.UpdateCurrency(currency);
+            using (BankContext bankContext = new BankContext())
+            {
+                CurrencyDBModel currentCurrencyRecord = bankContext.Currency.First(c => c.BankId == bankId && c.Name == currencyName);
+                currentCurrencyRecord = currencyDBMapper.Map<CurrencyDBModel>(updateCurrency);
+                bankContext.SaveChanges();
+            }
         }
 
         public void DeleteCurrency(string bankId, string currencyName)
         {
             CheckCurrencyExistance(bankId, currencyName);
-            dbService.DeleteCurrency(bankId, currencyName);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Remove(bankContext.Currency.First(c => c.BankId == bankId && c.Name == currencyName));
+                bankContext.SaveChanges();
+            }
         }
     }
 }
