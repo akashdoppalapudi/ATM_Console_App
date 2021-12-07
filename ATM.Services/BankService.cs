@@ -12,25 +12,25 @@ namespace ATM.Services
 {
     public class BankService : IBankService
     {
-        private readonly IDGenService idGenService;
-        private readonly TransactionService transactionService;
-        private readonly EmployeeActionService employeeActionService;
-        private readonly EmployeeService employeeService;
-        private readonly AccountService accountService;
-        private readonly CurrencyService currencyService;
+        private readonly IIDGenService _idGenService;
+        private readonly ITransactionService _transactionService;
+        private readonly IEmployeeActionService _employeeActionService;
+        private readonly IEmployeeService _employeeService;
+        private readonly IAccountService _accountService;
+        private readonly ICurrencyService _currencyService;
         private readonly MapperConfiguration bankDBConfig;
         private readonly Mapper bankDBMapper;
         private readonly MapperConfiguration dbBankConfig;
         private readonly Mapper dbBankMapper;
 
-        public BankService()
+        public BankService(IIDGenService idGenService, ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService)
         {
-            transactionService = new TransactionService();
-            employeeActionService = new EmployeeActionService();
-            idGenService = new IDGenService();
-            employeeService = new EmployeeService();
-            accountService = new AccountService();
-            currencyService = new CurrencyService();
+            _transactionService = transactionService;
+            _employeeActionService = employeeActionService;
+            _idGenService = idGenService;
+            _employeeService = employeeService;
+            _accountService = accountService;
+            _currencyService = currencyService;
             bankDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Bank, BankDBModel>());
             bankDBMapper = new Mapper(bankDBConfig);
             dbBankConfig = new MapperConfiguration(cfg => cfg.CreateMap<BankDBModel, Bank>());
@@ -63,7 +63,7 @@ namespace ATM.Services
             return new Bank
             {
                 Name = name,
-                Id = idGenService.GenId(name)
+                Id = _idGenService.GenId(name)
             };
         }
 
@@ -75,34 +75,34 @@ namespace ATM.Services
                 bankContext.Bank.Add(bankRecord);
                 bankContext.SaveChanges();
             }
-            employeeService.AddEmployee(bank.Id, adminEmployee);
-            Currency defaultCurrency = currencyService.CreateCurrency("INR", 1);
-            currencyService.AddCurrency(bank.Id, defaultCurrency);
+            _employeeService.AddEmployee(bank.Id, adminEmployee);
+            Currency defaultCurrency = _currencyService.CreateCurrency("INR", 1);
+            _currencyService.AddCurrency(bank.Id, defaultCurrency);
         }
 
         public void AddEmployee(string bankId, string employeeId, Employee newEmployee)
         {
-            if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
+            if (!_employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
-            employeeService.AddEmployee(bankId, newEmployee);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newEmployee.Id);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _employeeService.AddEmployee(bankId, newEmployee);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newEmployee.Id);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void AddAccount(string bankId, string employeeId, Account newAccount)
         {
-            Transaction transaction = transactionService.CreateTransaction(bankId, newAccount.Id, 1500, TransactionType.Credit, TransactionNarrative.AccountCreation, newAccount.Id);
-            accountService.AddAccount(bankId, newAccount);
-            transactionService.AddTransaction(bankId, newAccount.Id, transaction);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newAccount.Id, transaction.Id);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            Transaction transaction = _transactionService.CreateTransaction(bankId, newAccount.Id, 1500, TransactionType.Credit, TransactionNarrative.AccountCreation, newAccount.Id);
+            _accountService.AddAccount(bankId, newAccount);
+            _transactionService.AddTransaction(bankId, newAccount.Id, transaction);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.NewAccount, newAccount.Id, transaction.Id);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void UpdateBank(string bankId, string employeeId, Bank updateBank)
         {
-            if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
+            if (!_employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
@@ -116,31 +116,31 @@ namespace ATM.Services
                 currentBankRecord.ORTGS = updateBank.ORTGS;
                 bankContext.SaveChanges();
             }
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void UpdateEmployee(string bankId, string employeeId, string currentEmployeeId, Employee updateEmployee)
         {
-            if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
+            if (!_employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
-            employeeService.UpdateEmployee(bankId, currentEmployeeId, updateEmployee);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentEmployeeId);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _employeeService.UpdateEmployee(bankId, currentEmployeeId, updateEmployee);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentEmployeeId);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void UpdateAccount(string bankId, string employeeId, string currentAccountId, Account updateAccount)
         {
-            accountService.UpdateAccount(bankId, currentAccountId, updateAccount);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentAccountId);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _accountService.UpdateAccount(bankId, currentAccountId, updateAccount);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateAccount, currentAccountId);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void DeleteBank(string bankId, string employeeId)
         {
-            if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
+            if (!_employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
@@ -156,26 +156,26 @@ namespace ATM.Services
                 bankContext.Currency.RemoveRange(bankContext.Currency.Where(c => c.BankId == bankId));
                 bankContext.SaveChanges();
             }
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteBank);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteBank);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void DeleteEmployee(string bankId, string employeeId, string deleteEmployeeId)
         {
-            if (!employeeService.IsEmployeeAdmin(bankId, employeeId))
+            if (!_employeeService.IsEmployeeAdmin(bankId, employeeId))
             {
                 throw new AccessDeniedException();
             }
-            employeeService.DeleteEmployee(bankId, deleteEmployeeId);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteAccount, deleteEmployeeId);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _employeeService.DeleteEmployee(bankId, deleteEmployeeId);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteAccount, deleteEmployeeId);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void DeleteAccount(string bankId, string employeeId, string accountId)
         {
-            accountService.DeleteAccount(bankId, accountId);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteAccount, accountId);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _accountService.DeleteAccount(bankId, accountId);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteAccount, accountId);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public Dictionary<string, string> GetAllBankNames()
@@ -194,58 +194,58 @@ namespace ATM.Services
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
         {
-            accountService.Deposit(bankId, accountId, currency, amount);
-            Transaction transaction = transactionService.CreateTransaction(bankId, accountId, amount, TransactionType.Credit, TransactionNarrative.Deposit, accountId);
-            transactionService.AddTransaction(bankId, accountId, transaction);
+            _accountService.Deposit(bankId, accountId, currency, amount);
+            Transaction transaction = _transactionService.CreateTransaction(bankId, accountId, amount*((decimal)currency.ExchangeRate), TransactionType.Credit, TransactionNarrative.Deposit, accountId);
+            _transactionService.AddTransaction(bankId, accountId, transaction);
         }
 
         public void Withdraw(string bankId, string accountId, decimal amount)
         {
-            accountService.Withdraw(bankId, accountId, amount);
-            Transaction transaction = transactionService.CreateTransaction(bankId, accountId, amount, TransactionType.Debit, TransactionNarrative.Withdraw, accountId);
-            transactionService.AddTransaction(bankId, accountId, transaction);
+            _accountService.Withdraw(bankId, accountId, amount);
+            Transaction transaction = _transactionService.CreateTransaction(bankId, accountId, amount, TransactionType.Debit, TransactionNarrative.Withdraw, accountId);
+            _transactionService.AddTransaction(bankId, accountId, transaction);
         }
 
         public void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount)
         {
-            accountService.Transfer(selectedBankId, selectedAccountId, transferToBankId, transferToAccountId, amount);
-            Transaction fromTransaction = transactionService.CreateTransaction(selectedBankId, selectedAccountId, amount, TransactionType.Debit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
-            transactionService.AddTransaction(selectedBankId, selectedAccountId, fromTransaction);
-            Transaction toTransaction = transactionService.CreateTransaction(transferToBankId, transferToAccountId, amount, TransactionType.Credit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
-            transactionService.AddTransaction(transferToBankId, transferToAccountId, toTransaction);
+            _accountService.Transfer(selectedBankId, selectedAccountId, transferToBankId, transferToAccountId, amount);
+            Transaction fromTransaction = _transactionService.CreateTransaction(selectedBankId, selectedAccountId, amount, TransactionType.Debit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
+            _transactionService.AddTransaction(selectedBankId, selectedAccountId, fromTransaction);
+            Transaction toTransaction = _transactionService.CreateTransaction(transferToBankId, transferToAccountId, amount, TransactionType.Credit, TransactionNarrative.Transfer, selectedAccountId, transferToBankId, transferToAccountId);
+            _transactionService.AddTransaction(transferToBankId, transferToAccountId, toTransaction);
         }
 
         public void RevertTransaction(string bankId, string employeeId, string txnId)
         {
-            Transaction transaction = transactionService.GetTransactionById(bankId, txnId);
+            Transaction transaction = _transactionService.GetTransactionById(bankId, txnId);
             decimal amount = transaction.TransactionAmount;
             string fromAccId = transaction.AccountId;
             string toAccId = transaction.ToAccountId;
             string toBankId = transaction.ToBankId;
             Transfer(toBankId, toAccId, bankId, fromAccId, amount);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.RevertTransaction, fromAccId, txnId);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.RevertTransaction, fromAccId, txnId);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void AddCurrency(string bankId, string employeeId, Currency currency)
         {
-            currencyService.AddCurrency(bankId, currency);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _currencyService.AddCurrency(bankId, currency);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void UpdateCurrency(string bankId, string employeeId, string currencyName, Currency updateCurrency)
         {
-            currencyService.UpdateCurrency(bankId, currencyName, updateCurrency);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _currencyService.UpdateCurrency(bankId, currencyName, updateCurrency);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void DeleteCurrency(string bankId, string employeeId, string currencyName)
         {
-            currencyService.DeleteCurrency(bankId, currencyName);
-            EmployeeAction action = employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
-            employeeActionService.AddEmployeeAction(bankId, employeeId, action);
+            _currencyService.DeleteCurrency(bankId, currencyName);
+            EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
+            _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
 
         public void ValidateBankName(string bankName)

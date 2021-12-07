@@ -12,15 +12,15 @@ namespace ATM.Services
 {
     public class EmployeeActionService : IEmployeeActionService
     {
-        private readonly IDGenService idGenService;
+        private readonly IIDGenService _idGenService;
         private readonly MapperConfiguration employeeActionDBConfig;
         private readonly Mapper employeeActionDBMapper;
         private readonly MapperConfiguration dbEmployeeActionConfig;
         private readonly Mapper dbEmployeeActionMapper;
 
-        public EmployeeActionService()
+        public EmployeeActionService(IIDGenService idGenService)
         {
-            idGenService = new IDGenService();
+            _idGenService = idGenService;
             employeeActionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeAction, EmployeeActionDBModel>());
             employeeActionDBMapper = new Mapper(employeeActionDBConfig);
             dbEmployeeActionConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeActionDBModel, EmployeeAction>());
@@ -31,7 +31,7 @@ namespace ATM.Services
         {
             EmployeeAction newEmployeeAction = new EmployeeAction
             {
-                Id = idGenService.GenEmployeeActionId(bankId, employeeId),
+                Id = _idGenService.GenEmployeeActionId(bankId, employeeId),
                 TXNId = TXNID,
                 AccountId = accId,
                 ActionDate = DateTime.Now,

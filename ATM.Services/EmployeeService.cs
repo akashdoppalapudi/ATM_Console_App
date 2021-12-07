@@ -11,17 +11,17 @@ namespace ATM.Services
 {
     public class EmployeeService : IEmployeeService
     {
-        private readonly IDGenService idGenService;
-        private readonly EncryptionService encryptionService;
+        private readonly IIDGenService _idGenService;
+        private readonly IEncryptionService _encryptionService;
         private readonly MapperConfiguration employeeDBConfig;
         private readonly MapperConfiguration dbEmployeeConfig;
         private readonly Mapper employeeDBMapper;
         private readonly Mapper dbEmployeeMapper;
 
-        public EmployeeService()
+        public EmployeeService(IIDGenService idGenService, IEncryptionService encryptionService)
         {
-            idGenService = new IDGenService();
-            encryptionService = new EncryptionService();
+            _idGenService = idGenService;
+            _encryptionService = encryptionService;
             employeeDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Employee, EmployeeDBModel>());
             employeeDBMapper = new Mapper(employeeDBConfig);
             dbEmployeeConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeDBModel, Employee>());
@@ -51,10 +51,10 @@ namespace ATM.Services
 
         public Employee CreateEmployee(string name, Gender gender, string username, string password, EmployeeType employeeType)
         {
-            (byte[] passwordBytes, byte[] saltBytes) = encryptionService.ComputeHash(password);
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
             return new Employee
             {
-                Id = idGenService.GenId(name),
+                Id = _idGenService.GenId(name),
                 Name = name,
                 Gender = gender,
                 Username = username,
@@ -97,7 +97,7 @@ namespace ATM.Services
             employee.Name = UpdateEmployee.Name;
             employee.Gender = UpdateEmployee.Gender;
             employee.Username = UpdateEmployee.Username;
-            if (UpdateEmployee.Password != encryptionService.ComputeHash("", UpdateEmployee.Salt))
+            if (UpdateEmployee.Password != _encryptionService.ComputeHash("", UpdateEmployee.Salt))
             {
                 employee.Password = UpdateEmployee.Password;
                 employee.Salt = UpdateEmployee.Salt;
@@ -161,7 +161,7 @@ namespace ATM.Services
         public void Authenticate(string bankId, string employeeId, string password)
         {
             Employee employee = GetEmployeeById(bankId, employeeId);
-            if (Convert.ToBase64String(employee.Password) != Convert.ToBase64String(encryptionService.ComputeHash(password, employee.Salt)))
+            if (Convert.ToBase64String(employee.Password) != Convert.ToBase64String(_encryptionService.ComputeHash(password, employee.Salt)))
             {
                 throw new AuthenticationFailedException();
             }
