@@ -1,26 +1,27 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
-using ATM.Services.Exceptions;
-using AutoMapper;
 using ATM.Services.DBModels;
+using ATM.Services.Exceptions;
+using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Linq;
 
 namespace ATM.Services
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
-        private readonly IDGenService idGenService;
-        private readonly EncryptionService encryptionService;
+        private readonly IIDGenService _idGenService;
+        private readonly IEncryptionService _encryptionService;
         private readonly MapperConfiguration accountDBConfig;
         private readonly Mapper accountDBMapper;
         private readonly MapperConfiguration dbAccountConfig;
         private readonly Mapper dbAccountMapper;
 
-        public AccountService()
+        public AccountService(IIDGenService idGenService, IEncryptionService encryptionService)
         {
-            idGenService = new IDGenService();
-            encryptionService = new EncryptionService();
+            _idGenService = idGenService;
+            _encryptionService = encryptionService;
             accountDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Account, AccountDBModel>());
             accountDBMapper = new Mapper(accountDBConfig);
             dbAccountConfig = new MapperConfiguration(cfg => cfg.CreateMap<AccountDBModel, Account>());
@@ -49,10 +50,10 @@ namespace ATM.Services
 
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
         {
-            (byte[] passwordBytes, byte[] saltBytes) = encryptionService.ComputeHash(password);
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
             return new Account
             {
-                Id = idGenService.GenId(name),
+                Id = _idGenService.GenId(name),
                 Name = name,
                 Gender = gender,
                 Username = username,
@@ -94,7 +95,7 @@ namespace ATM.Services
             account.Name = updateAccount.Name;
             account.Gender = updateAccount.Gender;
             account.Username = updateAccount.Username;
-            if (updateAccount.Password != encryptionService.ComputeHash("", updateAccount.Salt))
+            if (updateAccount.Password != _encryptionService.ComputeHash("", updateAccount.Salt))
             {
                 account.Password = updateAccount.Password;
                 account.Salt = updateAccount.Salt;
@@ -202,7 +203,7 @@ namespace ATM.Services
         public void Authenticate(string bankId, string accountId, string password)
         {
             Account account = GetAccountById(bankId, accountId);
-            if (Convert.ToBase64String(account.Password) != Convert.ToBase64String(encryptionService.ComputeHash(password, account.Salt)))
+            if (Convert.ToBase64String(account.Password) != Convert.ToBase64String(_encryptionService.ComputeHash(password, account.Salt)))
             {
                 throw new AuthenticationFailedException();
             }

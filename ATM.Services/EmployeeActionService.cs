@@ -1,25 +1,26 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
-using System;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
-using System.Collections.Generic;
+using ATM.Services.IServices;
 using AutoMapper;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ATM.Services
 {
-    public class EmployeeActionService
+    public class EmployeeActionService : IEmployeeActionService
     {
-        private readonly IDGenService idGenService;
+        private readonly IIDGenService _idGenService;
         private readonly MapperConfiguration employeeActionDBConfig;
         private readonly Mapper employeeActionDBMapper;
         private readonly MapperConfiguration dbEmployeeActionConfig;
         private readonly Mapper dbEmployeeActionMapper;
 
-        public EmployeeActionService()
+        public EmployeeActionService(IIDGenService idGenService)
         {
-            idGenService = new IDGenService();
+            _idGenService = idGenService;
             employeeActionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeAction, EmployeeActionDBModel>());
             employeeActionDBMapper = new Mapper(employeeActionDBConfig);
             dbEmployeeActionConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeActionDBModel, EmployeeAction>());
@@ -30,7 +31,7 @@ namespace ATM.Services
         {
             EmployeeAction newEmployeeAction = new EmployeeAction
             {
-                Id = idGenService.GenEmployeeActionId(bankId, employeeId),
+                Id = _idGenService.GenEmployeeActionId(bankId, employeeId),
                 TXNId = TXNID,
                 AccountId = accId,
                 ActionDate = DateTime.Now,

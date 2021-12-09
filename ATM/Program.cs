@@ -10,14 +10,17 @@ namespace ATM.CLI
     {
         static void Main(string[] args)
         {
-            ConsoleUI consoleUI = new ConsoleUI();
             ConsoleMessages consoleMessages = new ConsoleMessages();
-            EmployeeService employeeService = new EmployeeService();
-            AccountService accountService = new AccountService();
-            BankService bankService = new BankService();
+            IDGenService idGenService = new IDGenService();
+            EncryptionService encryptionService = new EncryptionService();
+            TransactionService transactionService = new TransactionService(idGenService);
+            EmployeeActionService employeeActionService = new EmployeeActionService(idGenService);
+            EmployeeService employeeService = new EmployeeService(idGenService, encryptionService);
+            AccountService accountService = new AccountService(idGenService, encryptionService);
             CurrencyService currencyService = new CurrencyService();
-            TransactionService transactionService = new TransactionService();
-            EmployeeActionService employeeActionService = new EmployeeActionService();
+            BankService bankService = new BankService(idGenService, transactionService, employeeActionService, employeeService, accountService, currencyService);
+            ConsoleUI consoleUI = new ConsoleUI(bankService, employeeService, accountService, currencyService);
+
             consoleMessages.WelcomeMsg();
             while (true)
             {
@@ -352,7 +355,7 @@ namespace ATM.CLI
                                         {
                                             consoleMessages.NoTransactions();
                                         }
-                                        
+
                                     }
                                     else if (option3 == AdminOperation.ActionHistory)
                                     {

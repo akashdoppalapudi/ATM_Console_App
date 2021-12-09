@@ -1,8 +1,9 @@
-﻿using System;
+﻿using ATM.Services.IServices;
+using System;
 
 namespace ATM.Services
 {
-    public class IDGenService
+    public class IDGenService : IIDGenService
     {
         public string GenId(string Name)
         {

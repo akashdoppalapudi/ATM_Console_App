@@ -1,25 +1,26 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
-using System;
-using AutoMapper;
-using ATM.Services.Exceptions;
 using ATM.Services.DBModels;
+using ATM.Services.Exceptions;
+using ATM.Services.IServices;
+using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ATM.Services
 {
-    public class TransactionService
+    public class TransactionService : ITransactionService
     {
-        private readonly IDGenService idGenService;
+        private readonly IIDGenService _idGenService;
         private readonly MapperConfiguration transactionDBConfig;
         private readonly Mapper transactionDBMapper;
         private readonly MapperConfiguration dbTransactionConfig;
         private readonly Mapper dbTransactionMapper;
 
-        public TransactionService()
+        public TransactionService(IIDGenService idGenService)
         {
-            idGenService = new IDGenService();
+            _idGenService = idGenService;
             transactionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, TransactionDBModel>());
             transactionDBMapper = new Mapper(transactionDBConfig);
             dbTransactionConfig = new MapperConfiguration(cfg => cfg.CreateMap<TransactionDBModel, Transaction>());
@@ -30,7 +31,7 @@ namespace ATM.Services
         {
             Transaction newTransaction = new Transaction
             {
-                Id = idGenService.GenTransactionId(bankId, accountId),
+                Id = _idGenService.GenTransactionId(bankId, accountId),
                 TransactionDate = DateTime.Now,
                 TransactionType = transactionType,
                 BankId = bankId,
