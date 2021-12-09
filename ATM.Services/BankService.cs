@@ -2,11 +2,11 @@
 using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
+using ATM.Services.IServices;
+using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using AutoMapper;
-using ATM.Services.IServices;
 
 namespace ATM.Services
 {
@@ -35,6 +35,10 @@ namespace ATM.Services
             bankDBMapper = new Mapper(bankDBConfig);
             dbBankConfig = new MapperConfiguration(cfg => cfg.CreateMap<BankDBModel, Bank>());
             dbBankMapper = new Mapper(dbBankConfig);
+            using (BankContext bankContext = new BankContext())
+            {
+                bankContext.Database.EnsureCreated();
+            }
         }
 
         public void CheckBankExistance(string bankId)
@@ -195,7 +199,7 @@ namespace ATM.Services
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
         {
             _accountService.Deposit(bankId, accountId, currency, amount);
-            Transaction transaction = _transactionService.CreateTransaction(bankId, accountId, amount*((decimal)currency.ExchangeRate), TransactionType.Credit, TransactionNarrative.Deposit, accountId);
+            Transaction transaction = _transactionService.CreateTransaction(bankId, accountId, amount * ((decimal)currency.ExchangeRate), TransactionType.Credit, TransactionNarrative.Deposit, accountId);
             _transactionService.AddTransaction(bankId, accountId, transaction);
         }
 

@@ -1,10 +1,10 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services.Exceptions;
+using ATM.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ATM.Services.IServices;
 
 namespace ATM.Services
 {
