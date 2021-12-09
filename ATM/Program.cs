@@ -355,7 +355,7 @@ namespace ATM.CLI
                                         {
                                             consoleMessages.NoTransactions();
                                         }
-                                        
+
                                     }
                                     else if (option3 == AdminOperation.ActionHistory)
                                     {

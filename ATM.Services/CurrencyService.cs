@@ -1,9 +1,9 @@
 ﻿using ATM.Models;
-using AutoMapper;
 using ATM.Services.DBModels;
-using System.Linq;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
+using System.Linq;
 
 namespace ATM.Services
 {

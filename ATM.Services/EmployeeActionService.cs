@@ -1,12 +1,12 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
-using System;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
-using System.Collections.Generic;
-using AutoMapper;
-using System.Linq;
 using ATM.Services.IServices;
+using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ATM.Services
 {
