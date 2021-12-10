@@ -80,7 +80,7 @@ namespace ATM.Services
             using (BankContext bankContext = new BankContext())
             {
                 CurrencyDBModel currentCurrencyRecord = bankContext.Currency.First(c => c.BankId == bankId && c.Name == currencyName);
-                currentCurrencyRecord = currencyDBMapper.Map<CurrencyDBModel>(updateCurrency);
+                currentCurrencyRecord.ExchangeRate = updateCurrency.ExchangeRate;
                 bankContext.SaveChanges();
             }
         }
