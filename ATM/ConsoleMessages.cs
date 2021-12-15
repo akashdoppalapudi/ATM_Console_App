@@ -2,7 +2,44 @@
 
 namespace ATM.Services
 {
-    public class ConsoleMessages
+    public interface IConsoleMessages
+    {
+        void AccessDeniedMsg();
+        void AccountCreationFailed();
+        void AccountCreationSuccess();
+        void AccountDeleteSuccess();
+        void AccountUpdateSuccess();
+        void BankCreationFailedMsg();
+        void BankCreationSuccess();
+        void BankDeleteSuccess();
+        void BankDoesnotExistMsg();
+        void BankNameExistsMsg();
+        void BankUpdateSuccess();
+        void CurrencyAddedSuccess();
+        void CurrencyAlreadyExists();
+        void CurrencyDeleteSuccess();
+        void CurrencyDoesNotExist();
+        void CurrencyUpdateSuccess();
+        void DepositSuccess();
+        void EmployeeDeleteSuccess();
+        void EmployeeUpdateSuccess();
+        void InvalidAmountMsg();
+        void InvalidOptionMsg();
+        void NoBanksMsg();
+        void NoEmployeeActions();
+        void NoTransactions();
+        void RevertTransactionSuccess();
+        void TransactionNotFound();
+        void TransferFailed();
+        void TransferSuccess();
+        void UsernameAlreadyExists();
+        void UserNotFoundMsg();
+        void WelcomeMsg();
+        void WithdrawSuccess();
+        void WrongPasswordMsg();
+    }
+
+    public class ConsoleMessages : IConsoleMessages
     {
         public void AccountCreationFailed()
         {

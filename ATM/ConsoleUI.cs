@@ -8,7 +8,32 @@ using System.Linq;
 
 namespace ATM.Services
 {
-    public class ConsoleUI
+    public interface IConsoleUI
+    {
+        AdminOperation AdminOptions();
+        decimal GetAmount(char amtFor);
+        string GetCurrencyName();
+        Account GetDataForAccountCreation(string bankId);
+        Account GetDataForAccountUpdate(Account currentAccount);
+        (Bank, Employee) GetDataForBankCreation();
+        Bank GetDataForBankUpdate(Bank currentBank);
+        Currency GetDataForCurrencyCreation(string bankId);
+        Currency GetDataForCurrencyUpdate(Currency currentCurrency);
+        Employee GetDataForEmployeeCreation(string bankId);
+        Employee GetDataForEmployeeUpdate(Employee currentEmployee);
+        string GetPasswordFromUser();
+        string GetRevertTransactionId();
+        string GetUsername();
+        void PrintEmployeeActions(IList<EmployeeAction> employeeActions);
+        void PrintTransactions(IList<Transaction> transactions, decimal availBal);
+        string SelectBank(Dictionary<string, string> bankNames);
+        BankCreateOrSelect SelectOrCreateBank();
+        StaffOperation StaffOptions();
+        UserOperation UserOptions();
+        StaffOrUserLogin UserOrStaff();
+    }
+
+    public class ConsoleUI : IConsoleUI
     {
         private ConsoleMessages _consoleMessages;
         private IBankService _bankService;
