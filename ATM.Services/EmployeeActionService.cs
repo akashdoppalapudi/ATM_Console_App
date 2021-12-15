@@ -3,7 +3,6 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
-using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,26 +11,20 @@ namespace ATM.Services
 {
     public class EmployeeActionService : IEmployeeActionService
     {
-        private readonly IIDGenService _idGenService;
-        private readonly MapperConfiguration employeeActionDBConfig;
-        private readonly Mapper employeeActionDBMapper;
-        private readonly MapperConfiguration dbEmployeeActionConfig;
-        private readonly Mapper dbEmployeeActionMapper;
+        private readonly IMapperService _mapperService;
+        private readonly BankContext _bankContext;
 
-        public EmployeeActionService(IIDGenService idGenService)
+        public EmployeeActionService(BankContext bankContext, IMapperService mapperService)
         {
-            _idGenService = idGenService;
-            employeeActionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeAction, EmployeeActionDBModel>());
-            employeeActionDBMapper = new Mapper(employeeActionDBConfig);
-            dbEmployeeActionConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeActionDBModel, EmployeeAction>());
-            dbEmployeeActionMapper = new Mapper(dbEmployeeActionConfig);
+            _mapperService = mapperService;
+            _bankContext = bankContext;
         }
 
         public EmployeeAction CreateEmployeeAction(string bankId, string employeeId, EmployeeActionType actionType, string accId = null, string TXNID = null)
         {
             EmployeeAction newEmployeeAction = new EmployeeAction
             {
-                Id = _idGenService.GenEmployeeActionId(bankId, employeeId),
+                Id = bankId.GenEmployeeActionId(employeeId),
                 TXNId = TXNID,
                 AccountId = accId,
                 ActionDate = DateTime.Now,
@@ -44,20 +37,18 @@ namespace ATM.Services
         {
             employeeAction.BankId = bankId;
             employeeAction.EmployeeId = employeeId;
-            EmployeeActionDBModel employeeActionRecord = employeeActionDBMapper.Map<EmployeeActionDBModel>(employeeAction);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.EmployeeAction.Add(employeeActionRecord);
-                bankContext.SaveChanges();
-            }
+            EmployeeActionDBModel employeeActionRecord = _mapperService.MapEmployeeActionToDB(employeeAction);
+            _bankContext.EmployeeAction.Add(employeeActionRecord);
+            _bankContext.SaveChanges();
         }
 
         public IList<EmployeeAction> GetEmployeeActions(string bankId, string employeeId)
         {
-            IList<EmployeeAction> actions;
-            using (BankContext bankContext = new BankContext())
+            IList<EmployeeAction> actions = new List<EmployeeAction>();
+            IList<EmployeeActionDBModel> actionRecords = _bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList();
+            foreach (EmployeeActionDBModel adb in actionRecords)
             {
-                actions = dbEmployeeActionMapper.Map<EmployeeAction[]>(bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList());
+                actions.Add(_mapperService.MapDBToEmployeeAction(adb));
             }
             if (actions.Count == 0 || actions == null)
             {

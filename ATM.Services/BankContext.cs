@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ATM.Services
 {
-    internal class BankContext : DbContext
+    public class BankContext : DbContext
     {
         public DbSet<BankDBModel> Bank { get; set; }
         public DbSet<CurrencyDBModel> Currency { get; set; }
@@ -15,7 +15,7 @@ namespace ATM.Services
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS02;Initial Catalog=Banking_Application;Integrated Security=true");
+            optionsBuilder.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

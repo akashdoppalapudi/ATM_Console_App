@@ -19,6 +19,8 @@ This Solution Contains three projects
 
 >Microsoft.EntityFrameworkCore.Design
 
+>Microsoft.Extensions.DependencyInjection
+
 >AutoMapper
 
 ## Data Storage
