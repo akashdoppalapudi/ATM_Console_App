@@ -1,25 +1,27 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
 using ATM.Services;
+using ATM.Services.IServices;
 using ATM.Services.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 
 namespace ATM.CLI
 {
     class Program
     {
+        public static readonly IServiceProvider DIContainer = new DIContainerBuilder().Build();
         static void Main(string[] args)
         {
-            ConsoleMessages consoleMessages = new ConsoleMessages();
-            IDGenService idGenService = new IDGenService();
-            EncryptionService encryptionService = new EncryptionService();
-            TransactionService transactionService = new TransactionService(idGenService);
-            EmployeeActionService employeeActionService = new EmployeeActionService(idGenService);
-            EmployeeService employeeService = new EmployeeService(idGenService, encryptionService);
-            AccountService accountService = new AccountService(idGenService, encryptionService);
-            CurrencyService currencyService = new CurrencyService();
-            BankService bankService = new BankService(idGenService, transactionService, employeeActionService, employeeService, accountService, currencyService);
-            ConsoleUI consoleUI = new ConsoleUI(bankService, employeeService, accountService, currencyService);
+            IConsoleMessages consoleMessages = DIContainer.GetService<IConsoleMessages>();
+            IConsoleUI consoleUI = DIContainer.GetService<IConsoleUI>();
+            IBankService bankService = DIContainer.GetService<IBankService>();
+            IEmployeeService employeeService = DIContainer.GetService<IEmployeeService>();
+            IAccountService accountService = DIContainer.GetService<IAccountService>();
+            ICurrencyService currencyService = DIContainer.GetService<ICurrencyService>();
+            ITransactionService transactionService = DIContainer.GetService<ITransactionService>();
+            IEmployeeActionService employeeActionService = DIContainer.GetService<IEmployeeActionService>();
 
             consoleMessages.WelcomeMsg();
             while (true)
