@@ -17,14 +17,16 @@ namespace ATM.Services
         private readonly Mapper transactionDBMapper;
         private readonly MapperConfiguration dbTransactionConfig;
         private readonly Mapper dbTransactionMapper;
+        private readonly BankContext _bankContext;
 
-        public TransactionService(IIDGenService idGenService)
+        public TransactionService(IIDGenService idGenService, BankContext bankContext)
         {
             _idGenService = idGenService;
             transactionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Transaction, TransactionDBModel>());
             transactionDBMapper = new Mapper(transactionDBConfig);
             dbTransactionConfig = new MapperConfiguration(cfg => cfg.CreateMap<TransactionDBModel, Transaction>());
             dbTransactionMapper = new Mapper(dbTransactionConfig);
+            _bankContext = bankContext;
         }
 
         public Transaction CreateTransaction(string bankId, string accountId, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
@@ -49,33 +51,24 @@ namespace ATM.Services
             transaction.AccountId = accountId;
             transaction.BankId = bankId;
             TransactionDBModel transactionRecord = transactionDBMapper.Map<TransactionDBModel>(transaction);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.Transaction.Add(transactionRecord);
-                bankContext.SaveChanges();
-            }
+            _bankContext.Transaction.Add(transactionRecord);
+            _bankContext.SaveChanges();
         }
 
         public Transaction GetTransactionById(string bankId, string txnId)
         {
-            using (BankContext bankContext = new BankContext())
+            TransactionDBModel transactionRecord = _bankContext.Transaction.FirstOrDefault(t => t.BankId == bankId && t.Id == txnId);
+            if (transactionRecord == null)
             {
-                TransactionDBModel transactionRecord = bankContext.Transaction.FirstOrDefault(t => t.BankId == bankId && t.Id == txnId);
-                if (transactionRecord == null)
-                {
-                    throw new TransactionNotFoundException();
-                }
-                return dbTransactionMapper.Map<Transaction>(transactionRecord);
+                throw new TransactionNotFoundException();
             }
+            return dbTransactionMapper.Map<Transaction>(transactionRecord);
         }
 
         public IList<Transaction> GetTransactions(string bankId, string accountId)
         {
             IList<Transaction> transactions;
-            using (BankContext bankContext = new BankContext())
-            {
-                transactions = dbTransactionMapper.Map<Transaction[]>(bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList());
-            }
+            transactions = dbTransactionMapper.Map<Transaction[]>(_bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList());
             if (transactions.Count == 0 || transactions == null)
             {
                 throw new NoTransactionsException();

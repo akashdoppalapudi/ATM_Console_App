@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ATM.Services
 {
-    internal class BankContext : DbContext
+    public class BankContext : DbContext
     {
         public DbSet<BankDBModel> Bank { get; set; }
         public DbSet<CurrencyDBModel> Currency { get; set; }

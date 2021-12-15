@@ -22,8 +22,9 @@ namespace ATM.Services
         private readonly Mapper bankDBMapper;
         private readonly MapperConfiguration dbBankConfig;
         private readonly Mapper dbBankMapper;
+        private readonly BankContext _bankContext;
 
-        public BankService(IIDGenService idGenService, ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService)
+        public BankService(IIDGenService idGenService, ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, BankContext bankContext)
         {
             _transactionService = transactionService;
             _employeeActionService = employeeActionService;
@@ -35,31 +36,23 @@ namespace ATM.Services
             bankDBMapper = new Mapper(bankDBConfig);
             dbBankConfig = new MapperConfiguration(cfg => cfg.CreateMap<BankDBModel, Bank>());
             dbBankMapper = new Mapper(dbBankConfig);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.Database.EnsureCreated();
-            }
+            _bankContext = bankContext;
+            _bankContext.Database.EnsureCreated();
         }
 
         public void CheckBankExistance(string bankId)
         {
-            using (BankContext bankContext = new BankContext())
+            if (!_bankContext.Bank.Any(b => b.Id == bankId && b.IsActive))
             {
-                if (!bankContext.Bank.Any(b => b.Id == bankId && b.IsActive))
-                {
-                    throw new BankDoesnotExistException();
-                }
+                throw new BankDoesnotExistException();
             }
         }
 
         public Bank GetBankById(string bankId)
         {
             CheckBankExistance(bankId);
-            using (BankContext bankContext = new BankContext())
-            {
-                BankDBModel bankRecord = bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-                return dbBankMapper.Map<Bank>(bankRecord);
-            }
+            BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+            return dbBankMapper.Map<Bank>(bankRecord);
         }
 
         public Bank CreateBank(string name)
@@ -74,11 +67,8 @@ namespace ATM.Services
         public void AddBank(Bank bank, Employee adminEmployee)
         {
             BankDBModel bankRecord = bankDBMapper.Map<BankDBModel>(bank);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.Bank.Add(bankRecord);
-                bankContext.SaveChanges();
-            }
+            _bankContext.Bank.Add(bankRecord);
+            _bankContext.SaveChanges();
             _employeeService.AddEmployee(bank.Id, adminEmployee);
             Currency defaultCurrency = _currencyService.CreateCurrency("INR", 1);
             _currencyService.AddCurrency(bank.Id, defaultCurrency);
@@ -110,16 +100,13 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            using (BankContext bankContext = new BankContext())
-            {
-                BankDBModel currentBankRecord = bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
-                currentBankRecord.Name = updateBank.Name;
-                currentBankRecord.IMPS = updateBank.IMPS;
-                currentBankRecord.RTGS = updateBank.RTGS;
-                currentBankRecord.OIMPS = updateBank.OIMPS;
-                currentBankRecord.ORTGS = updateBank.ORTGS;
-                bankContext.SaveChanges();
-            }
+            BankDBModel currentBankRecord = _bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
+            currentBankRecord.Name = updateBank.Name;
+            currentBankRecord.IMPS = updateBank.IMPS;
+            currentBankRecord.RTGS = updateBank.RTGS;
+            currentBankRecord.OIMPS = updateBank.OIMPS;
+            currentBankRecord.ORTGS = updateBank.ORTGS;
+            _bankContext.SaveChanges();
             EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.UpdateBank);
             _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -148,18 +135,15 @@ namespace ATM.Services
             {
                 throw new AccessDeniedException();
             }
-            using (BankContext bankContext = new BankContext())
-            {
-                BankDBModel bankRecord = bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
-                bankRecord.IsActive = false;
-                bankRecord.DeletedOn = DateTime.Now;
-                var employeeRecords = bankContext.Employee.Where(e => e.BankId == bankId && e.IsActive).ToList();
-                employeeRecords.ForEach(e => e.IsActive = false);
-                var accountRecords = bankContext.Account.Where(a => a.BankId == bankId && a.IsActive).ToList();
-                accountRecords.ForEach(a => a.IsActive = false);
-                bankContext.Currency.RemoveRange(bankContext.Currency.Where(c => c.BankId == bankId));
-                bankContext.SaveChanges();
-            }
+            BankDBModel bankRecord = _bankContext.Bank.First(b => b.Id == bankId && b.IsActive);
+            bankRecord.IsActive = false;
+            bankRecord.DeletedOn = DateTime.Now;
+            var employeeRecords = _bankContext.Employee.Where(e => e.BankId == bankId && e.IsActive).ToList();
+            employeeRecords.ForEach(e => e.IsActive = false);
+            var accountRecords = _bankContext.Account.Where(a => a.BankId == bankId && a.IsActive).ToList();
+            accountRecords.ForEach(a => a.IsActive = false);
+            _bankContext.Currency.RemoveRange(_bankContext.Currency.Where(c => c.BankId == bankId));
+            _bankContext.SaveChanges();
             EmployeeAction action = _employeeActionService.CreateEmployeeAction(bankId, employeeId, EmployeeActionType.DeleteBank);
             _employeeActionService.AddEmployeeAction(bankId, employeeId, action);
         }
@@ -185,13 +169,10 @@ namespace ATM.Services
         public Dictionary<string, string> GetAllBankNames()
         {
             Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            using (BankContext bankContext = new BankContext())
+            var bankRecords = _bankContext.Bank.Where(b => b.IsActive).Select(b => new { b.Id, b.Name });
+            foreach (var bankRecord in bankRecords)
             {
-                var bankRecords = bankContext.Bank.Where(b => b.IsActive).Select(b => new { b.Id, b.Name });
-                foreach (var bankRecord in bankRecords)
-                {
-                    bankNames.Add(bankRecord.Id, bankRecord.Name);
-                }
+                bankNames.Add(bankRecord.Id, bankRecord.Name);
             }
             return bankNames;
         }
@@ -254,23 +235,17 @@ namespace ATM.Services
 
         public void ValidateBankName(string bankName)
         {
-            using (BankContext bankContext = new BankContext())
+            if (_bankContext.Bank.Any(b => b.Name == bankName && b.IsActive))
             {
-                if (bankContext.Bank.Any(b => b.Name == bankName && b.IsActive))
-                {
-                    throw new BankNameAlreadyExistsException();
-                }
+                throw new BankNameAlreadyExistsException();
             }
         }
 
         public Bank GetBankDetails(string bankId)
         {
             CheckBankExistance(bankId);
-            using (BankContext bankContext = new BankContext())
-            {
-                BankDBModel bankRecord = bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-                return dbBankMapper.Map<Bank>(bankRecord);
-            }
+            BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
+            return dbBankMapper.Map<Bank>(bankRecord);
         }
     }
 }

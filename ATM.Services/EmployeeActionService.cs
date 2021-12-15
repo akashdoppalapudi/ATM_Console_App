@@ -17,14 +17,16 @@ namespace ATM.Services
         private readonly Mapper employeeActionDBMapper;
         private readonly MapperConfiguration dbEmployeeActionConfig;
         private readonly Mapper dbEmployeeActionMapper;
+        private readonly BankContext _bankContext;
 
-        public EmployeeActionService(IIDGenService idGenService)
+        public EmployeeActionService(IIDGenService idGenService, BankContext bankContext)
         {
             _idGenService = idGenService;
             employeeActionDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeAction, EmployeeActionDBModel>());
             employeeActionDBMapper = new Mapper(employeeActionDBConfig);
             dbEmployeeActionConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeActionDBModel, EmployeeAction>());
             dbEmployeeActionMapper = new Mapper(dbEmployeeActionConfig);
+            _bankContext = bankContext;
         }
 
         public EmployeeAction CreateEmployeeAction(string bankId, string employeeId, EmployeeActionType actionType, string accId = null, string TXNID = null)
@@ -45,20 +47,14 @@ namespace ATM.Services
             employeeAction.BankId = bankId;
             employeeAction.EmployeeId = employeeId;
             EmployeeActionDBModel employeeActionRecord = employeeActionDBMapper.Map<EmployeeActionDBModel>(employeeAction);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.EmployeeAction.Add(employeeActionRecord);
-                bankContext.SaveChanges();
-            }
+            _bankContext.EmployeeAction.Add(employeeActionRecord);
+            _bankContext.SaveChanges();
         }
 
         public IList<EmployeeAction> GetEmployeeActions(string bankId, string employeeId)
         {
             IList<EmployeeAction> actions;
-            using (BankContext bankContext = new BankContext())
-            {
-                actions = dbEmployeeActionMapper.Map<EmployeeAction[]>(bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList());
-            }
+            actions = dbEmployeeActionMapper.Map<EmployeeAction[]>(_bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList());
             if (actions.Count == 0 || actions == null)
             {
                 throw new NoEmployeeActionsException();

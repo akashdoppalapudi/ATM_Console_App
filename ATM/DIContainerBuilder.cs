@@ -21,7 +21,8 @@ namespace ATM.CLI
                 .AddSingleton<IEmployeeService, EmployeeService>()
                 .AddSingleton<IBankService, BankService>()
                 .AddSingleton<IConsoleMessages, ConsoleMessages>()
-                .AddSingleton<IConsoleUI, ConsoleUI>();
+                .AddSingleton<IConsoleUI, ConsoleUI>()
+                .AddDbContext<BankContext>();
 
             return DIContainer.BuildServiceProvider();
         }

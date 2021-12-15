@@ -17,8 +17,9 @@ namespace ATM.Services
         private readonly Mapper accountDBMapper;
         private readonly MapperConfiguration dbAccountConfig;
         private readonly Mapper dbAccountMapper;
+        private readonly BankContext _bankContext;
 
-        public AccountService(IIDGenService idGenService, IEncryptionService encryptionService)
+        public AccountService(IIDGenService idGenService, IEncryptionService encryptionService, BankContext bankContext)
         {
             _idGenService = idGenService;
             _encryptionService = encryptionService;
@@ -26,26 +27,21 @@ namespace ATM.Services
             accountDBMapper = new Mapper(accountDBConfig);
             dbAccountConfig = new MapperConfiguration(cfg => cfg.CreateMap<AccountDBModel, Account>());
             dbAccountMapper = new Mapper(dbAccountConfig);
+            _bankContext = bankContext;
         }
 
         public void CheckAccountExistance(string bankId, string accountId)
         {
-            using (BankContext bankContext = new BankContext())
+            if (!_bankContext.Account.Any(a => a.BankId == bankId && a.Id == accountId && a.IsActive))
             {
-                if (!bankContext.Account.Any(a => a.BankId == bankId && a.Id == accountId && a.IsActive))
-                {
-                    throw new AccountDoesNotExistException();
-                }
+                throw new AccountDoesNotExistException();
             }
         }
 
         private Account GetAccountById(string bankId, string accountId)
         {
             CheckAccountExistance(bankId, accountId);
-            using (BankContext bankContext = new BankContext())
-            {
-                return dbAccountMapper.Map<Account>(bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
-            }
+            return dbAccountMapper.Map<Account>(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
         }
 
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
@@ -67,25 +63,19 @@ namespace ATM.Services
         {
             account.BankId = bankId;
             AccountDBModel accountRecord = accountDBMapper.Map<AccountDBModel>(account);
-            using (BankContext bankContext = new BankContext())
-            {
-                bankContext.Account.Add(accountRecord);
-                bankContext.SaveChanges();
-            }
+            _bankContext.Account.Add(accountRecord);
+            _bankContext.SaveChanges();
         }
 
         public string GetAccountIdByUsername(string bankId, string username)
         {
             string id;
-            using (BankContext bankContext = new BankContext())
+            AccountDBModel accountRecord = _bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.IsActive && a.Username == username);
+            if (accountRecord == null)
             {
-                AccountDBModel accountRecord = bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.IsActive && a.Username == username);
-                if (accountRecord == null)
-                {
-                    throw new AccountDoesNotExistException();
-                }
-                id = accountRecord.Id;
+                throw new AccountDoesNotExistException();
             }
+            id = accountRecord.Id;
             return id;
         }
 
@@ -102,30 +92,24 @@ namespace ATM.Services
             }
             account.AccountType = updateAccount.AccountType;
             account.Balance = updateAccount.Balance;
-            using (BankContext bankContext = new BankContext())
-            {
-                AccountDBModel currentAccountRecord = bankContext.Account.First(a => a.BankId == account.BankId && a.Id == account.Id && a.IsActive);
-                currentAccountRecord.Name = account.Name;
-                currentAccountRecord.Gender = account.Gender;
-                currentAccountRecord.Username = account.Username;
-                currentAccountRecord.Password = account.Password;
-                currentAccountRecord.Salt = account.Salt;
-                currentAccountRecord.AccountType = account.AccountType;
-                currentAccountRecord.Balance = account.Balance;
-                bankContext.SaveChanges();
-            }
+            AccountDBModel currentAccountRecord = _bankContext.Account.First(a => a.BankId == account.BankId && a.Id == account.Id && a.IsActive);
+            currentAccountRecord.Name = account.Name;
+            currentAccountRecord.Gender = account.Gender;
+            currentAccountRecord.Username = account.Username;
+            currentAccountRecord.Password = account.Password;
+            currentAccountRecord.Salt = account.Salt;
+            currentAccountRecord.AccountType = account.AccountType;
+            currentAccountRecord.Balance = account.Balance;
+            _bankContext.SaveChanges();
         }
 
         public void DeleteAccount(string bankId, string accountId)
         {
             CheckAccountExistance(bankId, accountId);
-            using (BankContext bankContext = new BankContext())
-            {
-                AccountDBModel accountRecord = bankContext.Account.First(a => a.Id == accountId && a.BankId == bankId && a.IsActive);
-                accountRecord.IsActive = false;
-                accountRecord.DeletedOn = DateTime.Now;
-                bankContext.SaveChanges();
-            }
+            AccountDBModel accountRecord = _bankContext.Account.First(a => a.Id == accountId && a.BankId == bankId && a.IsActive);
+            accountRecord.IsActive = false;
+            accountRecord.DeletedOn = DateTime.Now;
+            _bankContext.SaveChanges();
         }
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
@@ -191,12 +175,9 @@ namespace ATM.Services
 
         public void ValidateUsername(string bankId, string username)
         {
-            using (BankContext bankContext = new BankContext())
+            if (_bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
             {
-                if (bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
-                {
-                    throw new UsernameAlreadyExistsException();
-                }
+                throw new UsernameAlreadyExistsException();
             }
         }
 
