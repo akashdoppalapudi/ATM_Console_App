@@ -3,7 +3,6 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
-using AutoMapper;
 using System;
 using System.Linq;
 
@@ -11,22 +10,14 @@ namespace ATM.Services
 {
     public class AccountService : IAccountService
     {
-        private readonly IIDGenService _idGenService;
         private readonly IEncryptionService _encryptionService;
-        private readonly MapperConfiguration accountDBConfig;
-        private readonly Mapper accountDBMapper;
-        private readonly MapperConfiguration dbAccountConfig;
-        private readonly Mapper dbAccountMapper;
+        private readonly IMapperService _mapperService;
         private readonly BankContext _bankContext;
 
-        public AccountService(IIDGenService idGenService, IEncryptionService encryptionService, BankContext bankContext)
+        public AccountService(IEncryptionService encryptionService, BankContext bankContext, IMapperService mapperService)
         {
-            _idGenService = idGenService;
             _encryptionService = encryptionService;
-            accountDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Account, AccountDBModel>());
-            accountDBMapper = new Mapper(accountDBConfig);
-            dbAccountConfig = new MapperConfiguration(cfg => cfg.CreateMap<AccountDBModel, Account>());
-            dbAccountMapper = new Mapper(dbAccountConfig);
+            _mapperService = mapperService;
             _bankContext = bankContext;
         }
 
@@ -41,7 +32,7 @@ namespace ATM.Services
         private Account GetAccountById(string bankId, string accountId)
         {
             CheckAccountExistance(bankId, accountId);
-            return dbAccountMapper.Map<Account>(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
+            return _mapperService.MapDBToAccount(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
         }
 
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
@@ -49,7 +40,7 @@ namespace ATM.Services
             (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
             return new Account
             {
-                Id = _idGenService.GenId(name),
+                Id = name.GenId(),
                 Name = name,
                 Gender = gender,
                 Username = username,
@@ -62,7 +53,7 @@ namespace ATM.Services
         public void AddAccount(string bankId, Account account)
         {
             account.BankId = bankId;
-            AccountDBModel accountRecord = accountDBMapper.Map<AccountDBModel>(account);
+            AccountDBModel accountRecord = _mapperService.MapAccountToDB(account);
             _bankContext.Account.Add(accountRecord);
             _bankContext.SaveChanges();
         }

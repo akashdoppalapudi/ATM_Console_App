@@ -2,25 +2,18 @@
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
-using AutoMapper;
 using System.Linq;
 
 namespace ATM.Services
 {
     public class CurrencyService : ICurrencyService
     {
-        private readonly MapperConfiguration currencyDBConfig;
-        private readonly Mapper currencyDBMapper;
-        private readonly MapperConfiguration dbCurrencyConfig;
-        private readonly Mapper dbCurrencyMapper;
+        private readonly IMapperService _mapperService;
         private readonly BankContext _bankContext;
 
-        public CurrencyService(BankContext bankContext)
+        public CurrencyService(BankContext bankContext, IMapperService mapperService)
         {
-            currencyDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Currency, CurrencyDBModel>());
-            currencyDBMapper = new Mapper(currencyDBConfig);
-            dbCurrencyConfig = new MapperConfiguration(cfg => cfg.CreateMap<CurrencyDBModel, Currency>());
-            dbCurrencyMapper = new Mapper(dbCurrencyConfig);
+            _mapperService = mapperService;
             _bankContext = bankContext;
         }
 
@@ -44,7 +37,7 @@ namespace ATM.Services
         {
             CheckCurrencyExistance(bankId, currencyName);
             CurrencyDBModel currencyRecord = _bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
-            return dbCurrencyMapper.Map<Currency>(currencyRecord);
+            return _mapperService.MapDBToCurrency(currencyRecord);
         }
 
         public Currency CreateCurrency(string currencyName, double exchangeRate)
@@ -60,7 +53,7 @@ namespace ATM.Services
         public void AddCurrency(string bankId, Currency currency)
         {
             currency.BankId = bankId;
-            CurrencyDBModel currencyRecord = currencyDBMapper.Map<CurrencyDBModel>(currency);
+            CurrencyDBModel currencyRecord = _mapperService.MapCurrencyToDB(currency);
             _bankContext.Currency.Add(currencyRecord);
             _bankContext.SaveChanges();
         }

@@ -3,7 +3,6 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
-using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,30 +11,22 @@ namespace ATM.Services
 {
     public class BankService : IBankService
     {
-        private readonly IIDGenService _idGenService;
         private readonly ITransactionService _transactionService;
         private readonly IEmployeeActionService _employeeActionService;
         private readonly IEmployeeService _employeeService;
         private readonly IAccountService _accountService;
         private readonly ICurrencyService _currencyService;
-        private readonly MapperConfiguration bankDBConfig;
-        private readonly Mapper bankDBMapper;
-        private readonly MapperConfiguration dbBankConfig;
-        private readonly Mapper dbBankMapper;
+        private readonly IMapperService _mapperService;
         private readonly BankContext _bankContext;
 
-        public BankService(IIDGenService idGenService, ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, BankContext bankContext)
+        public BankService(ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, BankContext bankContext, IMapperService mapperService)
         {
             _transactionService = transactionService;
             _employeeActionService = employeeActionService;
-            _idGenService = idGenService;
             _employeeService = employeeService;
             _accountService = accountService;
             _currencyService = currencyService;
-            bankDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Bank, BankDBModel>());
-            bankDBMapper = new Mapper(bankDBConfig);
-            dbBankConfig = new MapperConfiguration(cfg => cfg.CreateMap<BankDBModel, Bank>());
-            dbBankMapper = new Mapper(dbBankConfig);
+            _mapperService = mapperService;
             _bankContext = bankContext;
             _bankContext.Database.EnsureCreated();
         }
@@ -52,7 +43,7 @@ namespace ATM.Services
         {
             CheckBankExistance(bankId);
             BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            return dbBankMapper.Map<Bank>(bankRecord);
+            return _mapperService.MapDBToBank(bankRecord);
         }
 
         public Bank CreateBank(string name)
@@ -60,13 +51,13 @@ namespace ATM.Services
             return new Bank
             {
                 Name = name,
-                Id = _idGenService.GenId(name)
+                Id = name.GenId()
             };
         }
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
-            BankDBModel bankRecord = bankDBMapper.Map<BankDBModel>(bank);
+            BankDBModel bankRecord = _mapperService.MapBankToDB(bank);
             _bankContext.Bank.Add(bankRecord);
             _bankContext.SaveChanges();
             _employeeService.AddEmployee(bank.Id, adminEmployee);
@@ -245,7 +236,7 @@ namespace ATM.Services
         {
             CheckBankExistance(bankId);
             BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            return dbBankMapper.Map<Bank>(bankRecord);
+            return _mapperService.MapDBToBank(bankRecord);
         }
     }
 }

@@ -3,7 +3,6 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
-using AutoMapper;
 using System;
 using System.Linq;
 
@@ -11,22 +10,14 @@ namespace ATM.Services
 {
     public class EmployeeService : IEmployeeService
     {
-        private readonly IIDGenService _idGenService;
         private readonly IEncryptionService _encryptionService;
-        private readonly MapperConfiguration employeeDBConfig;
-        private readonly MapperConfiguration dbEmployeeConfig;
-        private readonly Mapper employeeDBMapper;
-        private readonly Mapper dbEmployeeMapper;
+        private readonly IMapperService _mapperService;
         private readonly BankContext _bankContext;
 
-        public EmployeeService(IIDGenService idGenService, IEncryptionService encryptionService, BankContext bankContext)
+        public EmployeeService(IEncryptionService encryptionService, BankContext bankContext, IMapperService mapperService)
         {
-            _idGenService = idGenService;
             _encryptionService = encryptionService;
-            employeeDBConfig = new MapperConfiguration(cfg => cfg.CreateMap<Employee, EmployeeDBModel>());
-            employeeDBMapper = new Mapper(employeeDBConfig);
-            dbEmployeeConfig = new MapperConfiguration(cfg => cfg.CreateMap<EmployeeDBModel, Employee>());
-            dbEmployeeMapper = new Mapper(dbEmployeeConfig);
+            _mapperService = mapperService;
             _bankContext = bankContext;
         }
 
@@ -34,7 +25,7 @@ namespace ATM.Services
         {
             CheckEmployeeExistance(bankId, employeeId);
             EmployeeDBModel employeeRecord = _bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.Id == employeeId && e.IsActive);
-            return dbEmployeeMapper.Map<Employee>(employeeRecord);
+            return _mapperService.MapDBToEmployee(employeeRecord);
         }
 
         public void CheckEmployeeExistance(string bankId, string employeeId)
@@ -50,7 +41,7 @@ namespace ATM.Services
             (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
             return new Employee
             {
-                Id = _idGenService.GenId(name),
+                Id = name.GenId(),
                 Name = name,
                 Gender = gender,
                 Username = username,
@@ -75,7 +66,7 @@ namespace ATM.Services
         public void AddEmployee(string bankId, Employee employee)
         {
             employee.BankId = bankId;
-            EmployeeDBModel employeeRecord = employeeDBMapper.Map<EmployeeDBModel>(employee);
+            EmployeeDBModel employeeRecord = _mapperService.MapEmployeeToDB(employee);
             _bankContext.Employee.Add(employeeRecord);
             _bankContext.SaveChanges();
         }

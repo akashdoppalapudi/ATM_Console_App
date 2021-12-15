@@ -12,8 +12,8 @@ namespace ATM.CLI
             ServiceCollection DIContainer = new ServiceCollection();
 
             DIContainer
-                .AddSingleton<IIDGenService, IDGenService>()
                 .AddSingleton<IEncryptionService, EncryptionService>()
+                .AddSingleton<IMapperService, MapperService>()
                 .AddSingleton<ITransactionService, TransactionService>()
                 .AddSingleton<IEmployeeActionService, EmployeeActionService>()
                 .AddSingleton<ICurrencyService, CurrencyService>()
