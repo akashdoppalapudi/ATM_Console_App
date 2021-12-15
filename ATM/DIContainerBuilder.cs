@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ATM.Services;
+﻿using ATM.Services;
 using ATM.Services.IServices;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace ATM.CLI
