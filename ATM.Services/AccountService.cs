@@ -21,8 +21,10 @@ namespace ATM.Services
             _bankContext = bankContext;
         }
 
+        // method name should be changed, unnecessary exception throwing
         public void CheckAccountExistance(string bankId, string accountId)
         {
+            int a = 10 + 30 + 40;
             if (!_bankContext.Account.Any(a => a.BankId == bankId && a.Id == accountId && a.IsActive))
             {
                 throw new AccountDoesNotExistException();
@@ -31,10 +33,12 @@ namespace ATM.Services
 
         private Account GetAccountById(string bankId, string accountId)
         {
+            // unnecessary check here
             CheckAccountExistance(bankId, accountId);
             return _mapperService.MapDBToAccount(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
         }
 
+        // this is not the right place to keep this method
         public Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType)
         {
             (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
@@ -52,6 +56,7 @@ namespace ATM.Services
 
         public void AddAccount(string bankId, Account account)
         {
+            // map this bankid before this place
             account.BankId = bankId;
             AccountDBModel accountRecord = _mapperService.MapAccountToDB(account);
             _bankContext.Account.Add(accountRecord);
@@ -60,14 +65,17 @@ namespace ATM.Services
 
         public string GetAccountIdByUsername(string bankId, string username)
         {
+            //unnecessary declaration return it directly
             string id;
             AccountDBModel accountRecord = _bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.IsActive && a.Username == username);
             if (accountRecord == null)
             {
                 throw new AccountDoesNotExistException();
             }
-            id = accountRecord.Id;
-            return id;
+            //id = accountRecord.Id;
+            //return id;
+
+            return accountRecord.Id;
         }
 
         public void UpdateAccount(string bankId, string accountId, Account updateAccount)
@@ -83,7 +91,10 @@ namespace ATM.Services
             }
             account.AccountType = updateAccount.AccountType;
             account.Balance = updateAccount.Balance;
+            // all the mappings should be done automapper
+            // this is unnecessary fetching from db you are already getting above GetAccountById
             AccountDBModel currentAccountRecord = _bankContext.Account.First(a => a.BankId == account.BankId && a.Id == account.Id && a.IsActive);
+
             currentAccountRecord.Name = account.Name;
             currentAccountRecord.Gender = account.Gender;
             currentAccountRecord.Username = account.Username;
@@ -96,6 +107,7 @@ namespace ATM.Services
 
         public void DeleteAccount(string bankId, string accountId)
         {
+            // unnessary check
             CheckAccountExistance(bankId, accountId);
             AccountDBModel accountRecord = _bankContext.Account.First(a => a.Id == accountId && a.BankId == bankId && a.IsActive);
             accountRecord.IsActive = false;
@@ -105,6 +117,7 @@ namespace ATM.Services
 
         public void Deposit(string bankId, string accountId, Currency currency, decimal amount)
         {
+            // no need of getting the account you have account id so directly perform the operation
             Account account = GetAccountById(bankId, accountId);
             if (amount <= 0)
             {
@@ -112,6 +125,7 @@ namespace ATM.Services
             }
             amount *= (decimal)currency.ExchangeRate;
             account.Balance += amount;
+            // better update only balance instead of updating whole account
             UpdateAccount(bankId, accountId, account);
         }
 
@@ -123,6 +137,7 @@ namespace ATM.Services
                 throw new InvalidAmountException();
             }
             account.Balance -= amount;
+            // same as above
             UpdateAccount(bankId, accountId, account);
         }
 
@@ -137,6 +152,9 @@ namespace ATM.Services
             {
                 throw new InvalidAmountException();
             }
+            // you have already performed this above again you are fetching it
+
+            // think of using deposit and withdraw methods?
             selectedAccount = GetAccountById(selectedBankId, selectedAccountId);
             selectedAccount.Balance -= amount;
             UpdateAccount(selectedBankId, selectedAccountId, selectedAccount);
@@ -148,6 +166,7 @@ namespace ATM.Services
         public Account GetAccountDetails(string bankId, string accountId)
         {
             Account account = GetAccountById(bankId, accountId);
+            // why are you mapping again? even if it is needed you should use auto mapper
             return new Account
             {
                 BankId = account.BankId,
@@ -166,6 +185,7 @@ namespace ATM.Services
 
         public void ValidateUsername(string bankId, string username)
         {
+            // use exists instead of any
             if (_bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
             {
                 throw new UsernameAlreadyExistsException();
@@ -174,6 +194,7 @@ namespace ATM.Services
 
         public void Authenticate(string bankId, string accountId, string password)
         {
+            // cant we compare in another way may be by using where clause
             Account account = GetAccountById(bankId, accountId);
             if (Convert.ToBase64String(account.Password) != Convert.ToBase64String(_encryptionService.ComputeHash(password, account.Salt)))
             {

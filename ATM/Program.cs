@@ -11,6 +11,8 @@ namespace ATM.CLI
 {
     class Program
     {
+        // use static class for DIContainerBuilder
+        // follow the naming conventions when nameing a variable all time
         public static readonly IServiceProvider DIContainer = new DIContainerBuilder().Build();
         static void Main(string[] args)
         {
@@ -632,7 +634,7 @@ namespace ATM.CLI
                 {
                     consoleMessages.InvalidOptionMsg();
                 }
-            EndOfProgram:;
+                EndOfProgram:;
             }
         }
     }

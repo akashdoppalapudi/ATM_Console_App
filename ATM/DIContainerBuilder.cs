@@ -1,5 +1,6 @@
 ﻿using ATM.Services;
 using ATM.Services.IServices;
+using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -9,11 +10,20 @@ namespace ATM.CLI
     {
         public IServiceProvider Build()
         {
-            ServiceCollection DIContainer = new ServiceCollection();
+            // follow the naming conventions when nameing a variable all time
+            ServiceCollection services = new ServiceCollection();
 
-            DIContainer
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MapperService());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services
                 .AddSingleton<IEncryptionService, EncryptionService>()
-                .AddSingleton<IMapperService, MapperService>()
+                //.AddSingleton<IMapperService, MapperService>()
                 .AddSingleton<ITransactionService, TransactionService>()
                 .AddSingleton<IEmployeeActionService, EmployeeActionService>()
                 .AddSingleton<ICurrencyService, CurrencyService>()
@@ -24,7 +34,7 @@ namespace ATM.CLI
                 .AddSingleton<IConsoleUI, ConsoleUI>()
                 .AddDbContext<BankContext>();
 
-            return DIContainer.BuildServiceProvider();
+            return services.BuildServiceProvider();
         }
     }
 }

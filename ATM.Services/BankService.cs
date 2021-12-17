@@ -78,6 +78,7 @@ namespace ATM.Services
 
         public void AddAccount(string bankId, string employeeId, Account newAccount)
         {
+            // what happens if the adding of account fails at backend so better add transaction after the operation
             Transaction transaction = _transactionService.CreateTransaction(bankId, newAccount.Id, 1500, TransactionType.Credit, TransactionNarrative.AccountCreation, newAccount.Id);
             _accountService.AddAccount(bankId, newAccount);
             _transactionService.AddTransaction(bankId, newAccount.Id, transaction);
