@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,12 @@ namespace ATM.Services
 {
     public class EmployeeActionService : IEmployeeActionService
     {
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public EmployeeActionService(BankContext bankContext, IMapperService mapperService)
+        public EmployeeActionService(BankContext bankContext, IMapper mapper)
         {
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
         }
 
@@ -37,7 +38,7 @@ namespace ATM.Services
         {
             employeeAction.BankId = bankId;
             employeeAction.EmployeeId = employeeId;
-            EmployeeActionDBModel employeeActionRecord = _mapperService.MapEmployeeActionToDB(employeeAction);
+            EmployeeActionDBModel employeeActionRecord = _mapper.Map<EmployeeActionDBModel>(employeeAction);
             _bankContext.EmployeeAction.Add(employeeActionRecord);
             _bankContext.SaveChanges();
         }
@@ -48,7 +49,7 @@ namespace ATM.Services
             IList<EmployeeActionDBModel> actionRecords = _bankContext.EmployeeAction.Where(a => a.BankId == bankId && a.EmployeeId == employeeId).ToList();
             foreach (EmployeeActionDBModel adb in actionRecords)
             {
-                actions.Add(_mapperService.MapDBToEmployeeAction(adb));
+                actions.Add(_mapper.Map<EmployeeAction>(adb));
             }
             if (actions.Count == 0 || actions == null)
             {

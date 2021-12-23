@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Linq;
 
@@ -11,20 +12,19 @@ namespace ATM.Services
     public class AccountService : IAccountService
     {
         private readonly IEncryptionService _encryptionService;
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public AccountService(IEncryptionService encryptionService, BankContext bankContext, IMapperService mapperService)
+        public AccountService(IEncryptionService encryptionService, BankContext bankContext, IMapper mapper)
         {
             _encryptionService = encryptionService;
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
         }
 
         // method name should be changed, unnecessary exception throwing
         public void CheckAccountExistance(string bankId, string accountId)
         {
-            int a = 10 + 30 + 40;
             if (!_bankContext.Account.Any(a => a.BankId == bankId && a.Id == accountId && a.IsActive))
             {
                 throw new AccountDoesNotExistException();
@@ -35,7 +35,7 @@ namespace ATM.Services
         {
             // unnecessary check here
             CheckAccountExistance(bankId, accountId);
-            return _mapperService.MapDBToAccount(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
+            return _mapper.Map<Account>(_bankContext.Account.FirstOrDefault(a => a.BankId == bankId && a.Id == accountId && a.IsActive));
         }
 
         // this is not the right place to keep this method
@@ -58,7 +58,7 @@ namespace ATM.Services
         {
             // map this bankid before this place
             account.BankId = bankId;
-            AccountDBModel accountRecord = _mapperService.MapAccountToDB(account);
+            AccountDBModel accountRecord = _mapper.Map<AccountDBModel>(account);
             _bankContext.Account.Add(accountRecord);
             _bankContext.SaveChanges();
         }

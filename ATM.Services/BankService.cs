@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +17,17 @@ namespace ATM.Services
         private readonly IEmployeeService _employeeService;
         private readonly IAccountService _accountService;
         private readonly ICurrencyService _currencyService;
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public BankService(ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, BankContext bankContext, IMapperService mapperService)
+        public BankService(ITransactionService transactionService, IEmployeeActionService employeeActionService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, BankContext bankContext, IMapper mapper)
         {
             _transactionService = transactionService;
             _employeeActionService = employeeActionService;
             _employeeService = employeeService;
             _accountService = accountService;
             _currencyService = currencyService;
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
             _bankContext.Database.EnsureCreated();
         }
@@ -43,7 +44,7 @@ namespace ATM.Services
         {
             CheckBankExistance(bankId);
             BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            return _mapperService.MapDBToBank(bankRecord);
+            return _mapper.Map<Bank>(bankRecord);
         }
 
         public Bank CreateBank(string name)
@@ -57,7 +58,7 @@ namespace ATM.Services
 
         public void AddBank(Bank bank, Employee adminEmployee)
         {
-            BankDBModel bankRecord = _mapperService.MapBankToDB(bank);
+            BankDBModel bankRecord = _mapper.Map<BankDBModel>(bank);
             _bankContext.Bank.Add(bankRecord);
             _bankContext.SaveChanges();
             _employeeService.AddEmployee(bank.Id, adminEmployee);
@@ -237,7 +238,7 @@ namespace ATM.Services
         {
             CheckBankExistance(bankId);
             BankDBModel bankRecord = _bankContext.Bank.FirstOrDefault(b => b.Id == bankId && b.IsActive);
-            return _mapperService.MapDBToBank(bankRecord);
+            return _mapper.Map<Bank>(bankRecord);
         }
     }
 }

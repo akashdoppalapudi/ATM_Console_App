@@ -13,17 +13,17 @@ namespace ATM.CLI
     {
         // use static class for DIContainerBuilder
         // follow the naming conventions when nameing a variable all time
-        public static readonly IServiceProvider DIContainer = new DIContainerBuilder().Build();
+        public static readonly IServiceProvider services = DIContainerBuilder.Build();
         static void Main(string[] args)
         {
-            IConsoleMessages consoleMessages = DIContainer.GetService<IConsoleMessages>();
-            IConsoleUI consoleUI = DIContainer.GetService<IConsoleUI>();
-            IBankService bankService = DIContainer.GetService<IBankService>();
-            IEmployeeService employeeService = DIContainer.GetService<IEmployeeService>();
-            IAccountService accountService = DIContainer.GetService<IAccountService>();
-            ICurrencyService currencyService = DIContainer.GetService<ICurrencyService>();
-            ITransactionService transactionService = DIContainer.GetService<ITransactionService>();
-            IEmployeeActionService employeeActionService = DIContainer.GetService<IEmployeeActionService>();
+            IConsoleMessages consoleMessages = services.GetService<IConsoleMessages>();
+            IConsoleUI consoleUI = services.GetService<IConsoleUI>();
+            IBankService bankService = services.GetService<IBankService>();
+            IEmployeeService employeeService = services.GetService<IEmployeeService>();
+            IAccountService accountService = services.GetService<IAccountService>();
+            ICurrencyService currencyService = services.GetService<ICurrencyService>();
+            ITransactionService transactionService = services.GetService<ITransactionService>();
+            IEmployeeActionService employeeActionService = services.GetService<IEmployeeActionService>();
 
             consoleMessages.WelcomeMsg();
             while (true)

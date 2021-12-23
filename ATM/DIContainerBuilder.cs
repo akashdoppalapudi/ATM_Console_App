@@ -6,24 +6,23 @@ using System;
 
 namespace ATM.CLI
 {
-    public class DIContainerBuilder
+    public static class DIContainerBuilder
     {
-        public IServiceProvider Build()
+        public static IServiceProvider Build()
         {
             // follow the naming conventions when nameing a variable all time
             ServiceCollection services = new ServiceCollection();
 
             var mappingConfig = new MapperConfiguration(mc =>
             {
-                mc.AddProfile(new MapperService());
+                mc.AddProfile(new MapperProfile());
             });
 
             IMapper mapper = mappingConfig.CreateMapper();
-            services.AddSingleton(mapper);
 
             services
                 .AddSingleton<IEncryptionService, EncryptionService>()
-                //.AddSingleton<IMapperService, MapperService>()
+                .AddSingleton(mapper)
                 .AddSingleton<ITransactionService, TransactionService>()
                 .AddSingleton<IEmployeeActionService, EmployeeActionService>()
                 .AddSingleton<ICurrencyService, CurrencyService>()

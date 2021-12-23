@@ -2,18 +2,19 @@
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System.Linq;
 
 namespace ATM.Services
 {
     public class CurrencyService : ICurrencyService
     {
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public CurrencyService(BankContext bankContext, IMapperService mapperService)
+        public CurrencyService(BankContext bankContext, IMapper mapper)
         {
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
         }
 
@@ -37,7 +38,7 @@ namespace ATM.Services
         {
             CheckCurrencyExistance(bankId, currencyName);
             CurrencyDBModel currencyRecord = _bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
-            return _mapperService.MapDBToCurrency(currencyRecord);
+            return _mapper.Map<Currency>(currencyRecord);
         }
 
         public Currency CreateCurrency(string currencyName, double exchangeRate)
@@ -53,7 +54,7 @@ namespace ATM.Services
         public void AddCurrency(string bankId, Currency currency)
         {
             currency.BankId = bankId;
-            CurrencyDBModel currencyRecord = _mapperService.MapCurrencyToDB(currency);
+            CurrencyDBModel currencyRecord = _mapper.Map<CurrencyDBModel>(currency);
             _bankContext.Currency.Add(currencyRecord);
             _bankContext.SaveChanges();
         }

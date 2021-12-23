@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Linq;
 
@@ -11,13 +12,13 @@ namespace ATM.Services
     public class EmployeeService : IEmployeeService
     {
         private readonly IEncryptionService _encryptionService;
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public EmployeeService(IEncryptionService encryptionService, BankContext bankContext, IMapperService mapperService)
+        public EmployeeService(IEncryptionService encryptionService, BankContext bankContext, IMapper mapper)
         {
             _encryptionService = encryptionService;
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
         }
 
@@ -25,7 +26,7 @@ namespace ATM.Services
         {
             CheckEmployeeExistance(bankId, employeeId);
             EmployeeDBModel employeeRecord = _bankContext.Employee.FirstOrDefault(e => e.BankId == bankId && e.Id == employeeId && e.IsActive);
-            return _mapperService.MapDBToEmployee(employeeRecord);
+            return _mapper.Map<Employee>(employeeRecord);
         }
 
         public void CheckEmployeeExistance(string bankId, string employeeId)
@@ -66,7 +67,7 @@ namespace ATM.Services
         public void AddEmployee(string bankId, Employee employee)
         {
             employee.BankId = bankId;
-            EmployeeDBModel employeeRecord = _mapperService.MapEmployeeToDB(employee);
+            EmployeeDBModel employeeRecord = _mapper.Map<EmployeeDBModel>(employee);
             _bankContext.Employee.Add(employeeRecord);
             _bankContext.SaveChanges();
         }

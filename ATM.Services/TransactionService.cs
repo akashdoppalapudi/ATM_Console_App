@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +12,12 @@ namespace ATM.Services
 {
     public class TransactionService : ITransactionService
     {
-        private readonly IMapperService _mapperService;
+        private readonly IMapper _mapper;
         private readonly BankContext _bankContext;
 
-        public TransactionService(BankContext bankContext, IMapperService mapperService)
+        public TransactionService(BankContext bankContext, IMapper mapper)
         {
-            _mapperService = mapperService;
+            _mapper = mapper;
             _bankContext = bankContext;
         }
 
@@ -41,7 +42,7 @@ namespace ATM.Services
         {
             transaction.AccountId = accountId;
             transaction.BankId = bankId;
-            TransactionDBModel transactionRecord = _mapperService.MapTransctionToDB(transaction);
+            TransactionDBModel transactionRecord = _mapper.Map<TransactionDBModel>(transaction);
             _bankContext.Transaction.Add(transactionRecord);
             _bankContext.SaveChanges();
         }
@@ -53,7 +54,7 @@ namespace ATM.Services
             {
                 throw new TransactionNotFoundException();
             }
-            return _mapperService.MapDBToTransaction(transactionRecord);
+            return _mapper.Map<Transaction>(transactionRecord);
         }
 
         public IList<Transaction> GetTransactions(string bankId, string accountId)
@@ -62,7 +63,7 @@ namespace ATM.Services
             IList<TransactionDBModel> transactionRecords = _bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList();
             foreach (TransactionDBModel tdb in transactionRecords)
             {
-                transactions.Add(_mapperService.MapDBToTransaction(tdb));
+                transactions.Add(_mapper.Map<Transaction>(tdb));
             }
             if (transactions.Count == 0 || transactions == null)
             {
