@@ -5,12 +5,15 @@ using AutoMapper;
 
 namespace ATM.Services
 {
-    public class MapperService : IMapperService
+    // no need of imapper service
+    // should inherit Automapper.Profile class
+    public class MapperService : Profile
     {
         private readonly Mapper mapper;
 
         public MapperService()
         {
+            CreateMap<Account, AccountDBModel>();
             mapper = new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Account, AccountDBModel>();
@@ -28,6 +31,9 @@ namespace ATM.Services
             }));
         }
 
+        // We dont need this to be done separately do this in service layer itself, remove all the the code which is in 'Not Required' region
+
+        #region Not Required
         public AccountDBModel MapAccountToDB(Account account)
         {
             return mapper.Map<AccountDBModel>(account);
@@ -87,5 +93,7 @@ namespace ATM.Services
         {
             return mapper.Map<Transaction>(transactionDBModel);
         }
+
+        #endregion
     }
 }
