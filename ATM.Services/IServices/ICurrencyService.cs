@@ -4,9 +4,7 @@ namespace ATM.Services.IServices
 {
     public interface ICurrencyService
     {
-        void AddCurrency(string bankId, Currency currency);
-        void CheckCurrencyExistance(string bankId, string currencyName);
-        Currency CreateCurrency(string currencyName, double exchangeRate);
+        void AddCurrency(Currency currency);
         void DeleteCurrency(string bankId, string currencyName);
         Currency GetCurrencyByName(string bankId, string currencyName);
         void UpdateCurrency(string bankId, string currencyName, Currency updateCurrency);

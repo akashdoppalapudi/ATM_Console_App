@@ -1,5 +1,6 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Models.ViewModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
 using System;
@@ -14,13 +15,13 @@ namespace ATM.Services
         decimal GetAmount(char amtFor);
         string GetCurrencyName();
         Account GetDataForAccountCreation(string bankId);
-        Account GetDataForAccountUpdate(Account currentAccount);
+        Account GetDataForAccountUpdate(AccountViewModel currentAccount);
         (Bank, Employee) GetDataForBankCreation();
         Bank GetDataForBankUpdate(Bank currentBank);
         Currency GetDataForCurrencyCreation(string bankId);
         Currency GetDataForCurrencyUpdate(Currency currentCurrency);
         Employee GetDataForEmployeeCreation(string bankId);
-        Employee GetDataForEmployeeUpdate(Employee currentEmployee);
+        Employee GetDataForEmployeeUpdate(EmployeeViewModel currentEmployee);
         string GetPasswordFromUser();
         string GetRevertTransactionId();
         string GetUsername();
@@ -35,18 +36,20 @@ namespace ATM.Services
 
     public class ConsoleUI : IConsoleUI
     {
-        private ConsoleMessages _consoleMessages;
+        private IConsoleMessages _consoleMessages;
         private IBankService _bankService;
         private IEmployeeService _employeeService;
         private IAccountService _accountService;
         private ICurrencyService _currencyService;
-        public ConsoleUI(IBankService bankService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService)
+        private IEncryptionService _encryptionService;
+        public ConsoleUI(IConsoleMessages consoleMessages, IBankService bankService, IEmployeeService employeeService, IAccountService accountService, ICurrencyService currencyService, IEncryptionService encryptionService)
         {
-            _consoleMessages = new ConsoleMessages();
+            _consoleMessages = consoleMessages;
             _bankService = bankService;
             _employeeService = employeeService;
             _accountService = accountService;
             _currencyService = currencyService;
+            _encryptionService = encryptionService;
         }
 
         public (Bank, Employee) GetDataForBankCreation()
@@ -61,18 +64,21 @@ namespace ATM.Services
                 throw new BankCreationFailedException();
             }
             _bankService.ValidateBankName(name);
-            Bank bank = _bankService.CreateBank(name);
+            Bank bank = new Bank
+            {
+                Name = name,
+                Id = name.GenId(),
+            };
             string empName, username, password;
             Gender gender;
             Console.WriteLine("\n____ACCOUNT CREATION____\n");
             Console.Write("Please Enter Name : ");
-            string selectedName = Console.ReadLine();
-            if (selectedName.Length < 3)
+            empName = Console.ReadLine();
+            if (empName.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
                 throw new AccountCreationFailedException();
             }
-            empName = selectedName;
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
             foreach (string g in Enum.GetNames(typeof(Gender)))
@@ -97,22 +103,31 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             Console.Write("\nPlease set a Username : ");
-            string selectedUsername = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedUsername))
+            username = Console.ReadLine();
+            if (String.IsNullOrEmpty(username))
             {
                 Console.WriteLine("Invalid Username");
                 throw new AccountCreationFailedException();
             }
-            username = selectedUsername;
             Console.Write("Please set a Password : ");
-            string selectedPassword = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedPassword))
+            password = Console.ReadLine();
+            if (String.IsNullOrEmpty(password))
             {
                 Console.WriteLine("Invalid Password");
                 throw new AccountCreationFailedException();
             }
-            password = selectedPassword;
-            Employee employee = _employeeService.CreateEmployee(empName, gender, username, password, EmployeeType.Admin);
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
+            Employee employee = new Employee
+            {
+                Id = empName.GenId(),
+                Name = empName,
+                Gender = gender,
+                Username = username,
+                Password = passwordBytes,
+                Salt = saltBytes,
+                EmployeeType = EmployeeType.Admin,
+                BankId = bank.Id
+            };
             return (bank, employee);
         }
 
@@ -123,13 +138,12 @@ namespace ATM.Services
             EmployeeType employeeType;
             Console.WriteLine("\n____EMPLOYEE CREATION____\n");
             Console.Write("Please Enter Name : ");
-            string selectedName = Console.ReadLine();
-            if (selectedName.Length < 3)
+            name = Console.ReadLine();
+            if (name.Length < 3)
             {
                 Console.WriteLine("Invalid Name");
                 throw new AccountCreationFailedException();
             }
-            name = selectedName;
             Console.WriteLine("\n__GENDER__\n");
             int i = 1;
             foreach (string g in Enum.GetNames(typeof(Gender)))
@@ -154,21 +168,19 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             Console.Write("\nPlease set a Username : ");
-            string selectedUsername = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedUsername))
+            username = Console.ReadLine();
+            if (String.IsNullOrEmpty(username))
             {
                 throw new AccountCreationFailedException();
             }
-            username = selectedUsername;
             _employeeService.ValidateUsername(bankId, username);
             Console.Write("Please set a Password : ");
-            string selectedPassword = Console.ReadLine();
-            if (String.IsNullOrEmpty(selectedPassword))
+            password = Console.ReadLine();
+            if (String.IsNullOrEmpty(password))
             {
                 Console.WriteLine("Invalid Password");
                 throw new AccountCreationFailedException();
             }
-            password = selectedPassword;
             Console.WriteLine("\n__EMPLOYEE TYPE__\n");
             i = 1;
             foreach (string type in Enum.GetNames(typeof(EmployeeType)))
@@ -192,7 +204,17 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Employee Type");
                 throw new AccountCreationFailedException();
             }
-            return _employeeService.CreateEmployee(name, gender, username, password, employeeType);
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
+            return new Employee
+            {
+                Id = name.GenId(),
+                Name = name,
+                Gender = gender,
+                Username = username,
+                Password = passwordBytes,
+                Salt = saltBytes,
+                EmployeeType = employeeType
+            };
         }
         public Account GetDataForAccountCreation(string bankId)
         {
@@ -271,7 +293,17 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Account Type");
                 throw new AccountCreationFailedException();
             }
-            return _accountService.CreateAccount(name, gender, username, password, accountType);
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
+            return new Account
+            {
+                Id = name.GenId(),
+                Name = name,
+                Username = username,
+                Password = passwordBytes,
+                Salt = saltBytes,
+                AccountType = accountType,
+                BankId = bankId
+            };
         }
 
         public Bank GetDataForBankUpdate(Bank currentBank)
@@ -383,10 +415,17 @@ namespace ATM.Services
                 }
             }
 
-            return new Bank { Name = name, IMPS = imps, RTGS = rtgs, OIMPS = oimps, ORTGS = ortgs };
+            return new Bank
+            {
+                Name = name,
+                IMPS = imps,
+                RTGS = rtgs,
+                OIMPS = oimps,
+                ORTGS = ortgs
+            };
         }
 
-        public Employee GetDataForEmployeeUpdate(Employee currentEmployee)
+        public Employee GetDataForEmployeeUpdate(EmployeeViewModel currentEmployee)
         {
             string name, username, password;
             Gender gender;
@@ -476,11 +515,20 @@ namespace ATM.Services
                     employeeType = currentEmployee.EmployeeType;
                 }
             }
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
 
-            return _employeeService.CreateEmployee(name, gender, username, password, employeeType);
+            return new Employee
+            {
+                Name = name,
+                Username = username,
+                Gender = gender,
+                EmployeeType = employeeType,
+                Password = passwordBytes,
+                Salt = saltBytes
+            };
         }
 
-        public Account GetDataForAccountUpdate(Account currentAccount)
+        public Account GetDataForAccountUpdate(AccountViewModel currentAccount)
         {
             string name, username, password;
             Gender gender;
@@ -573,8 +621,18 @@ namespace ATM.Services
                     accountType = currentAccount.AccountType;
                 }
             }
+            (byte[] passwordBytes, byte[] saltBytes) = _encryptionService.ComputeHash(password);
 
-            return _accountService.CreateAccount(name, gender, username, password, accountType);
+            return new Account
+            {
+                Name = name,
+                Username = username,
+                Gender = gender,
+                AccountType = accountType,
+                Password = passwordBytes,
+                Salt = saltBytes
+            };
+
         }
 
         public string SelectBank(Dictionary<string, string> bankNames)
@@ -695,7 +753,12 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Exchange Rate");
                 throw new CurrencyDataInvalidException();
             }
-            return _currencyService.CreateCurrency(currencyName, exchangeRate);
+            return new Currency
+            {
+                Name = currencyName,
+                ExchangeRate = exchangeRate,
+                BankId = bankId
+            };
         }
 
         public Currency GetDataForCurrencyUpdate(Currency currentCurrency)
@@ -724,7 +787,12 @@ namespace ATM.Services
                     exchangeRate = currentCurrency.ExchangeRate;
                 }
             }
-            return _currencyService.CreateCurrency(currentCurrency.Name, exchangeRate);
+            return new Currency
+            {
+                Name = currentCurrency.Name,
+                ExchangeRate = exchangeRate,
+                BankId = currentCurrency.BankId
+            };
         }
 
         public string GetPasswordFromUser()

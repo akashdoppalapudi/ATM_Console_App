@@ -13,12 +13,11 @@ namespace ATM.CLI
             // follow the naming conventions when nameing a variable all time
             ServiceCollection services = new ServiceCollection();
 
-            var mappingConfig = new MapperConfiguration(mc =>
+
+            IMapper mapper = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MapperProfile());
-            });
-
-            IMapper mapper = mappingConfig.CreateMapper();
+            }).CreateMapper();
 
             services
                 .AddSingleton<IEncryptionService, EncryptionService>()

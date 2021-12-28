@@ -1,5 +1,6 @@
 ﻿using ATM.Models;
 using ATM.Models.Enums;
+using ATM.Models.ViewModels;
 using ATM.Services;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
@@ -11,7 +12,6 @@ namespace ATM.CLI
 {
     class Program
     {
-        // use static class for DIContainerBuilder
         // follow the naming conventions when nameing a variable all time
         public static readonly IServiceProvider services = DIContainerBuilder.Build();
         static void Main(string[] args)
@@ -34,7 +34,15 @@ namespace ATM.CLI
                     try
                     {
                         (Bank newBank, Employee adminEmployee) = consoleUI.GetDataForBankCreation();
-                        bankService.AddBank(newBank, adminEmployee);
+                        bankService.AddBank(newBank);
+                        employeeService.AddEmployee(adminEmployee);
+                        Currency defaultCurrency = new Currency
+                        {
+                            Name = "INR",
+                            ExchangeRate = 1,
+                            BankId = newBank.Id,
+                        };
+                        currencyService.AddCurrency(defaultCurrency);
                         consoleMessages.BankCreationSuccess();
                     }
                     catch (BankNameAlreadyExistsException)
@@ -61,11 +69,7 @@ namespace ATM.CLI
                         continue;
                     }
                     string bankId = consoleUI.SelectBank(bankNames);
-                    try
-                    {
-                        bankService.CheckBankExistance(bankId);
-                    }
-                    catch (BankDoesnotExistException)
+                    if (bankId == null)
                     {
                         consoleMessages.BankDoesnotExistMsg();
                         continue;
@@ -81,7 +85,7 @@ namespace ATM.CLI
                             {
                                 employeeId = employeeService.GetEmployeeIdByUsername(bankId, username);
                                 password = consoleUI.GetPasswordFromUser();
-                                employeeService.Authenticate(bankId, employeeId, password);
+                                employeeService.Authenticate(employeeId, password);
                             }
                             catch (EmployeeDoesNotExistException)
                             {
@@ -93,18 +97,28 @@ namespace ATM.CLI
                                 consoleMessages.WrongPasswordMsg();
                                 continue;
                             }
-                            if (employeeService.IsEmployeeAdmin(bankId, employeeId))
+                            if (employeeService.IsEmployeeAdmin(employeeId))
                             {
                                 while (true)
                                 {
                                     AdminOperation option3 = consoleUI.AdminOptions();
                                     if (option3 == AdminOperation.CreateEmployee)
                                     {
-                                        Employee newEmployee;
                                         try
                                         {
-                                            newEmployee = consoleUI.GetDataForEmployeeCreation(bankId);
-                                            bankService.AddEmployee(bankId, employeeId, newEmployee);
+                                            Employee newEmployee = consoleUI.GetDataForEmployeeCreation(bankId);
+                                            newEmployee.BankId = bankId;
+                                            employeeService.AddEmployee(newEmployee);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = newEmployee.Id,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.NewAccount,
+                                                BankId = bankId,
+                                                EmployeeId = employeeId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccountCreationFailedException)
@@ -126,14 +140,22 @@ namespace ATM.CLI
                                     else if (option3 == AdminOperation.UpdateEmployee)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
-                                        string updateEmployeeId;
-                                        Employee currentEmployee, updatedEmployee;
                                         try
                                         {
-                                            updateEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
-                                            currentEmployee = employeeService.GetEmployeeDetails(bankId, updateEmployeeId);
-                                            updatedEmployee = consoleUI.GetDataForEmployeeUpdate(currentEmployee);
-                                            bankService.UpdateEmployee(bankId, employeeId, updateEmployeeId, updatedEmployee);
+                                            string updateEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
+                                            EmployeeViewModel currentEmployee = employeeService.GetEmployeeDetails(updateEmployeeId);
+                                            Employee updatedEmployee = consoleUI.GetDataForEmployeeUpdate(currentEmployee);
+                                            employeeService.UpdateEmployee(updateEmployeeId, updatedEmployee);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = updateEmployeeId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateAccount,
+                                                BankId = bankId,
+                                                EmployeeId = employeeId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.EmployeeUpdateSuccess();
                                         }
                                         catch (EmployeeDoesNotExistException)
@@ -155,11 +177,20 @@ namespace ATM.CLI
                                     else if (option3 == AdminOperation.DeleteEmployee)
                                     {
                                         string selectedUsername = consoleUI.GetUsername();
-                                        string deleteEmployeeId;
                                         try
                                         {
-                                            deleteEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
-                                            bankService.DeleteEmployee(bankId, employeeId, deleteEmployeeId);
+                                            string deleteEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
+                                            employeeService.DeleteEmployee(deleteEmployeeId);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = deleteEmployeeId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.DeleteAccount,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.EmployeeDeleteSuccess();
                                         }
                                         catch (EmployeeDoesNotExistException)
@@ -175,11 +206,33 @@ namespace ATM.CLI
                                     }
                                     else if (option3 == AdminOperation.CreateAccount)
                                     {
-                                        Account newAccount;
                                         try
                                         {
-                                            newAccount = consoleUI.GetDataForAccountCreation(bankId);
-                                            bankService.AddAccount(bankId, employeeId, newAccount);
+                                            Account newAccount = consoleUI.GetDataForAccountCreation(bankId);
+                                            newAccount.BankId = bankId;
+                                            accountService.AddAccount(newAccount);
+                                            Transaction transaction = new Transaction
+                                            {
+                                                Id = bankId.GenTransactionId(newAccount.Id),
+                                                TransactionDate = DateTime.Now,
+                                                TransactionType = TransactionType.Credit,
+                                                BankId = bankId,
+                                                AccountId = newAccount.Id,
+                                                TransactionNarrative = TransactionNarrative.AccountCreation,
+                                                TransactionAmount = 1500
+                                            };
+                                            transactionService.AddTransaction(transaction);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                TXNId = transaction.Id,
+                                                AccountId = newAccount.Id,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.NewAccount,
+                                                BankId = bankId,
+                                                EmployeeId = employeeId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccountCreationFailedException)
@@ -202,14 +255,22 @@ namespace ATM.CLI
                                     else if (option3 == AdminOperation.UpdateAccount)
                                     {
                                         string selecteUsername = consoleUI.GetUsername();
-                                        string updateAccountId;
-                                        Account currentAccount, updatedAccount;
                                         try
                                         {
-                                            updateAccountId = accountService.GetAccountIdByUsername(bankId, selecteUsername);
-                                            currentAccount = accountService.GetAccountDetails(bankId, updateAccountId);
-                                            updatedAccount = consoleUI.GetDataForAccountUpdate(currentAccount);
-                                            bankService.UpdateAccount(bankId, employeeId, updateAccountId, updatedAccount);
+                                            string updateAccountId = accountService.GetAccountIdByUsername(bankId, selecteUsername);
+                                            AccountViewModel currentAccount = accountService.GetAccountDetails(updateAccountId);
+                                            Account updatedAccount = consoleUI.GetDataForAccountUpdate(currentAccount);
+                                            accountService.UpdateAccount(updateAccountId, updatedAccount);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = updateAccountId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateAccount,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountUpdateSuccess();
                                         }
                                         catch (AccountDoesNotExistException)
@@ -230,21 +291,40 @@ namespace ATM.CLI
                                         try
                                         {
                                             deleteAccountId = accountService.GetAccountIdByUsername(bankId, selectedUsername);
+                                            accountService.DeleteAccount(deleteAccountId);
+                                            EmployeeAction employeeAction = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = deleteAccountId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.DeleteAccount,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(employeeAction);
+                                            consoleMessages.AccountDeleteSuccess();
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        bankService.DeleteAccount(bankId, employeeId, deleteAccountId);
-                                        consoleMessages.AccountDeleteSuccess();
                                     }
                                     else if (option3 == AdminOperation.AddCurrency)
                                     {
                                         try
                                         {
                                             Currency newCurrency = consoleUI.GetDataForCurrencyCreation(bankId);
-                                            bankService.AddCurrency(bankId, employeeId, newCurrency);
+                                            currencyService.AddCurrency(newCurrency);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateBank,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyAddedSuccess();
                                         }
                                         catch (CurrencyAlreadyExistsException)
@@ -261,7 +341,16 @@ namespace ATM.CLI
                                             string currencyName = consoleUI.GetCurrencyName();
                                             Currency currency = currencyService.GetCurrencyByName(bankId, currencyName);
                                             Currency updatedCurrency = consoleUI.GetDataForCurrencyUpdate(currency);
-                                            bankService.UpdateCurrency(bankId, employeeId, currencyName, updatedCurrency);
+                                            currencyService.UpdateCurrency(bankId, currencyName, updatedCurrency);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateBank,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyUpdateSuccess();
                                         }
                                         catch (CurrencyDoesNotExistException)
@@ -275,8 +364,16 @@ namespace ATM.CLI
                                         string currencyName = consoleUI.GetCurrencyName();
                                         try
                                         {
-                                            currencyService.CheckCurrencyExistance(bankId, currencyName);
-                                            bankService.DeleteCurrency(bankId, employeeId, currencyName);
+                                            currencyService.DeleteCurrency(bankId, currencyName);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateBank,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyDeleteSuccess();
                                         }
                                         catch (CurrencyDoesNotExistException)
@@ -287,13 +384,27 @@ namespace ATM.CLI
                                     }
                                     else if (option3 == AdminOperation.UpdateBank)
                                     {
-                                        Bank currentBank = bankService.GetBankDetails(bankId);
                                         try
                                         {
+                                            Bank currentBank = bankService.GetBankDetails(bankId);
                                             Bank updatedBank = consoleUI.GetDataForBankUpdate(currentBank);
-                                            bankService.UpdateBank(bankId, employeeId, updatedBank);
+                                            bankService.UpdateBank(bankId, updatedBank);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateBank,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.BankUpdateSuccess();
                                             goto EndOfProgram;
+                                        }
+                                        catch (BankDoesnotExistException)
+                                        {
+                                            consoleMessages.BankDoesnotExistMsg();
+                                            continue;
                                         }
                                         catch (AccessDeniedException)
                                         {
@@ -310,7 +421,16 @@ namespace ATM.CLI
                                     {
                                         try
                                         {
-                                            bankService.DeleteBank(bankId, employeeId);
+                                            bankService.DeleteBank(bankId);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.DeleteBank,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.BankDeleteSuccess();
                                             goto EndOfProgram;
                                         }
@@ -325,7 +445,15 @@ namespace ATM.CLI
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
                                         {
-                                            bankService.RevertTransaction(bankId, employeeId, txnId);
+                                            bankService.RevertTransaction(bankId, txnId);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.RevertTransaction,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
                                             consoleMessages.RevertTransactionSuccess();
                                         }
                                         catch (TransactionNotFoundException)
@@ -346,8 +474,8 @@ namespace ATM.CLI
                                         try
                                         {
                                             selectedAccountId = accountService.GetAccountIdByUsername(bankId, selectedUsername);
-                                            IList<Transaction> transactions = transactionService.GetTransactions(bankId, selectedAccountId);
-                                            decimal balance = accountService.GetBalance(bankId, selectedAccountId);
+                                            IList<Transaction> transactions = transactionService.GetTransactions(selectedAccountId);
+                                            decimal balance = accountService.GetBalance(selectedAccountId);
                                             consoleUI.PrintTransactions(transactions, balance);
                                         }
                                         catch (AccountDoesNotExistException)
@@ -368,7 +496,7 @@ namespace ATM.CLI
                                         try
                                         {
                                             selectedEmployeeId = employeeService.GetEmployeeIdByUsername(bankId, selectedUsername);
-                                            IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(bankId, selectedEmployeeId);
+                                            IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(selectedEmployeeId);
                                             consoleUI.PrintEmployeeActions(actions);
                                         }
                                         catch (AccountDoesNotExistException)
@@ -399,11 +527,33 @@ namespace ATM.CLI
                                     StaffOperation option4 = consoleUI.StaffOptions();
                                     if (option4 == StaffOperation.CreateAccount)
                                     {
-                                        Account newAccount;
                                         try
                                         {
-                                            newAccount = consoleUI.GetDataForAccountCreation(bankId);
-                                            bankService.AddAccount(bankId, employeeId, newAccount);
+                                            Account newAccount = consoleUI.GetDataForAccountCreation(bankId);
+                                            newAccount.BankId = bankId;
+                                            accountService.AddAccount(newAccount);
+                                            Transaction transaction = new Transaction
+                                            {
+                                                Id = bankId.GenTransactionId(newAccount.Id),
+                                                TransactionDate = DateTime.Now,
+                                                TransactionType = TransactionType.Credit,
+                                                BankId = bankId,
+                                                AccountId = newAccount.Id,
+                                                TransactionNarrative = TransactionNarrative.AccountCreation,
+                                                TransactionAmount = 1500
+                                            };
+                                            transactionService.AddTransaction(transaction);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                TXNId = transaction.Id,
+                                                AccountId = newAccount.Id,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.NewAccount,
+                                                BankId = bankId,
+                                                EmployeeId = employeeId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
                                         catch (AccountCreationFailedException)
@@ -420,14 +570,22 @@ namespace ATM.CLI
                                     else if (option4 == StaffOperation.UpdateAccount)
                                     {
                                         string selecteUsername = consoleUI.GetUsername();
-                                        string updateAccountId;
-                                        Account currentAccount, updatedAccount;
                                         try
                                         {
-                                            updateAccountId = accountService.GetAccountIdByUsername(bankId, selecteUsername);
-                                            currentAccount = accountService.GetAccountDetails(bankId, updateAccountId);
-                                            updatedAccount = consoleUI.GetDataForAccountUpdate(currentAccount);
-                                            bankService.UpdateAccount(bankId, employeeId, updateAccountId, updatedAccount);
+                                            string updateAccountId = accountService.GetAccountIdByUsername(bankId, selecteUsername);
+                                            AccountViewModel currentAccount = accountService.GetAccountDetails(updateAccountId);
+                                            Account updatedAccount = consoleUI.GetDataForAccountUpdate(currentAccount);
+                                            accountService.UpdateAccount(updateAccountId, updatedAccount);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = updateAccountId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.UpdateAccount,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountUpdateSuccess();
                                         }
                                         catch (AccountDoesNotExistException)
@@ -448,21 +606,39 @@ namespace ATM.CLI
                                         try
                                         {
                                             deleteAccountId = accountService.GetAccountIdByUsername(bankId, selectedUsername);
+                                            accountService.DeleteAccount(deleteAccountId);
+                                            EmployeeAction employeeAction = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                AccountId = deleteAccountId,
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.DeleteAccount,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
+                                            employeeActionService.AddEmployeeAction(employeeAction);
+                                            consoleMessages.AccountDeleteSuccess();
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        bankService.DeleteAccount(bankId, employeeId, deleteAccountId);
-                                        consoleMessages.AccountDeleteSuccess();
                                     }
                                     else if (option4 == StaffOperation.RevertTransaction)
                                     {
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
                                         {
-                                            bankService.RevertTransaction(bankId, employeeId, txnId);
+                                            bankService.RevertTransaction(bankId, txnId);
+                                            EmployeeAction action = new EmployeeAction
+                                            {
+                                                Id = bankId.GenEmployeeActionId(employeeId),
+                                                ActionDate = DateTime.Now,
+                                                ActionType = EmployeeActionType.RevertTransaction,
+                                                EmployeeId = employeeId,
+                                                BankId = bankId
+                                            };
                                             consoleMessages.RevertTransactionSuccess();
                                         }
                                         catch (TransactionNotFoundException)
@@ -484,13 +660,13 @@ namespace ATM.CLI
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        IList<Transaction> transactions = transactionService.GetTransactions(bankId, selectedAccountId);
-                                        decimal balance = accountService.GetBalance(bankId, selectedAccountId);
+                                        IList<Transaction> transactions = transactionService.GetTransactions(selectedAccountId);
+                                        decimal balance = accountService.GetBalance(selectedAccountId);
                                         consoleUI.PrintTransactions(transactions, balance);
                                     }
                                     else if (option4 == StaffOperation.ActionHistory)
                                     {
-                                        IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(bankId, employeeId);
+                                        IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(employeeId);
                                         consoleUI.PrintEmployeeActions(actions);
                                     }
                                     else if (option4 == StaffOperation.Back)
@@ -512,7 +688,7 @@ namespace ATM.CLI
                             {
                                 accountId = accountService.GetAccountIdByUsername(bankId, username);
                                 password = consoleUI.GetPasswordFromUser();
-                                accountService.Authenticate(bankId, accountId, password);
+                                accountService.Authenticate(accountId, password);
                             }
                             catch (AccountDoesNotExistException)
                             {
@@ -535,8 +711,24 @@ namespace ATM.CLI
                                     try
                                     {
                                         Currency currency = currencyService.GetCurrencyByName(bankId, currencyName);
-                                        bankService.Deposit(bankId, accountId, currency, amount);
+                                        accountService.Deposit(accountId, currency, amount);
+                                        Transaction transaction = new Transaction
+                                        {
+                                            Id = bankId.GenTransactionId(accountId),
+                                            TransactionDate = DateTime.Now,
+                                            TransactionType = TransactionType.Credit,
+                                            TransactionNarrative = TransactionNarrative.Deposit,
+                                            TransactionAmount = amount,
+                                            BankId = bankId,
+                                            AccountId = accountId
+                                        };
+                                        transactionService.AddTransaction(transaction);
                                         consoleMessages.DepositSuccess();
+                                    }
+                                    catch (AccountDoesNotExistException)
+                                    {
+                                        consoleMessages.UserNotFoundMsg();
+                                        continue;
                                     }
                                     catch (CurrencyDoesNotExistException)
                                     {
@@ -554,8 +746,24 @@ namespace ATM.CLI
                                     amount = consoleUI.GetAmount('w');
                                     try
                                     {
-                                        bankService.Withdraw(bankId, accountId, amount);
+                                        accountService.Withdraw(accountId, amount);
+                                        Transaction transaction = new Transaction
+                                        {
+                                            Id = bankId.GenTransactionId(accountId),
+                                            TransactionDate = DateTime.Now,
+                                            TransactionType = TransactionType.Debit,
+                                            TransactionNarrative = TransactionNarrative.Withdraw,
+                                            TransactionAmount = amount,
+                                            BankId = bankId,
+                                            AccountId = accountId
+                                        };
+                                        transactionService.AddTransaction(transaction);
                                         consoleMessages.WithdrawSuccess();
+                                    }
+                                    catch (AccountDoesNotExistException)
+                                    {
+                                        consoleMessages.UserNotFoundMsg();
+                                        continue;
                                     }
                                     catch (InvalidAmountException)
                                     {
@@ -566,15 +774,37 @@ namespace ATM.CLI
                                 else if (option5 == UserOperation.Transfer)
                                 {
                                     amount = consoleUI.GetAmount('t');
-                                    string toBankId, toAccountId;
                                     string selectedToBankId = consoleUI.SelectBank(bankNames);
                                     try
                                     {
-                                        bankService.CheckBankExistance(selectedToBankId);
-                                        toBankId = selectedToBankId;
+                                        string toBankId = selectedToBankId;
                                         string selectedToUsername = consoleUI.GetUsername();
-                                        toAccountId = accountService.GetAccountIdByUsername(toBankId, selectedToUsername);
-                                        bankService.Transfer(bankId, accountId, toBankId, toAccountId, amount);
+                                        string toAccountId = accountService.GetAccountIdByUsername(toBankId, selectedToUsername);
+                                        accountService.Transfer(accountId, toAccountId, amount);
+                                        Transaction toTransaction = new Transaction
+                                        {
+                                            Id = bankId.GenTransactionId(accountId),
+                                            TransactionDate = DateTime.Now,
+                                            TransactionType = TransactionType.Debit,
+                                            TransactionNarrative = TransactionNarrative.Transfer,
+                                            TransactionAmount = amount,
+                                            BankId = bankId,
+                                            AccountId = accountId,
+                                            ToAccountId = toAccountId,
+                                            ToBankId = toBankId
+                                        };
+                                        transactionService.AddTransaction(toTransaction);
+                                        Transaction fromTransaction = new Transaction
+                                        {
+                                            Id = bankId.GenTransactionId(toAccountId),
+                                            TransactionDate = DateTime.Now,
+                                            TransactionType = TransactionType.Credit,
+                                            TransactionNarrative = TransactionNarrative.Transfer,
+                                            TransactionAmount = amount,
+                                            BankId = toBankId,
+                                            AccountId = toAccountId,
+                                        };
+                                        transactionService.AddTransaction(fromTransaction);
                                         consoleMessages.TransferSuccess();
                                     }
                                     catch (BankDoesnotExistException)
@@ -600,9 +830,8 @@ namespace ATM.CLI
                                 }
                                 else if (option5 == UserOperation.TransactionHistory)
                                 {
-                                    accountService.CheckAccountExistance(bankId, accountId);
-                                    IList<Transaction> transactions = transactionService.GetTransactions(bankId, accountId);
-                                    decimal balance = accountService.GetBalance(bankId, accountId);
+                                    IList<Transaction> transactions = transactionService.GetTransactions(accountId);
+                                    decimal balance = accountService.GetBalance(accountId);
                                     consoleUI.PrintTransactions(transactions, balance);
                                 }
                                 else if (option5 == UserOperation.Back)
@@ -634,7 +863,7 @@ namespace ATM.CLI
                 {
                     consoleMessages.InvalidOptionMsg();
                 }
-                EndOfProgram:;
+            EndOfProgram:;
             }
         }
     }

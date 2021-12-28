@@ -1,22 +1,20 @@
 ﻿using ATM.Models;
-using ATM.Models.Enums;
+using ATM.Models.ViewModels;
 
 namespace ATM.Services.IServices
 {
     public interface IAccountService
     {
-        void AddAccount(string bankId, Account account);
-        void Authenticate(string bankId, string accountId, string password);
-        void CheckAccountExistance(string bankId, string accountId);
-        Account CreateAccount(string name, Gender gender, string username, string password, AccountType accountType);
-        void DeleteAccount(string bankId, string accountId);
-        void Deposit(string bankId, string accountId, Currency currency, decimal amount);
-        Account GetAccountDetails(string bankId, string accountId);
+        void AddAccount(Account account);
+        void Authenticate(string accountId, string password);
+        void DeleteAccount(string accountId);
+        void Deposit(string accountId, Currency currency, decimal amount);
+        AccountViewModel GetAccountDetails(string accountId);
         string GetAccountIdByUsername(string bankId, string username);
-        decimal GetBalance(string bankId, string accountId);
-        void Transfer(string selectedBankId, string selectedAccountId, string transferToBankId, string transferToAccountId, decimal amount);
-        void UpdateAccount(string bankId, string accountId, Account updateAccount);
+        decimal GetBalance(string accountId);
+        void Transfer(string selectedAccountId, string transferToAccountId, decimal amount);
+        void UpdateAccount(string accountId, Account updateAccount);
         void ValidateUsername(string bankId, string username);
-        void Withdraw(string bankId, string accountId, decimal amount);
+        void Withdraw(string accountId, decimal amount);
     }
 }

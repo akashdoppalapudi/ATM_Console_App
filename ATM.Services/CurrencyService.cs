@@ -18,14 +18,6 @@ namespace ATM.Services
             _bankContext = bankContext;
         }
 
-        public void CheckCurrencyExistance(string bankId, string currencyName)
-        {
-            if (!_bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName))
-            {
-                throw new CurrencyDoesNotExistException();
-            }
-        }
-
         public void ValidateCurrencyName(string bankId, string currencyName)
         {
             if (_bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName))
@@ -36,24 +28,16 @@ namespace ATM.Services
 
         public Currency GetCurrencyByName(string bankId, string currencyName)
         {
-            CheckCurrencyExistance(bankId, currencyName);
             CurrencyDBModel currencyRecord = _bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
+            if (currencyRecord == null)
+            {
+                throw new CurrencyDoesNotExistException();
+            }
             return _mapper.Map<Currency>(currencyRecord);
         }
 
-        public Currency CreateCurrency(string currencyName, double exchangeRate)
+        public void AddCurrency(Currency currency)
         {
-            Currency newCurrency = new Currency
-            {
-                Name = currencyName,
-                ExchangeRate = exchangeRate,
-            };
-            return newCurrency;
-        }
-
-        public void AddCurrency(string bankId, Currency currency)
-        {
-            currency.BankId = bankId;
             CurrencyDBModel currencyRecord = _mapper.Map<CurrencyDBModel>(currency);
             _bankContext.Currency.Add(currencyRecord);
             _bankContext.SaveChanges();
@@ -61,15 +45,23 @@ namespace ATM.Services
 
         public void UpdateCurrency(string bankId, string currencyName, Currency updateCurrency)
         {
-            CurrencyDBModel currentCurrencyRecord = _bankContext.Currency.First(c => c.BankId == bankId && c.Name == currencyName);
+            CurrencyDBModel currentCurrencyRecord = _bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
+            if (currentCurrencyRecord == null)
+            {
+                throw new CurrencyDoesNotExistException();
+            }
             currentCurrencyRecord.ExchangeRate = updateCurrency.ExchangeRate;
             _bankContext.SaveChanges();
         }
 
         public void DeleteCurrency(string bankId, string currencyName)
         {
-            CheckCurrencyExistance(bankId, currencyName);
-            _bankContext.Remove(_bankContext.Currency.First(c => c.BankId == bankId && c.Name == currencyName));
+            CurrencyDBModel currency = _bankContext.Currency.FirstOrDefault(c => c.BankId == bankId && c.Name == currencyName);
+            if (currency == null)
+            {
+                throw new CurrencyDoesNotExistException();
+            }
+            _bankContext.Remove(currency);
             _bankContext.SaveChanges();
         }
     }

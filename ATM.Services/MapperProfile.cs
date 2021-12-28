@@ -1,4 +1,5 @@
 ﻿using ATM.Models;
+using ATM.Models.ViewModels;
 using ATM.Services.DBModels;
 using AutoMapper;
 
@@ -20,6 +21,8 @@ namespace ATM.Services
             CreateMap<EmployeeActionDBModel, EmployeeAction>();
             CreateMap<Transaction, TransactionDBModel>();
             CreateMap<TransactionDBModel, Transaction>();
+            CreateMap<AccountDBModel, AccountViewModel>();
+            CreateMap<EmployeeDBModel, EmployeeViewModel>();
         }
     }
 }

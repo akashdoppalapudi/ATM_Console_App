@@ -1,10 +1,8 @@
 ﻿using ATM.Models;
-using ATM.Models.Enums;
 using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
 using AutoMapper;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,35 +19,16 @@ namespace ATM.Services
             _bankContext = bankContext;
         }
 
-        public Transaction CreateTransaction(string bankId, string accountId, decimal amount, TransactionType transactionType, TransactionNarrative transactionNarrative, string fromAccId, string toBankId = null, string toAccId = null)
+        public void AddTransaction(Transaction transaction)
         {
-            Transaction newTransaction = new Transaction
-            {
-                Id = bankId.GenTransactionId(accountId),
-                TransactionDate = DateTime.Now,
-                TransactionType = transactionType,
-                BankId = bankId,
-                AccountId = fromAccId,
-                ToBankId = toBankId,
-                ToAccountId = toAccId,
-                TransactionNarrative = transactionNarrative,
-                TransactionAmount = amount
-            };
-            return newTransaction;
-        }
-
-        public void AddTransaction(string bankId, string accountId, Transaction transaction)
-        {
-            transaction.AccountId = accountId;
-            transaction.BankId = bankId;
             TransactionDBModel transactionRecord = _mapper.Map<TransactionDBModel>(transaction);
             _bankContext.Transaction.Add(transactionRecord);
             _bankContext.SaveChanges();
         }
 
-        public Transaction GetTransactionById(string bankId, string txnId)
+        public Transaction GetTransactionById(string txnId)
         {
-            TransactionDBModel transactionRecord = _bankContext.Transaction.FirstOrDefault(t => t.BankId == bankId && t.Id == txnId);
+            TransactionDBModel transactionRecord = _bankContext.Transaction.FirstOrDefault(t => t.Id == txnId);
             if (transactionRecord == null)
             {
                 throw new TransactionNotFoundException();
@@ -57,10 +36,10 @@ namespace ATM.Services
             return _mapper.Map<Transaction>(transactionRecord);
         }
 
-        public IList<Transaction> GetTransactions(string bankId, string accountId)
+        public IList<Transaction> GetTransactions(string accountId)
         {
             IList<Transaction> transactions = new List<Transaction>();
-            IList<TransactionDBModel> transactionRecords = _bankContext.Transaction.Where(t => t.BankId == bankId && t.AccountId == accountId).ToList();
+            IList<TransactionDBModel> transactionRecords = _bankContext.Transaction.Where(t => t.AccountId == accountId).ToList();
             foreach (TransactionDBModel tdb in transactionRecords)
             {
                 transactions.Add(_mapper.Map<Transaction>(tdb));
