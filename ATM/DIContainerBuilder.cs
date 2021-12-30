@@ -1,6 +1,7 @@
 ﻿using ATM.Services;
 using ATM.Services.IServices;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -30,7 +31,7 @@ namespace ATM.CLI
                 .AddSingleton<IBankService, BankService>()
                 .AddSingleton<IConsoleMessages, ConsoleMessages>()
                 .AddSingleton<IConsoleUI, ConsoleUI>()
-                .AddDbContext<BankContext>();
+                .AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"));
 
             return services.BuildServiceProvider();
         }
