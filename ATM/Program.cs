@@ -654,20 +654,31 @@ namespace ATM.CLI
                                         try
                                         {
                                             selectedAccountId = accountService.GetAccountIdByUsername(bankId, selectedUsername);
+                                            IList<Transaction> transactions = transactionService.GetTransactions(selectedAccountId);
+                                            decimal balance = accountService.GetBalance(selectedAccountId);
+                                            consoleUI.PrintTransactions(transactions, balance);
                                         }
                                         catch (AccountDoesNotExistException)
                                         {
                                             consoleMessages.UserNotFoundMsg();
                                             continue;
                                         }
-                                        IList<Transaction> transactions = transactionService.GetTransactions(selectedAccountId);
-                                        decimal balance = accountService.GetBalance(selectedAccountId);
-                                        consoleUI.PrintTransactions(transactions, balance);
+                                        catch (NoTransactionsException)
+                                        {
+                                            consoleMessages.NoTransactions();
+                                        }
                                     }
                                     else if (option4 == StaffOperation.ActionHistory)
                                     {
-                                        IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(employeeId);
-                                        consoleUI.PrintEmployeeActions(actions);
+                                        try
+                                        {
+                                            IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(employeeId);
+                                            consoleUI.PrintEmployeeActions(actions);
+                                        }
+                                        catch(NoEmployeeActionsException)
+                                        {
+                                            consoleMessages.NoEmployeeActions();
+                                        }
                                     }
                                     else if (option4 == StaffOperation.Back)
                                     {
