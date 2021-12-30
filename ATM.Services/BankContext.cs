@@ -13,10 +13,7 @@ namespace ATM.Services
         public DbSet<TransactionDBModel> Transaction { get; set; }
         public DbSet<EmployeeActionDBModel> EmployeeAction { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true");
-        }
+        public BankContext(DbContextOptions<BankContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
