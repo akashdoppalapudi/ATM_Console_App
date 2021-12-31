@@ -14,7 +14,7 @@ namespace ATM.Services.IServices
         decimal GetBalance(string accountId);
         void Transfer(string selectedAccountId, string transferToAccountId, decimal amount);
         void UpdateAccount(string accountId, Account updateAccount);
-        void ValidateUsername(string bankId, string username);
+        bool IsUsernameExists(string bankId, string username);
         void Withdraw(string accountId, decimal amount);
     }
 }

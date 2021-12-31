@@ -12,6 +12,6 @@ namespace ATM.Services.IServices
         string GetEmployeeIdByUsername(string bankId, string username);
         bool IsEmployeeAdmin(string employeeId);
         void UpdateEmployee(string employeeId, Employee UpdateEmployee);
-        void ValidateUsername(string bankId, string username);
+        bool IsUsernameExists(string bankId, string username);
     }
 }

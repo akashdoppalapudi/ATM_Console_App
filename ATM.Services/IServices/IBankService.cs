@@ -11,6 +11,6 @@ namespace ATM.Services.IServices
         Bank GetBankDetails(string bankId);
         void RevertTransaction(string bankId, string txnId);
         void UpdateBank(string bankId, Bank updateBank);
-        void ValidateBankName(string bankName);
+        bool IsBankNameExists(string bankName);
     }
 }

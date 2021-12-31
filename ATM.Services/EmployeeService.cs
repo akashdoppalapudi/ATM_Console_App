@@ -91,12 +91,9 @@ namespace ATM.Services
             return employeeRecord.EmployeeType == EmployeeType.Admin;
         }
 
-        public void ValidateUsername(string bankId, string username)
+        public bool IsUsernameExists(string bankId, string username)
         {
-            if (_bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive))
-            {
-                throw new UsernameAlreadyExistsException();
-            }
+            return _bankContext.Employee.Any(e => e.BankId == bankId && e.Username == username && e.IsActive);
         }
 
         public void Authenticate(string employeeId, string password)
