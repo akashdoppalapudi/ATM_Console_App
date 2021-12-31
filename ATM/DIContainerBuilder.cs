@@ -1,29 +1,28 @@
 ﻿using ATM.Services;
 using ATM.Services.IServices;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace ATM.CLI
 {
-    public class DIContainerBuilder
+    public static class DIContainerBuilder
     {
-        public IServiceProvider Build()
+        public static IServiceProvider Build()
         {
             // follow the naming conventions when nameing a variable all time
             ServiceCollection services = new ServiceCollection();
 
-            var mappingConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MapperService());
-            });
 
-            IMapper mapper = mappingConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            IMapper mapper = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MapperProfile());
+            }).CreateMapper();
 
             services
                 .AddSingleton<IEncryptionService, EncryptionService>()
-                //.AddSingleton<IMapperService, MapperService>()
+                .AddSingleton(mapper)
                 .AddSingleton<ITransactionService, TransactionService>()
                 .AddSingleton<IEmployeeActionService, EmployeeActionService>()
                 .AddSingleton<ICurrencyService, CurrencyService>()
@@ -32,7 +31,7 @@ namespace ATM.CLI
                 .AddSingleton<IBankService, BankService>()
                 .AddSingleton<IConsoleMessages, ConsoleMessages>()
                 .AddSingleton<IConsoleUI, ConsoleUI>()
-                .AddDbContext<BankContext>();
+                .AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"));
 
             return services.BuildServiceProvider();
         }

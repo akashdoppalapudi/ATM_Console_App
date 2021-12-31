@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace ATM.Services
+namespace ATM.Services.Extensions
 {
-    public static class IDGenService
+    public static class Extension
     {
-        public static string GenId(this string Name)
+        public static string GenId(this string name)
         {
             string Id;
-            Id = Name.Substring(0, 3).ToUpper() + GetDateStr();
+            Id = name[..3].ToUpper() + GetDateStr();
             return Id;
         }
 
