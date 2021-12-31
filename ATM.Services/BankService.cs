@@ -85,12 +85,9 @@ namespace ATM.Services
             _accountService.Transfer(toAccId, fromAccId, amount);
         }
 
-        public void ValidateBankName(string bankName)
+        public bool IsBankNameExists(string bankName)
         {
-            if (_bankContext.Bank.Any(b => b.Name == bankName && b.IsActive))
-            {
-                throw new BankNameAlreadyExistsException();
-            }
+            return _bankContext.Bank.Any(b => b.Name == bankName && b.IsActive);
         }
 
         public Bank GetBankDetails(string bankId)

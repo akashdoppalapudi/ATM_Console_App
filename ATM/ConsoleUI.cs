@@ -65,7 +65,10 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Name");
                 throw new BankCreationFailedException();
             }
-            _bankService.ValidateBankName(name);
+            if (_bankService.IsBankNameExists(name))
+            {
+                throw new BankNameAlreadyExistsException();
+            }
             Bank bank = new Bank
             {
                 Name = name,
@@ -174,7 +177,10 @@ namespace ATM.Services
             {
                 throw new AccountCreationFailedException();
             }
-            _employeeService.ValidateUsername(bankId, username);
+            if (_employeeService.IsUsernameExists(bankId, username))
+            {
+                throw new UsernameAlreadyExistsException();
+            }
             password = ConsolePasswordReader.Read("Please set a Password : ");
             if (String.IsNullOrEmpty(password))
             {
@@ -261,7 +267,10 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             username = selectedUsername;
-            _accountService.ValidateUsername(bankId, username);
+            if (_accountService.IsUsernameExists(bankId, username))
+            {
+                throw new UsernameAlreadyExistsException();
+            }
             string selectedPassword = ConsolePasswordReader.Read("Please set a Password : ");
             if (String.IsNullOrEmpty(selectedPassword))
             {
@@ -319,7 +328,10 @@ namespace ATM.Services
             else
             {
                 name = userInput;
-                _bankService.ValidateBankName(name);
+                if (_bankService.IsBankNameExists(name))
+                {
+                    throw new BankNameAlreadyExistsException();
+                }
             }
             Console.Write("[" + currentBank.IMPS + "] Enter new IMPS for same bank transfer (Leave it empty to not change) : ");
             userInput = Console.ReadLine();
@@ -479,7 +491,10 @@ namespace ATM.Services
             else
             {
                 username = selectedUsername;
-                _employeeService.ValidateUsername(currentEmployee.BankId, username);
+                if (_employeeService.IsUsernameExists(currentEmployee.BankId, username))
+                {
+                    throw new UsernameAlreadyExistsException();
+                }
             }
             password = ConsolePasswordReader.Read("Please set a new Password (Leave it empty to not change) : ");
 
@@ -583,7 +598,10 @@ namespace ATM.Services
             else
             {
                 username = selectedUsername;
-                _accountService.ValidateUsername(currentAccount.BankId, username);
+                if (_accountService.IsUsernameExists(currentAccount.BankId, username))
+                {
+                    throw new UsernameAlreadyExistsException();
+                }
             }
             password = ConsolePasswordReader.Read("Please set a new Password (Leave it empty to not change) : ");
 
@@ -726,7 +744,7 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Name");
                 throw new CurrencyDataInvalidException();
             }
-            _currencyService.ValidateCurrencyName(bankId, userInput);
+            _currencyService.IsCurrencyNameExists(bankId, userInput);
             currencyName = userInput;
             Console.Write("Enter Exchange Rate : ");
             userInput = Console.ReadLine();

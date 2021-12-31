@@ -8,6 +8,6 @@ namespace ATM.Services.IServices
         void DeleteCurrency(string bankId, string currencyName);
         Currency GetCurrencyByName(string bankId, string currencyName);
         void UpdateCurrency(string bankId, string currencyName, Currency updateCurrency);
-        void ValidateCurrencyName(string bankId, string currencyName);
+        bool IsCurrencyNameExists(string bankId, string currencyName);
     }
 }

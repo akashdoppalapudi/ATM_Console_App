@@ -18,12 +18,9 @@ namespace ATM.Services
             _bankContext = bankContext;
         }
 
-        public void ValidateCurrencyName(string bankId, string currencyName)
+        public bool IsCurrencyNameExists(string bankId, string currencyName)
         {
-            if (_bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName))
-            {
-                throw new CurrencyAlreadyExistsException();
-            }
+            return _bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName);
         }
 
         public Currency GetCurrencyByName(string bankId, string currencyName)

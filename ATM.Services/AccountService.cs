@@ -133,13 +133,10 @@ namespace ATM.Services
             return accountRecord.Balance;
         }
 
-        public void ValidateUsername(string bankId, string username)
+        public bool IsUsernameExists(string bankId, string username)
         {
             // use exists instead of any - [exists wont work on DbSet]
-            if (_bankContext.Account.Any(a => a.BankId == bankId && a.Username == username && a.IsActive))
-            {
-                throw new UsernameAlreadyExistsException();
-            }
+            return _bankContext.Account.Any(a => a.BankId == bankId && a.Username == username && a.IsActive);
         }
 
         public void Authenticate(string accountId, string password)
