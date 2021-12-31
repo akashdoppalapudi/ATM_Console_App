@@ -28,16 +28,13 @@ namespace ATM.Services
 
         public IList<EmployeeAction> GetEmployeeActions(string employeeId)
         {
-            IList<EmployeeAction> actions = new List<EmployeeAction>();
+            IList<EmployeeAction> actions;
             IList<EmployeeActionDBModel> actionRecords = _bankContext.EmployeeAction.Where(a => a.EmployeeId == employeeId).ToList();
-            foreach (EmployeeActionDBModel adb in actionRecords)
-            {
-                actions.Add(_mapper.Map<EmployeeAction>(adb));
-            }
-            if (actions.Count == 0 || actions == null)
+            if (actionRecords.Count == 0 || actionRecords == null)
             {
                 throw new NoEmployeeActionsException();
             }
+            actions = _mapper.Map<EmployeeAction[]>(actionRecords);
             return actions;
         }
     }
