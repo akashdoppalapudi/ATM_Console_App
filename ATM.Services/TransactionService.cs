@@ -38,16 +38,13 @@ namespace ATM.Services
 
         public IList<Transaction> GetTransactions(string accountId)
         {
-            IList<Transaction> transactions = new List<Transaction>();
+            IList<Transaction> transactions;
             IList<TransactionDBModel> transactionRecords = _bankContext.Transaction.Where(t => t.AccountId == accountId).ToList();
-            foreach (TransactionDBModel tdb in transactionRecords)
-            {
-                transactions.Add(_mapper.Map<Transaction>(tdb));
-            }
-            if (transactions.Count == 0 || transactions == null)
+            if (transactionRecords.Count == 0 || transactionRecords == null)
             {
                 throw new NoTransactionsException();
             }
+            transactions = _mapper.Map<Transaction[]>(transactionRecords);
             return transactions;
         }
     }
