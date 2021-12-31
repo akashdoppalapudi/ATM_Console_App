@@ -6,6 +6,7 @@ using ATM.Services.IServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GetPass;
 
 namespace ATM.Services
 {
@@ -109,8 +110,7 @@ namespace ATM.Services
                 Console.WriteLine("Invalid Username");
                 throw new AccountCreationFailedException();
             }
-            Console.Write("Please set a Password : ");
-            password = Console.ReadLine();
+            password = ConsolePasswordReader.Read("Please set a Password : ");
             if (String.IsNullOrEmpty(password))
             {
                 Console.WriteLine("Invalid Password");
@@ -174,8 +174,7 @@ namespace ATM.Services
                 throw new AccountCreationFailedException();
             }
             _employeeService.ValidateUsername(bankId, username);
-            Console.Write("Please set a Password : ");
-            password = Console.ReadLine();
+            password = ConsolePasswordReader.Read("Please set a Password : ");
             if (String.IsNullOrEmpty(password))
             {
                 Console.WriteLine("Invalid Password");
@@ -262,8 +261,7 @@ namespace ATM.Services
             }
             username = selectedUsername;
             _accountService.ValidateUsername(bankId, username);
-            Console.Write("Please set a Password : ");
-            string selectedPassword = Console.ReadLine();
+            string selectedPassword = ConsolePasswordReader.Read("Please set a Password : ");
             if (String.IsNullOrEmpty(selectedPassword))
             {
                 Console.WriteLine("Invalid Password");
@@ -482,8 +480,7 @@ namespace ATM.Services
                 username = selectedUsername;
                 _employeeService.ValidateUsername(currentEmployee.BankId, username);
             }
-            Console.Write("Please set a new Password (Leave it empty to not change) : ");
-            password = Console.ReadLine();
+            password = ConsolePasswordReader.Read("Please set a new Password (Leave it empty to not change) : ");
 
             Console.WriteLine("\n__EMPLOYEE TYPE__\n");
             i = 1;
@@ -587,9 +584,7 @@ namespace ATM.Services
                 username = selectedUsername;
                 _accountService.ValidateUsername(currentAccount.BankId, username);
             }
-
-            Console.Write("Please set a new Password (Leave it empty to not change) : ");
-            password = Console.ReadLine();
+            password = ConsolePasswordReader.Read("Please set a new Password (Leave it empty to not change) : ");
 
             Console.WriteLine("\n__Account TYPE__\n");
             i = 1;
@@ -798,8 +793,7 @@ namespace ATM.Services
         public string GetPasswordFromUser()
         {
             Console.WriteLine("\n____AUTHENTICATION____\n");
-            Console.Write("Enter Password : ");
-            string userInput = Console.ReadLine();
+            string userInput = ConsolePasswordReader.Read("Enter Password : ");
             return userInput;
         }
 
