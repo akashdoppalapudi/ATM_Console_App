@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ATM.Services
+namespace ATM.Services.Extensions
 {
-    public static class IDGenService
+    public static class Extension
     {
         public static string GenId(this string name)
         {
