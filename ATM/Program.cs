@@ -3,6 +3,7 @@ using ATM.Models.Enums;
 using ATM.Models.ViewModels;
 using ATM.Services;
 using ATM.Services.Exceptions;
+using ATM.Services.Extensions;
 using ATM.Services.IServices;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -675,7 +676,7 @@ namespace ATM.CLI
                                             IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(employeeId);
                                             consoleUI.PrintEmployeeActions(actions);
                                         }
-                                        catch(NoEmployeeActionsException)
+                                        catch (NoEmployeeActionsException)
                                         {
                                             consoleMessages.NoEmployeeActions();
                                         }

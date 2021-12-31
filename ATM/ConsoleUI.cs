@@ -2,11 +2,12 @@
 using ATM.Models.Enums;
 using ATM.Models.ViewModels;
 using ATM.Services.Exceptions;
+using ATM.Services.Extensions;
 using ATM.Services.IServices;
+using GetPass;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GetPass;
 
 namespace ATM.Services
 {
