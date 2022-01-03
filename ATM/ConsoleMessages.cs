@@ -37,6 +37,7 @@ namespace ATM.Services
         void WelcomeMsg();
         void WithdrawSuccess();
         void WrongPasswordMsg();
+        void Log(string msg);
     }
 
     public class ConsoleMessages : IConsoleMessages
@@ -204,6 +205,10 @@ namespace ATM.Services
         public void NoEmployeeActions()
         {
             Console.WriteLine("There are no actions for this employee");
+        }
+        public void Log(string msg)
+        {
+            Console.WriteLine(msg);
         }
     }
 }
