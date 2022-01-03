@@ -72,6 +72,10 @@ namespace ATM.Services
             {
                 bankNames.Add(bankRecord.Id, bankRecord.Name);
             }
+            if (bankNames.Count == 0 || bankNames == null)
+            {
+                throw new NoBanksException();
+            }
             return bankNames;
         }
 
