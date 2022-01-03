@@ -333,7 +333,10 @@ namespace ATM.CLI
                                             consoleMessages.CurrencyAlreadyExists();
                                             continue;
                                         }
-                                        catch (CurrencyDataInvalidException) { }
+                                        catch (CurrencyDataInvalidException) 
+                                        { 
+                                            consoleMessages.InvalidAmountMsg();
+                                        }
                                     }
                                     else if (option3 == AdminOperation.ChangeCurrency)
                                     {
