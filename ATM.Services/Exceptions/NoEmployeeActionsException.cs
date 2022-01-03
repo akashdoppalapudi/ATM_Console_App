@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATM.Services.Exceptions
 {
     public class NoEmployeeActionsException : Exception
     {
+        public NoEmployeeActionsException() : base("There are no actions for this employee") { }
     }
 }

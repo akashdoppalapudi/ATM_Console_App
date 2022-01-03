@@ -46,27 +46,28 @@ namespace ATM.CLI
                         currencyService.AddCurrency(defaultCurrency);
                         consoleMessages.BankCreationSuccess();
                     }
-                    catch (BankNameAlreadyExistsException)
-                    {
-                        consoleMessages.BankNameExistsMsg();
-                        consoleMessages.BankCreationFailedMsg();
-                    }
                     catch (BankCreationFailedException)
                     {
                         consoleMessages.BankCreationFailedMsg();
+                        continue;
                     }
-                    catch (AccountCreationFailedException)
+                    catch (Exception ex)
                     {
-                        consoleMessages.AccountCreationFailed();
+                        consoleMessages.Log(ex.Message);
                         consoleMessages.BankCreationFailedMsg();
+                        continue;
                     }
                 }
                 else if (option1 == BankCreateOrSelect.SelectBank)
                 {
-                    Dictionary<string, string> bankNames = bankService.GetAllBankNames();
-                    if (bankNames.Count == 0 || bankNames == null)
+                    Dictionary<string, string> bankNames;
+                    try
                     {
-                        consoleMessages.NoBanksMsg();
+                        bankNames = bankService.GetAllBankNames();
+                    }
+                    catch (Exception ex)
+                    {
+                        consoleMessages.Log(ex.Message);
                         continue;
                     }
                     string bankId = consoleUI.SelectBank(bankNames);
@@ -88,14 +89,9 @@ namespace ATM.CLI
                                 password = consoleUI.GetPasswordFromUser();
                                 employeeService.Authenticate(employeeId, password);
                             }
-                            catch (EmployeeDoesNotExistException)
+                            catch (Exception ex)
                             {
-                                consoleMessages.UserNotFoundMsg();
-                                continue;
-                            }
-                            catch (AuthenticationFailedException)
-                            {
-                                consoleMessages.WrongPasswordMsg();
+                                consoleMessages.Log(ex.Message);
                                 continue;
                             }
                             if (employeeService.IsEmployeeAdmin(employeeId))
@@ -122,19 +118,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
-                                        catch (AccountCreationFailedException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.AccountCreationFailed();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
-                                            continue;
-                                        }
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -159,19 +145,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.EmployeeUpdateSuccess();
                                         }
-                                        catch (EmployeeDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
-                                            continue;
-                                        }
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -194,14 +170,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.EmployeeDeleteSuccess();
                                         }
-                                        catch (EmployeeDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -236,20 +207,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
-                                        catch (AccountCreationFailedException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.AccountCreationFailed();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
-                                            continue;
-                                        }
-
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -274,14 +234,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountUpdateSuccess();
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
-                                            continue;
-                                        }
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -305,9 +260,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(employeeAction);
                                             consoleMessages.AccountDeleteSuccess();
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -328,12 +283,11 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyAddedSuccess();
                                         }
-                                        catch (CurrencyAlreadyExistsException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.CurrencyAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
-                                        catch (CurrencyDataInvalidException) { }
                                     }
                                     else if (option3 == AdminOperation.ChangeCurrency)
                                     {
@@ -354,9 +308,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyUpdateSuccess();
                                         }
-                                        catch (CurrencyDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.CurrencyDoesNotExist();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -377,9 +331,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.CurrencyDeleteSuccess();
                                         }
-                                        catch (CurrencyDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.CurrencyDoesNotExist();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -402,19 +356,9 @@ namespace ATM.CLI
                                             consoleMessages.BankUpdateSuccess();
                                             goto EndOfProgram;
                                         }
-                                        catch (BankDoesnotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.BankDoesnotExistMsg();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
-                                            continue;
-                                        }
-                                        catch (BankNameAlreadyExistsException)
-                                        {
-                                            consoleMessages.BankNameExistsMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -435,9 +379,9 @@ namespace ATM.CLI
                                             consoleMessages.BankDeleteSuccess();
                                             goto EndOfProgram;
                                         }
-                                        catch (AccessDeniedException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.AccessDeniedMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -457,14 +401,9 @@ namespace ATM.CLI
                                             };
                                             consoleMessages.RevertTransactionSuccess();
                                         }
-                                        catch (TransactionNotFoundException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.TransactionNotFound();
-                                            continue;
-                                        }
-                                        catch (AccessDeniedException)
-                                        {
-                                            consoleMessages.AccessDeniedMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -479,16 +418,11 @@ namespace ATM.CLI
                                             decimal balance = accountService.GetBalance(selectedAccountId);
                                             consoleUI.PrintTransactions(transactions, balance);
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
-                                        catch (NoTransactionsException)
-                                        {
-                                            consoleMessages.NoTransactions();
-                                        }
-
                                     }
                                     else if (option3 == AdminOperation.ActionHistory)
                                     {
@@ -500,14 +434,9 @@ namespace ATM.CLI
                                             IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(selectedEmployeeId);
                                             consoleUI.PrintEmployeeActions(actions);
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
-                                            continue;
-                                        }
-                                        catch (NoEmployeeActionsException)
-                                        {
-                                            consoleMessages.NoEmployeeActions();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -557,14 +486,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountCreationSuccess();
                                         }
-                                        catch (AccountCreationFailedException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.AccountCreationFailed();
-                                            continue;
-                                        }
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -589,14 +513,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(action);
                                             consoleMessages.AccountUpdateSuccess();
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
-                                            continue;
-                                        }
-                                        catch (UsernameAlreadyExistsException)
-                                        {
-                                            consoleMessages.UsernameAlreadyExists();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -620,9 +539,9 @@ namespace ATM.CLI
                                             employeeActionService.AddEmployeeAction(employeeAction);
                                             consoleMessages.AccountDeleteSuccess();
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -642,9 +561,9 @@ namespace ATM.CLI
                                             };
                                             consoleMessages.RevertTransactionSuccess();
                                         }
-                                        catch (TransactionNotFoundException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.TransactionNotFound();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
                                         }
                                     }
@@ -659,14 +578,10 @@ namespace ATM.CLI
                                             decimal balance = accountService.GetBalance(selectedAccountId);
                                             consoleUI.PrintTransactions(transactions, balance);
                                         }
-                                        catch (AccountDoesNotExistException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.UserNotFoundMsg();
+                                            consoleMessages.Log(ex.Message);
                                             continue;
-                                        }
-                                        catch (NoTransactionsException)
-                                        {
-                                            consoleMessages.NoTransactions();
                                         }
                                     }
                                     else if (option4 == StaffOperation.ActionHistory)
@@ -676,9 +591,10 @@ namespace ATM.CLI
                                             IList<EmployeeAction> actions = employeeActionService.GetEmployeeActions(employeeId);
                                             consoleUI.PrintEmployeeActions(actions);
                                         }
-                                        catch (NoEmployeeActionsException)
+                                        catch (Exception ex)
                                         {
-                                            consoleMessages.NoEmployeeActions();
+                                            consoleMessages.Log(ex.Message);
+                                            continue;
                                         }
                                     }
                                     else if (option4 == StaffOperation.Back)
@@ -702,14 +618,9 @@ namespace ATM.CLI
                                 password = consoleUI.GetPasswordFromUser();
                                 accountService.Authenticate(accountId, password);
                             }
-                            catch (AccountDoesNotExistException)
+                            catch (Exception ex)
                             {
-                                consoleMessages.UserNotFoundMsg();
-                                continue;
-                            }
-                            catch (AuthenticationFailedException)
-                            {
-                                consoleMessages.WrongPasswordMsg();
+                                consoleMessages.Log(ex.Message);
                                 continue;
                             }
                             while (true)
@@ -737,19 +648,9 @@ namespace ATM.CLI
                                         transactionService.AddTransaction(transaction);
                                         consoleMessages.DepositSuccess();
                                     }
-                                    catch (AccountDoesNotExistException)
+                                    catch (Exception ex)
                                     {
-                                        consoleMessages.UserNotFoundMsg();
-                                        continue;
-                                    }
-                                    catch (CurrencyDoesNotExistException)
-                                    {
-                                        consoleMessages.CurrencyDoesNotExist();
-                                        continue;
-                                    }
-                                    catch (InvalidAmountException)
-                                    {
-                                        consoleMessages.InvalidAmountMsg();
+                                        consoleMessages.Log(ex.Message);
                                         continue;
                                     }
                                 }
@@ -772,14 +673,9 @@ namespace ATM.CLI
                                         transactionService.AddTransaction(transaction);
                                         consoleMessages.WithdrawSuccess();
                                     }
-                                    catch (AccountDoesNotExistException)
+                                    catch (Exception ex)
                                     {
-                                        consoleMessages.UserNotFoundMsg();
-                                        continue;
-                                    }
-                                    catch (InvalidAmountException)
-                                    {
-                                        consoleMessages.InvalidAmountMsg();
+                                        consoleMessages.Log(ex.Message);
                                         continue;
                                     }
                                 }
@@ -819,24 +715,9 @@ namespace ATM.CLI
                                         transactionService.AddTransaction(fromTransaction);
                                         consoleMessages.TransferSuccess();
                                     }
-                                    catch (BankDoesnotExistException)
+                                    catch (Exception ex)
                                     {
-                                        consoleMessages.BankDoesnotExistMsg();
-                                        continue;
-                                    }
-                                    catch (AccountDoesNotExistException)
-                                    {
-                                        consoleMessages.UserNotFoundMsg();
-                                        continue;
-                                    }
-                                    catch (InvalidAmountException)
-                                    {
-                                        consoleMessages.InvalidAmountMsg();
-                                        continue;
-                                    }
-                                    catch (AccessDeniedException)
-                                    {
-                                        consoleMessages.TransferFailed();
+                                        consoleMessages.Log(ex.Message);
                                         continue;
                                     }
                                 }
