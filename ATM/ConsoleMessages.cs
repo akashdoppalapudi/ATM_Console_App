@@ -4,8 +4,6 @@ namespace ATM.Services
 {
     public interface IConsoleMessages
     {
-        void AccessDeniedMsg();
-        void AccountCreationFailed();
         void AccountCreationSuccess();
         void AccountDeleteSuccess();
         void AccountUpdateSuccess();
@@ -13,39 +11,23 @@ namespace ATM.Services
         void BankCreationSuccess();
         void BankDeleteSuccess();
         void BankDoesnotExistMsg();
-        void BankNameExistsMsg();
         void BankUpdateSuccess();
         void CurrencyAddedSuccess();
-        void CurrencyAlreadyExists();
         void CurrencyDeleteSuccess();
-        void CurrencyDoesNotExist();
         void CurrencyUpdateSuccess();
         void DepositSuccess();
         void EmployeeDeleteSuccess();
         void EmployeeUpdateSuccess();
-        void InvalidAmountMsg();
         void InvalidOptionMsg();
-        void NoBanksMsg();
-        void NoEmployeeActions();
-        void NoTransactions();
         void RevertTransactionSuccess();
-        void TransactionNotFound();
-        void TransferFailed();
         void TransferSuccess();
-        void UsernameAlreadyExists();
-        void UserNotFoundMsg();
         void WelcomeMsg();
         void WithdrawSuccess();
-        void WrongPasswordMsg();
+        void Log(string msg);
     }
 
     public class ConsoleMessages : IConsoleMessages
     {
-        public void AccountCreationFailed()
-        {
-            Console.WriteLine("Account Creation Failed");
-        }
-
         public void AccountCreationSuccess()
         {
             Console.WriteLine("Account Created Successfully");
@@ -61,24 +43,9 @@ namespace ATM.Services
             Console.WriteLine("Invalid Option");
         }
 
-        public void InvalidAmountMsg()
-        {
-            Console.WriteLine("Invalid Amount");
-        }
-
-        public void WrongPasswordMsg()
-        {
-            Console.WriteLine("Wrong Password! Authentication Failed");
-        }
-
         public void TransferSuccess()
         {
             Console.WriteLine("Amount Transfered Successfully");
-        }
-
-        public void TransferFailed()
-        {
-            Console.WriteLine("Transfer Failed");
         }
 
         public void DepositSuccess()
@@ -91,11 +58,6 @@ namespace ATM.Services
             Console.WriteLine("Amount Withdrawn Successfully");
         }
 
-        public void UserNotFoundMsg()
-        {
-            Console.WriteLine("User Not Found");
-        }
-
         public void BankCreationFailedMsg()
         {
             Console.WriteLine("Bank Creation Failed");
@@ -106,29 +68,9 @@ namespace ATM.Services
             Console.WriteLine("Bank Created Successfully");
         }
 
-        public void BankNameExistsMsg()
-        {
-            Console.WriteLine("Bank Name Already Exists");
-        }
-
         public void BankDoesnotExistMsg()
         {
             Console.WriteLine("Bank Doesnot Exist");
-        }
-
-        public void UsernameAlreadyExists()
-        {
-            Console.WriteLine("Account with given username already exists");
-        }
-
-        public void NoBanksMsg()
-        {
-            Console.WriteLine("Currently there are no banks.\nTry Creating a new bank.");
-        }
-
-        public void AccessDeniedMsg()
-        {
-            Console.WriteLine("User don't have access to do this operation");
         }
 
         public void EmployeeUpdateSuccess()
@@ -176,34 +118,14 @@ namespace ATM.Services
             Console.WriteLine("Currency Deleted Successfully");
         }
 
-        public void CurrencyDoesNotExist()
-        {
-            Console.WriteLine("Currency doesn't exist with that name");
-        }
-
-        public void CurrencyAlreadyExists()
-        {
-            Console.WriteLine("Currency with that name already exists");
-        }
-
-        public void TransactionNotFound()
-        {
-            Console.WriteLine("No valid transaction found");
-        }
-
         public void RevertTransactionSuccess()
         {
             Console.WriteLine("Transaction Reverted Successfully");
         }
 
-        public void NoTransactions()
+        public void Log(string msg)
         {
-            Console.WriteLine("There are no Transactions in this account");
-        }
-
-        public void NoEmployeeActions()
-        {
-            Console.WriteLine("There are no actions for this employee");
+            Console.WriteLine(msg);
         }
     }
 }
