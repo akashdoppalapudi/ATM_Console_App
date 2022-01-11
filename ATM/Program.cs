@@ -60,17 +60,17 @@ namespace ATM.CLI
                 }
                 else if (option1 == BankCreateOrSelect.SelectBank)
                 {
-                    Dictionary<string, string> bankNames;
+                    IList<Bank> banks;
                     try
                     {
-                        bankNames = bankService.GetAllBankNames();
+                        banks = bankService.GetAllBanks();
                     }
                     catch (Exception ex)
                     {
                         consoleMessages.Log(ex.Message);
                         continue;
                     }
-                    string bankId = consoleUI.SelectBank(bankNames);
+                    string bankId = consoleUI.SelectBank(banks);
                     if (bankId == null)
                     {
                         consoleMessages.BankDoesnotExistMsg();
@@ -682,7 +682,7 @@ namespace ATM.CLI
                                 else if (option5 == UserOperation.Transfer)
                                 {
                                     amount = consoleUI.GetAmount('t');
-                                    string selectedToBankId = consoleUI.SelectBank(bankNames);
+                                    string selectedToBankId = consoleUI.SelectBank(banks);
                                     try
                                     {
                                         string toBankId = selectedToBankId;

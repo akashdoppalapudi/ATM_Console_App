@@ -29,7 +29,7 @@ namespace ATM.Services
         string GetUsername();
         void PrintEmployeeActions(IList<EmployeeAction> employeeActions);
         void PrintTransactions(IList<Transaction> transactions, decimal availBal);
-        string SelectBank(Dictionary<string, string> bankNames);
+        string SelectBank(IList<Bank> banks);
         BankCreateOrSelect SelectOrCreateBank();
         StaffOperation StaffOptions();
         UserOperation UserOptions();
@@ -649,13 +649,13 @@ namespace ATM.Services
 
         }
 
-        public string SelectBank(Dictionary<string, string> bankNames)
+        public string SelectBank(IList<Bank> banks)
         {
             Console.WriteLine("\n____BANKS____\n");
             int i = 1;
-            foreach (string name in bankNames.Values)
+            foreach (Bank bank in banks)
             {
-                Console.WriteLine(i + ". " + name);
+                Console.WriteLine(i + ". " + bank.Name);
                 i++;
             }
             Console.Write("\nSelect a Bank : ");
@@ -663,9 +663,9 @@ namespace ATM.Services
             try
             {
                 int selectedOption = Convert.ToInt32(userInput);
-                if (selectedOption >= 1 && selectedOption <= bankNames.Count)
+                if (selectedOption >= 1 && selectedOption <= banks.Count)
                 {
-                    return bankNames.ElementAt(selectedOption - 1).Key;
+                    return banks.ElementAt(selectedOption - 1).Id;
                 }
                 else
                 {
