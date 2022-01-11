@@ -64,19 +64,16 @@ namespace ATM.Services
             _bankContext.SaveChanges();
         }
 
-        public Dictionary<string, string> GetAllBankNames()
+        public IList<Bank> GetAllBanks()
         {
-            Dictionary<string, string> bankNames = new Dictionary<string, string>();
-            var bankRecords = _bankContext.Bank.Where(b => b.IsActive).Select(b => new { b.Id, b.Name });
-            foreach (var bankRecord in bankRecords)
-            {
-                bankNames.Add(bankRecord.Id, bankRecord.Name);
-            }
-            if (bankNames.Count == 0 || bankNames == null)
+            IList<Bank> banks = new List<Bank>();
+            IList<BankDBModel> bankRecords = _bankContext.Bank.Where(b => b.IsActive).ToList();
+            banks = _mapper.Map<Bank[]>(bankRecords);
+            if (banks.Count == 0 || banks == null)
             {
                 throw new NoBanksException();
             }
-            return bankNames;
+            return banks;
         }
 
         public void RevertTransaction(string bankId, string txnId)

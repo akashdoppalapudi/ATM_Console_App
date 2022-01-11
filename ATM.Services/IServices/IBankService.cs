@@ -7,7 +7,7 @@ namespace ATM.Services.IServices
     {
         void AddBank(Bank bank);
         void DeleteBank(string bankId);
-        Dictionary<string, string> GetAllBankNames();
+        IList<Bank> GetAllBanks();
         Bank GetBankDetails(string bankId);
         void RevertTransaction(string bankId, string txnId);
         void UpdateBank(string bankId, Bank updateBank);
