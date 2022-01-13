@@ -3,6 +3,7 @@ using ATM.Services.DBModels;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
 using AutoMapper;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ATM.Services
@@ -21,6 +22,11 @@ namespace ATM.Services
         public bool IsCurrencyNameExists(string bankId, string currencyName)
         {
             return _bankContext.Currency.Any(c => c.BankId == bankId && c.Name == currencyName);
+        }
+
+        public IList<Currency> GetAllCurrencies(string bankId)
+        {
+            return _mapper.Map<Currency[]>(_bankContext.Currency.Where(c => c.BankId == bankId));
         }
 
         public Currency GetCurrencyByName(string bankId, string currencyName)

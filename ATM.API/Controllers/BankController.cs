@@ -27,7 +27,7 @@ namespace ATM.API.Controllers
         {
             try
             {
-                _logger.Log(LogLevel.Information, message: "Fetched all the banks");
+                _logger.Log(LogLevel.Information, message: "Fetching all the banks");
                 return Ok(_mapper.Map<BankDTO[]>(_bankService.GetAllBanks()));
             }
             catch (NoBanksException ex)
@@ -42,7 +42,7 @@ namespace ATM.API.Controllers
         {
             try
             {
-                _logger.Log(LogLevel.Information, message: $"Fetched the bank with the id {bankId}");
+                _logger.Log(LogLevel.Information, message: $"Fetching the bank with the id {bankId}");
                 return Ok(_mapper.Map<BankDTO>(_bankService.GetBankDetails(bankId)));
             }
             catch (BankDoesnotExistException ex)
@@ -62,7 +62,7 @@ namespace ATM.API.Controllers
             };
             _bankService.AddBank(newBank);
             _logger.Log(LogLevel.Information, message: "Created a Bank");
-            return Created($"{Request.Path}/{newBank.Id}", newBank);
+            return Created($"{Request.Path}/{newBank.Id}", _mapper.Map<BankDTO>(newBank));
         }
 
         [HttpPut("{bankId}")]

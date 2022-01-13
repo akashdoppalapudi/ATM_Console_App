@@ -26,7 +26,7 @@ namespace ATM.API.Controllers
         [HttpGet("{bankId}")]
         public IActionResult GetCurrencies(string bankId)
         {
-            _logger.Log(LogLevel.Information, message: "Fetched All Currencies of a Bank");
+            _logger.Log(LogLevel.Information, message: "Fetching All Currencies of a Bank");
             return Ok(_currencyService.GetAllCurrencies(bankId));
         }
 
@@ -35,7 +35,7 @@ namespace ATM.API.Controllers
         {
             try
             {
-                _logger.Log(LogLevel.Information, message: "Fetched a Currency by name");
+                _logger.Log(LogLevel.Information, message: "Fetching a Currency by name");
                 return Ok(_currencyService.GetCurrencyByName(bankId, currencyName));
             }
             catch(CurrencyDoesNotExistException ex)
@@ -48,6 +48,7 @@ namespace ATM.API.Controllers
         [HttpPost("{bankId}")]
         public IActionResult CreateCurrency(string bankId, Currency currency)
         {
+            currency.BankId = bankId;
             _currencyService.AddCurrency(currency);
             _logger.Log(LogLevel.Information, message: "Currrency Created Successfully");
             return Created($"{Request.Path}/{currency.Name}", currency);

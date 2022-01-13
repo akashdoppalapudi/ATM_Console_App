@@ -51,7 +51,7 @@ namespace ATM.Services
             currentAccountRecord.Name = updateAccount.Name;
             currentAccountRecord.Gender = updateAccount.Gender;
             currentAccountRecord.Username = updateAccount.Username;
-            if (Convert.ToBase64String(_encryptionService.ComputeHash("", updateAccount.Salt)) == Convert.ToBase64String(updateAccount.Password))
+            if (Convert.ToBase64String(_encryptionService.ComputeHash("", updateAccount.Salt)) != Convert.ToBase64String(updateAccount.Password))
             {
                 currentAccountRecord.Password = updateAccount.Password;
                 currentAccountRecord.Salt = updateAccount.Salt;

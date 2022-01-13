@@ -23,6 +23,8 @@ namespace ATM.Services
             CreateMap<TransactionDBModel, Transaction>();
             CreateMap<AccountDBModel, AccountViewModel>();
             CreateMap<EmployeeDBModel, EmployeeViewModel>();
+            CreateMap<Account, AccountViewModel>();
+            CreateMap<Employee, EmployeeViewModel>();
         }
     }
 }

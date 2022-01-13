@@ -12,11 +12,13 @@ IMapper mapper = new MapperConfiguration(mc =>
 {
     mc.AddProfile(new MapperProfile());
     mc.CreateMap<Bank, BankDTO>();
+    mc.CreateMap<AccountCreateDTO, Account>().ForMember(dest => dest.Password, act => act.Ignore());
+    mc.CreateMap<EmployeeCreateDTO, Employee>().ForMember(dest => dest.Password, act => act.Ignore());
 }).CreateMapper();
 
 builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"))
     .AddSingleton(mapper)
-    .AddScoped<IEncryptionService, EncryptionService>()
+    .AddSingleton<IEncryptionService, EncryptionService>()
     .AddScoped<ITransactionService, TransactionService>()
     .AddScoped<IEmployeeActionService, EmployeeActionService>()
     .AddScoped<ICurrencyService, CurrencyService>()
