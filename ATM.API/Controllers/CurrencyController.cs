@@ -1,9 +1,9 @@
-﻿using ATM.Services;
+﻿using ATM.Models;
+using ATM.Services;
+using ATM.Services.Exceptions;
 using ATM.Services.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using ATM.Services.Exceptions;
-using ATM.Models;
 
 namespace ATM.API.Controllers
 {
@@ -38,17 +38,16 @@ namespace ATM.API.Controllers
                 _logger.Log(LogLevel.Information, message: "Fetching a Currency by name");
                 return Ok(_currencyService.GetCurrencyByName(bankId, currencyName));
             }
-            catch(CurrencyDoesNotExistException ex)
+            catch (CurrencyDoesNotExistException ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
                 return NotFound(ex.Message);
             }
         }
 
-        [HttpPost("{bankId}")]
-        public IActionResult CreateCurrency(string bankId, Currency currency)
+        [HttpPost]
+        public IActionResult CreateCurrency(Currency currency)
         {
-            currency.BankId = bankId;
             _currencyService.AddCurrency(currency);
             _logger.Log(LogLevel.Information, message: "Currrency Created Successfully");
             return Created($"{Request.Path}/{currency.Name}", currency);
@@ -79,7 +78,7 @@ namespace ATM.API.Controllers
                 _logger.Log(LogLevel.Information, message: "Currency deleted successsfully");
                 return Ok("Currency deleted successsfully");
             }
-            catch(CurrencyDoesNotExistException ex)
+            catch (CurrencyDoesNotExistException ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
                 return NotFound(ex.Message);

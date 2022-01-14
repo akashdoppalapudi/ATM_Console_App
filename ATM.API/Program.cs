@@ -14,6 +14,8 @@ IMapper mapper = new MapperConfiguration(mc =>
     mc.CreateMap<Bank, BankDTO>();
     mc.CreateMap<AccountCreateDTO, Account>().ForMember(dest => dest.Password, act => act.Ignore());
     mc.CreateMap<EmployeeCreateDTO, Employee>().ForMember(dest => dest.Password, act => act.Ignore());
+    mc.CreateMap<EmployeeActionCreateDTO, EmployeeAction>();
+    mc.CreateMap<TransactionCreateDTO, Transaction>();
 }).CreateMapper();
 
 builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"))
@@ -29,6 +31,7 @@ builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(conne
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 //builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

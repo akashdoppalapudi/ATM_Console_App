@@ -57,16 +57,15 @@ namespace ATM.API.Controllers
             }
         }
 
-        [HttpPost("{bankId}")]
-        public IActionResult CreateAccount(string bankId, AccountCreateDTO account)
+        [HttpPost]
+        public IActionResult CreateAccount(AccountCreateDTO account)
         {
             Account newAccount = _mapper.Map<Account>(account);
-            newAccount.BankId = bankId;
             newAccount.Id = account.Name.GenId();
             (newAccount.Password, newAccount.Salt) = _encryptionService.ComputeHash(account.Password);
             _accountService.AddAccount(newAccount);
             _logger.Log(LogLevel.Information, message: "Created New Account");
-            return Created($"{Request.Path}/username/{newAccount.Id}", _mapper.Map<AccountViewModel>(newAccount));
+            return Created($"{Request.Path}/id/{newAccount.Id}", _mapper.Map<AccountViewModel>(newAccount));
         }
 
         [HttpPut("id/{id}")]

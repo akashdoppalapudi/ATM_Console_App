@@ -6,7 +6,7 @@ namespace ATM.Models
     public class Transaction
     {
         public string Id { get; set; }
-        public DateTime TransactionDate { get; set; }
+        public DateTime TransactionDate { get; set; } = DateTime.Now;
         public TransactionType TransactionType { get; set; }
         public string ToBankId { get; set; }
         public string ToAccountId { get; set; }

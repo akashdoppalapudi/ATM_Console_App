@@ -9,5 +9,6 @@ namespace ATM.API.Models
         public string Username { get; set; }
         public EmployeeType EmployeeType { get; set; }
         public string Password { get; set; }
+        public string BankId { get; set; }
     }
 }
