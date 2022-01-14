@@ -40,6 +40,7 @@ namespace ATM.API.Controllers
                 return NotFound(ex.Message);
             }
         }
+
         [HttpGet("{bankId}/username/{username}")]
         public IActionResult GetEmployeeByUsername(string bankId, string username)
         {
@@ -56,16 +57,15 @@ namespace ATM.API.Controllers
             }
         }
 
-        [HttpPost("{bankId}")]
-        public IActionResult CreateEmployee(string bankId, EmployeeCreateDTO employee)
+        [HttpPost]
+        public IActionResult CreateEmployee(EmployeeCreateDTO employee)
         {
             Employee newEmployee = _mapper.Map<Employee>(employee);
-            newEmployee.BankId = bankId;
             newEmployee.Id = employee.Name.GenId();
             (newEmployee.Password, newEmployee.Salt) = _encryptionService.ComputeHash(employee.Password);
             _employeeService.AddEmployee(newEmployee);
             _logger.Log(LogLevel.Information, message: "Created New Employee");
-            return Created($"{Request.Path}/username/{newEmployee.Id}", _mapper.Map<EmployeeViewModel>(newEmployee));
+            return Created($"{Request.Path}/id/{newEmployee.Id}", _mapper.Map<EmployeeViewModel>(newEmployee));
         }
 
         [HttpPut("id/{id}")]
@@ -94,7 +94,8 @@ namespace ATM.API.Controllers
                 _employeeService.DeleteEmployee(id);
                 _logger.Log(LogLevel.Information, message: "Employee Deleted Successfully");
                 return Ok("Account Deleted Succesfully");
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
                 return NotFound(ex.Message);

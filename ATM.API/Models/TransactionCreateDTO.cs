@@ -2,13 +2,11 @@
 
 namespace ATM.API.Models
 {
-    public class TransactionDTO
+    public class TransactionCreateDTO
     {
-        public string Id { get; set; }
-        public DateTime TransactionDate { get; set; }
         public TransactionType TransactionType { get; set; }
-        public string ToBankId { get; set; }
-        public string ToAccountId { get; set; }
+        public string? ToBankId { get; set; }
+        public string? ToAccountId { get; set; }
         public TransactionNarrative TransactionNarrative { get; set; }
         public decimal TransactionAmount { get; set; }
         public string BankId { get; set; }
