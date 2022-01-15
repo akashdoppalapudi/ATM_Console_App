@@ -57,9 +57,9 @@ namespace ATM.Services
             bankRecord.IsActive = false;
             bankRecord.DeletedOn = DateTime.Now;
             var employeeRecords = _bankContext.Employee.Where(e => e.BankId == bankId && e.IsActive).ToList();
-            employeeRecords.ForEach(e => e.IsActive = false);
+            employeeRecords.ForEach(e => { e.IsActive = false; e.DeletedOn = DateTime.Now; });
             var accountRecords = _bankContext.Account.Where(a => a.BankId == bankId && a.IsActive).ToList();
-            accountRecords.ForEach(a => a.IsActive = false);
+            accountRecords.ForEach(a => { a.IsActive = false; a.DeletedOn = DateTime.Now; });
             _bankContext.Currency.RemoveRange(_bankContext.Currency.Where(c => c.BankId == bankId));
             _bankContext.SaveChanges();
         }
