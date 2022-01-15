@@ -1,5 +1,4 @@
-using ATM.API.Models;
-using ATM.Models;
+using ATM.API;
 using ATM.Services;
 using ATM.Services.IServices;
 using AutoMapper;
@@ -11,11 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 IMapper mapper = new MapperConfiguration(mc =>
 {
     mc.AddProfile(new MapperProfile());
-    mc.CreateMap<Bank, BankDTO>();
-    mc.CreateMap<AccountCreateDTO, Account>().ForMember(dest => dest.Password, act => act.Ignore());
-    mc.CreateMap<EmployeeCreateDTO, Employee>().ForMember(dest => dest.Password, act => act.Ignore());
-    mc.CreateMap<EmployeeActionCreateDTO, EmployeeAction>();
-    mc.CreateMap<TransactionCreateDTO, Transaction>();
+    mc.AddProfile(new ApiMapperProfile());
 }).CreateMapper();
 
 builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"))
