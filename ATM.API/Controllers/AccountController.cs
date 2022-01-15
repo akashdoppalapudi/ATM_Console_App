@@ -14,13 +14,15 @@ namespace ATM.API.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
+        private readonly ICurrencyService _currencyService;
         private readonly IMapper _mapper;
         private readonly IEncryptionService _encryptionService;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAccountService accountService, IMapper mapper, ILogger<AccountController> logger, IEncryptionService encryptionService)
+        public AccountController(IAccountService accountService, ICurrencyService currencyService, IMapper mapper, ILogger<AccountController> logger, IEncryptionService encryptionService)
         {
             _accountService = accountService;
+            _currencyService = currencyService;
             _mapper = mapper;
             _logger = logger;
             _encryptionService = encryptionService;
@@ -49,6 +51,21 @@ namespace ATM.API.Controllers
                 string accountId = _accountService.GetAccountIdByUsername(bankId, username);
                 _logger.Log(LogLevel.Information, message: $"Fetching Account by Id {accountId}");
                 return Ok(_accountService.GetAccountDetails(accountId));
+            }
+            catch (AccountDoesNotExistException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("id/{id}/balance")]
+        public IActionResult GetBalance(string id)
+        {
+            try
+            {
+                _logger.Log(LogLevel.Information, message: $"Fetching balance of account {id}");
+                return Ok(new AccountBalance(_accountService.GetBalance(id)));
             }
             catch (AccountDoesNotExistException ex)
             {
@@ -98,6 +115,84 @@ namespace ATM.API.Controllers
             catch (Exception ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPatch("id/{id}/credit")]
+        public IActionResult CreditAmount(string id, CreditAmountDTO ca)
+        {
+            try
+            {
+                AccountViewModel account = _accountService.GetAccountDetails(id);
+                Currency currency = _currencyService.GetCurrencyByName(account.BankId, ca.CurrencyName);
+                _accountService.Deposit(id, currency, ca.Amount);
+                _logger.Log(LogLevel.Information, message: $"{ca.Amount} {ca.CurrencyName} credited successfully into account {id}");
+                return NoContent();
+            }
+            catch (AccountDoesNotExistException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (InvalidAmountException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPatch("id/{id}/debit")]
+        public IActionResult DebitAmount(string id, DebitAmountDTO da)
+        {
+            try
+            {
+                _accountService.Withdraw(id, da.Amount);
+                _logger.Log(LogLevel.Information, message: $"{da.Amount} INR debited from account {id}");
+                return NoContent();
+            }
+            catch (AccountDoesNotExistException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (InvalidAmountException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("id/{id}/authenticate")]
+        public IActionResult Authenticate(string id, PasswordDTO password)
+        {
+            try
+            {
+                _accountService.Authenticate(id, password.Password);
+                _logger.Log(LogLevel.Information, message: $"Employee with id {id} logged in successfully");
+                return Ok(new { Authenticate = true });
+            }
+            catch (AccountDoesNotExistException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (AuthenticationFailedException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{bankId}/usernameexists")]
+        public IActionResult IsUsernameExists(string bankId, UsernameDTO username)
+        {
+            try
+            {
+                return Ok(new { usernameExists = _accountService.IsUsernameExists(bankId, username.Username) });
+            }
+            catch (BankDoesnotExistException ex)
+            {
                 return NotFound(ex.Message);
             }
         }

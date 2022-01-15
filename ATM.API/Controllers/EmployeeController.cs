@@ -101,5 +101,39 @@ namespace ATM.API.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpPost("id/{id}/authenticate")]
+        public IActionResult Authenticate(string id, PasswordDTO password)
+        {
+            try
+            {
+                _employeeService.Authenticate(id, password.Password);
+                _logger.Log(LogLevel.Information, message: $"Employee with id {id} logged in successfully");
+                return Ok(new { Authenticate = true });
+            }
+            catch (AccountDoesNotExistException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (AuthenticationFailedException ex)
+            {
+                _logger.Log(LogLevel.Error, message: ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{bankId}/usernameexists")]
+        public IActionResult IsUsernameExists(string bankId, UsernameDTO username)
+        {
+            try
+            {
+                return Ok(new { usernameExists = _employeeService.IsUsernameExists(bankId, username.Username) });
+            }
+            catch (BankDoesnotExistException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }
