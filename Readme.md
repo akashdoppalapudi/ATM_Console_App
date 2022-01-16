@@ -8,6 +8,7 @@ This is built on **.NET** framework of version `.NET.6.0`
 This Solution Contains three projects
 
 - ATM.CLI _`Depends on ATM.Services`_
+- ATM.API _`Depends on ATM.Services`_
 - ATM.Models
 - ATM.Services _`Depends on ATM.Models`_
 
@@ -22,6 +23,8 @@ This Solution Contains three projects
 >Microsoft.Extensions.DependencyInjection
 
 >AutoMapper
+
+>GetPass
 
 ## Data Storage
 
