@@ -390,7 +390,7 @@ namespace ATM.CLI
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
                                         {
-                                            bankService.RevertTransaction(bankId, txnId);
+                                            bankService.RevertTransaction(txnId);
                                             EmployeeAction action = new EmployeeAction
                                             {
                                                 Id = bankId.GenEmployeeActionId(employeeId),
@@ -550,7 +550,7 @@ namespace ATM.CLI
                                         string txnId = consoleUI.GetRevertTransactionId();
                                         try
                                         {
-                                            bankService.RevertTransaction(bankId, txnId);
+                                            bankService.RevertTransaction(txnId);
                                             EmployeeAction action = new EmployeeAction
                                             {
                                                 Id = bankId.GenEmployeeActionId(employeeId),

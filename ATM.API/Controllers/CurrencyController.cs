@@ -1,4 +1,5 @@
-﻿using ATM.Models;
+﻿using ATM.API.Models;
+using ATM.Models;
 using ATM.Services;
 using ATM.Services.Exceptions;
 using ATM.Services.IServices;
@@ -81,6 +82,19 @@ namespace ATM.API.Controllers
             catch (CurrencyDoesNotExistException ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPost("{bankId}/iscurrencynameexists")]
+        public IActionResult IsCurrencyNameExists(string bankId, CurrencyNameDTO currencyName)
+        {
+            try
+            {
+                return Ok(new { CurrencyNameExists = _currencyService.IsCurrencyNameExists(bankId, currencyName.CurrencyName) });
+            }
+            catch (CurrencyDoesNotExistException ex)
+            {
                 return NotFound(ex.Message);
             }
         }
