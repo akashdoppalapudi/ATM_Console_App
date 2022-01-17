@@ -76,13 +76,12 @@ namespace ATM.Services
             return banks;
         }
 
-        public void RevertTransaction(string bankId, string txnId)
+        public void RevertTransaction(string txnId)
         {
             Transaction transaction = _transactionService.GetTransactionById(txnId);
             decimal amount = transaction.TransactionAmount;
             string fromAccId = transaction.AccountId;
             string toAccId = transaction.ToAccountId;
-            string toBankId = transaction.ToBankId;
             _accountService.Transfer(toAccId, fromAccId, amount);
         }
 
