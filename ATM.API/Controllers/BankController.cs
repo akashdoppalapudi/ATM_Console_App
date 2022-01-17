@@ -96,5 +96,11 @@ namespace ATM.API.Controllers
                 return NotFound(ex.Message);
             }
         }
+
+        [HttpPost("isbanknameexists")]
+        public IActionResult IsBankNameExists(BankNameDTO bankName)
+        {
+            return Ok(new { BankNameExists = _bankService.IsBankNameExists(bankName.BankName) });
+        }
     }
 }
