@@ -58,7 +58,7 @@ namespace ATM.API.Controllers
                 _logger.Log(LogLevel.Information, message: "Transaction reverted Successfully");
                 return NoContent();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Log(LogLevel.Error, message: ex.Message);
                 return NotFound(ex.Message);
