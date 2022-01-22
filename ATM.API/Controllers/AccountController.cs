@@ -65,7 +65,7 @@ namespace ATM.API.Controllers
             try
             {
                 _logger.Log(LogLevel.Information, message: $"Fetching balance of account {id}");
-                return Ok(new AccountBalance(_accountService.GetBalance(id)));
+                return Ok(new { Balance = _accountService.GetBalance(id) });
             }
             catch (AccountDoesNotExistException ex)
             {
