@@ -13,7 +13,7 @@ IMapper mapper = new MapperConfiguration(mc =>
     mc.AddProfile(new ApiMapperProfile());
 }).CreateMapper();
 
-builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"))
+builder.Services.AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: builder.Configuration.GetConnectionString("value")))
     .AddSingleton(mapper)
     .AddSingleton<IEncryptionService, EncryptionService>()
     .AddScoped<ITransactionService, TransactionService>()
@@ -33,11 +33,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+app.UseSwagger();
+app.UseSwaggerUI();
+//}
 
 
 app.UseHttpsRedirection();
