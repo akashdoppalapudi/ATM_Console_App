@@ -31,7 +31,7 @@ namespace ATM.CLI
                 .AddSingleton<IBankService, BankService>()
                 .AddSingleton<IConsoleMessages, ConsoleMessages>()
                 .AddSingleton<IConsoleUI, ConsoleUI>()
-                .AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application;Integrated Security=true"));
+                .AddDbContext<BankContext>(options => options.UseSqlServer(connectionString: @"Data Source=AKASH-VIVOBOOK\SQLEXPRESS03;Initial Catalog=Banking_Application_Dev;Integrated Security=true"));
 
             return services.BuildServiceProvider();
         }
